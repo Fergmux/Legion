@@ -118,3 +118,7 @@ basic Race+Type change, coin flip, discard animation). Checklist:
 - Card backs: owner picks (wyrm 2, grove 1, tide 3, runes 3, stars 1, violet 1) resized to 512x768 WebP in
   rldb/assets/art/card_backs/; Violet Sigil is now painted (card_back.gd STYLES). Source: ElevenLabs flow "RLDB card backs 9 Nov"
   (GPT Image 2.5, edit of old back + Gilded Sun style ref). Update rldb/assets/CREDITS.md + data/credits.json.
+- 2026-11-10: M batch complete and released as v0.5.0 (commits 1b48115..HEAD; batch log design/owner-feedback-2026-11-09.md).
+  Ritual/Arcane set pieces now use one long cue each (ritual_full / arcane_full) with FxSummon.CLIMAX on the measured
+  impact. ElevenLabs credits are exhausted (74 left); image work can use the owner's OpenAI key (Windows user env
+  OPENAI_API_KEY, read at run time, never printed) via a gpt-image-2.5-sunburst script.
