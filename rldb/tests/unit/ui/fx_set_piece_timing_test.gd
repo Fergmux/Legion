@@ -186,9 +186,24 @@ func test_set_pieces_are_distinct_and_have_their_own_sounds() -> void:
 			assert_bool(ResourceLoader.exists(Sfx.DIR + String(snd) + ".wav")).is_true()
 			assert_bool(seen.has(snd)).is_false()
 			seen[snd] = true
-		assert_float(FxSummon.length_for(kind)).is_between(1.2, 2.0)
+		# Owner (10 Nov): Ritual and Arcane build up longer (about 3 s and 2.3 s); Fusion stays short.
+		assert_float(FxSummon.length_for(kind)).is_between(1.2, 3.5)
 		assert_float(FxSummon.land_time(kind)).is_less(FxSummon.length_for(kind))
 	assert_bool(Sfx.NAMES.has(FxSummon.SOUND_SLAM)).is_true()
+
+
+func test_ritual_and_arcane_play_one_long_cue_with_the_climax_on_its_impact() -> void:
+	# Arrange / Act / Assert: owner (10 Nov) "at least 5 seconds ... building up to a big impact".
+	for kind in ["ritual", "arcane"]:
+		var snd := String(FxSummon.SOUND_FULL[kind])
+		assert_bool(Sfx.NAMES.has(snd)).is_true()
+		assert_bool(ResourceLoader.exists(Sfx.DIR + snd + ".wav")).is_true()
+		var stream := load(Sfx.DIR + snd + ".wav") as AudioStream
+		assert_float(stream.get_length()).is_greater_equal(4.5)
+		# the build: the climax comes well into the cue, and the cue rings on past the landing
+		assert_float(float(FxSummon.CLIMAX[kind])).is_greater(1.2)
+		assert_float(stream.get_length()).is_greater(FxSummon.length_for(kind))
+	assert_bool(FxSummon.SOUND_FULL.has("fusion")).is_false()   # Fusion keeps its charge + climax pair
 
 
 func test_set_piece_skips_cleanly_on_click() -> void:

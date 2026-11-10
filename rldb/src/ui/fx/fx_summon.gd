@@ -1,7 +1,8 @@
 class_name FxSummon
 extends FxPart
 ## Fusion / Ritual / Arcane summon set pieces (D8, owner feedback 2026-10-20). Each one is a staged
-## sequence of about 1.7-1.9 s with its own look and sound, keeping the F03-17 themes:
+## sequence (Fusion about 1.7 s; Ritual and Arcane about 3 s and 2.3 s with a long build, owner 10 Nov)
+## with its own look and sound, keeping the F03-17 themes:
 ##   anticipation: the board dims under a vignette, the materials are drawn in (Fusion: they spiral into
 ##                 a vortex that twists the board; Ritual: a rune circle inscribes itself and the runes are
 ##                 drawn out of the tributed units as they burn away; Arcane: the spent materials rise as
@@ -15,9 +16,11 @@ extends FxPart
 ## the board shows its real state. FxPlayer.play() schedules it and holds the rest of the batch for
 ## length_for(kind), so the events after the summon (its triggers, a trap) wait for the landing.
 
-## Seconds of each set piece and of its climax (before UIStyle.dur).
-const LEN := {"fusion": 1.7, "ritual": 1.9, "arcane": 1.75}
-const CLIMAX := {"fusion": 0.78, "ritual": 0.88, "arcane": 0.82}
+## Seconds of each set piece and of its climax (before UIStyle.dur). Owner (10 Nov): Ritual and Arcane
+## build up longer, their climax on the impact of their one long cue (SOUND_FULL, measured on the
+## mastered files: Ritual 1.95 s, Arcane 1.40 s); the resolution after the climax keeps its old length.
+const LEN := {"fusion": 1.7, "ritual": 2.97, "arcane": 2.33}
+const CLIMAX := {"fusion": 0.78, "ritual": 1.95, "arcane": 1.4}
 ## Seconds of the calm (reduced motion) variant.
 const CALM_LEN := 0.75
 ## The card falls this long after the climax and lands (the slam) at climax + DROP_DELAY + DROP_TIME.
@@ -26,6 +29,10 @@ const DROP_TIME := 0.16
 ## Sounds: the anticipation layer, the climax hit and the landing slam.
 const SOUND_CHARGE := {"fusion": "fusion_vortex", "ritual": "ritual_choir", "arcane": "arcane_shimmer"}
 const SOUND_CLIMAX := {"fusion": "fusion_impact", "ritual": "ritual_impact", "arcane": "arcane_impact"}
+## Owner (10 Nov): kinds with one long cue (build, impact on CLIMAX, a tail that rings on after the
+## landing) played from the start instead of the charge and climax layers. The calm variant keeps the
+## short climax cue.
+const SOUND_FULL := {"ritual": "ritual_full", "arcane": "arcane_full"}
 const SOUND_SLAM := "card_slam"
 const DUST := Color("d8c7a0")
 ## Set-piece colours per kind, [main, accent], keeping the category themes: Fusion royal blue and violet,
@@ -80,7 +87,10 @@ func play(kind: String, p: int, slot: int, mats: Array, summon_e: Dictionary, pr
 	var climax := float(CLIMAX.get(kind, 0.8))
 	var win: Rect2 = screen.get_global_rect()
 	var reach := clampf(minf(win.size.x, win.size.y) * 0.22, 140.0, 250.0)
-	Sfx.play(String(SOUND_CHARGE[kind]), -2.0, 0.0)
+	if SOUND_FULL.has(kind):
+		Sfx.play(String(SOUND_FULL[kind]), 0.0, 0.0)
+	else:
+		Sfx.play(String(SOUND_CHARGE[kind]), -2.0, 0.0)
 	_fx.vignette(0.78, 0.28, climax + 0.15, 0.6)
 	# The drawn magic: on the table, under the card in flight.
 	var art := FxSummonArt.new()
@@ -263,7 +273,8 @@ func _shatter_up(m: Dictionary, p: int, col: Color, delay: float, prev_mv: Dicti
 
 ## The climax: flash, refracting shockwave, light rays, particles and a camera shake, per kind.
 func _climax(kind: String, centre: Vector2, col: Color, reach: float) -> void:
-	Sfx.play(String(SOUND_CLIMAX[kind]), 0.0, 0.0)
+	if not SOUND_FULL.has(kind):
+		Sfx.play(String(SOUND_CLIMAX[kind]), 0.0, 0.0)   # a full-cue kind's impact is already in its cue
 	var acc := accent_of(kind)
 	_fx.screen_flash(col.lerp(Color.WHITE, 0.35), 0.34, 0.02, 0.25, centre)
 	_fx.distort(centre, reach * 2.8, 0.8, 30.0, 0.0, Color(acc, 0.14))

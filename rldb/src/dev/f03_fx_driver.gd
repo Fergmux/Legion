@@ -210,7 +210,7 @@ func _summon_scene(kind: String) -> void:
 			m.submit(a, {"t": "arcane", "uid": ar})
 	_auto_answer()
 	host.broadcast()
-	await _seq(kind, 30, 0.06)
+	await _seq(kind, ceili(FxSummon.length_for(kind) / 0.06) + 4, 0.06)   # the whole set piece (Ritual / Arcane build longer since 10 Nov)
 	_done()
 
 

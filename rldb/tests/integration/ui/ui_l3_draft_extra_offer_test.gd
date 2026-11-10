@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## L3 (owner, 5 Nov): the Extra Deck draft offer shows one Fusion, one Ritual and one Arcane, in that
-## order, each named by a small chip in its kind's colour. A pick plays the draft_pick cue.
-## Story: design/owner-feedback-2026-11-05.md L3.
+## order. Owner (10 Nov): no kind tags over the cards. A pick plays the draft_pick cue.
+## Story: design/owner-feedback-2026-11-05.md L3, design/owner-feedback-2026-11-09.md.
 
 const DIR := "user://test_saves_l3"
 
@@ -34,15 +34,14 @@ func _offer_cards(gs: GameScreen) -> Array:
 	return [] if row == null else row.find_children("*", "CardWidget", true, false)
 
 
-func test_l3_extra_offer_cards_carry_their_kind_chips_in_order() -> void:
+func test_l3_extra_offer_is_fusion_ritual_arcane_with_no_kind_tags() -> void:
 	var r := await _screen()
 	var host: LocalHost = r[0]
 	var gs: GameScreen = r[1]
 	host.handle(0, {"t": "draft_category", "category": "extra"})
 	await await_idle_frame()
 	var row: Node = gs.overlays.overlay_box.find_child("Offer", true, false)
-	var chips := row.find_children("KindChip_*", "", true, false).map(func(c): return String(c.name))
-	assert_array(chips).is_equal(["KindChip_fusion", "KindChip_ritual", "KindChip_arcane"])
+	assert_array(row.find_children("KindChip_*", "", true, false)).is_empty()
 	var kinds := _offer_cards(gs).map(func(w): return String((w as CardWidget).view["category"]))
 	assert_array(kinds).is_equal(["fusion", "ritual", "arcane"])
 

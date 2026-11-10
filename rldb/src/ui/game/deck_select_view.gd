@@ -466,24 +466,13 @@ func _draft(box: VBoxContainer) -> void:
 	var fresh := sig != _offer_sig
 	_offer_sig = sig
 	var cards: Array = []
-	var kinded := String(dr.get("category", "")) == "extra"
 	for i in dr["offer"].size():
 		var c: Dictionary = dr["offer"][i]
 		var colm := CenterContainer.new()
 		colm.custom_minimum_size = Vector2(ceilf(card.x * GameSeriesOverlay.DRAFT_HOVER_SCALE), room)
-		var holder: Control = colm
-		if kinded:
-			# L3: the Extra Deck offer is always one Fusion, one Ritual and one Arcane, in that order;
-			# a small chip in the kind's colour names each one over its card.
-			var stack := VBoxContainer.new()
-			stack.alignment = BoxContainer.ALIGNMENT_CENTER
-			stack.add_theme_constant_override("separation", UIStyle.sp("sm"))
-			row.add_child(stack)
-			stack.add_child(kind_chip(String(c.get("category", ""))))
-			stack.add_child(colm)
-			colm.custom_minimum_size.y = room - KIND_CHIP_H
-		else:
-			row.add_child(holder)
+		# Owner (10 Nov): no Fusion / Ritual / Arcane tags over the Extra Deck offer (the cards show
+		# their kind themselves); every offer lays out the same.
+		row.add_child(colm)
 		var cw := CardWidget.new().setup(MatchView.summary_view(c), "big")
 		cw.custom_minimum_size = card
 		cw.tooltip_text = "Pick %s" % c["name"]
@@ -664,22 +653,6 @@ static func drafted_counts(picked: Array) -> Dictionary:
 			cat = "extra"
 		out[cat] = int(out.get(cat, 0)) + 1
 	return out
-
-
-## L3: height of the kind chip over each Extra Deck offer card (the offer keeps its total height).
-const KIND_CHIP_H := 30.0
-
-
-## L3: the kind chip over an Extra Deck offer card: "FUSION" / "RITUAL" / "ARCANE" in the kind's
-## colour, centred over the card.
-static func kind_chip(kind: String) -> Control:
-	var col: Color = UIStyle.CATEGORY_COLORS.get(kind, UIStyle.BRONZE)
-	var chip := UIStyle.chip(String(UIStyle.CATEGORY_NAMES.get(kind, kind.capitalize())).to_upper(), col.lightened(0.25), 13)
-	chip.name = "KindChip_" + kind
-	chip.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	chip.custom_minimum_size.y = KIND_CHIP_H - 6.0
-	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return chip
 
 
 ## Width of a draft offer card for a window `h` px tall (the modal has to fit a short window).

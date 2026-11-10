@@ -54,6 +54,8 @@ const NAMES: PackedStringArray = [
 	"dropdown_select",
 	# M batch (owner, 10 Nov): the draft offer's own hover (other card hovers keep card_hover).
 	"draft_hover",
+	# M batch (owner, 10 Nov): the Ritual and Arcane set pieces as one long cue each (build, impact, tail).
+	"ritual_full", "arcane_full",
 ]
 ## F22 / F25: UI sounds. One user action makes exactly one UI sound: within one frame only the request
 ## with the highest priority plays (a later, higher one stops the earlier voice, a lower or equal one is
