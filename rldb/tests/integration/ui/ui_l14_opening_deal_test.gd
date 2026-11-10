@@ -68,6 +68,7 @@ func test_l14_going_first_in_game_two_deals_the_opening_hand() -> void:
 	assert_bool(cards.is_empty()).is_false()
 	# Assert: the hand waits hidden for the deal, then each card flies in from the draw pile.
 	assert_float(gs.hand.layer.modulate.a).is_equal(0.0)
+	var draws_before := Sfx.debug_played.count("card_draw")
 	var dealt := false
 	# Real time, not a frame count: the deal now follows the opening shuffle (M batch, SHUFFLE_LEAD),
 	# and headless frames run far faster than 60 fps.
@@ -78,8 +79,11 @@ func test_l14_going_first_in_game_two_deals_the_opening_hand() -> void:
 			dealt = true
 			break
 	assert_bool(dealt).override_failure_message("the opening hand was not dealt in").is_true()
-	await get_tree().create_timer(1.0).timeout
+	# The cards leave the deck GameHandView.DRAW_STEP apart (owner, 10 Nov), so wait out the last one.
+	await get_tree().create_timer(GameHandView.DRAW_STEP * cards.size() + 0.6).timeout
 	assert_bool(cards.all(func(w): return (w as CardWidget).scale.is_equal_approx(Vector2.ONE) and (w as CardWidget).modulate.a >= 1.0)).is_true()
+	# Owner (10 Nov): one distinct card_draw per dealt card, not one for the whole hand.
+	assert_int(Sfx.debug_played.count("card_draw") - draws_before).is_equal(cards.size())
 
 
 func test_l14_going_second_in_game_two_fades_the_opponents_hand_in() -> void:

@@ -6,6 +6,9 @@ extends RefCounted
 ## remove, the basic-unit Type and Race) live here.
 
 const OFFER_CARD := Vector2(168, 252)
+## The rewards footer's two buttons (View your deck, Finish / Skip): one size, side by side.
+const FOOTER_BUTTON_W := 230.0
+const FOOTER_BUTTON_H := 44.0
 const PREVIEW_CARD := Vector2(150, 225)
 ## Rows of the chosen-rewards list shown before it scrolls.
 const LEDGER_MAX_ROWS := 4
@@ -336,16 +339,18 @@ func _footer(with_finish: bool, r: Dictionary = {}) -> Control:
 	h.add_theme_constant_override("separation", 12)
 	v.add_child(h)
 	# Design review #61: the reward tiles are the screen's primary interaction, so the footer has no
-	# gold button: Finish / Skip is a secondary and View your deck a text link with its tome glyph.
+	# gold button. Owner (10 Nov): View your deck is a proper (secondary) button like Finish / Skip,
+	# its tome glyph inside on the left; it was a text link.
 	if gs.view.has("deck"):
-		var see := TextLink.make("View your deck", 15)
-		see.name = "ViewDeckLink"
-		see.custom_minimum_size = Vector2(0, 40)
-		see.set_lead(34)
+		var see := UIStyle.secondary_button("View your deck", 16)
+		see.name = "ViewDeckButton"
+		see.custom_minimum_size = Vector2(FOOTER_BUTTON_W, FOOTER_BUTTON_H)
+		see.add_theme_constant_override("h_separation", 0)
 		var g := DeckSelectView.TabGlyph.new("tome", UIStyle.GOLD)
+		g.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		g.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-		g.offset_left = 6
-		g.offset_right = 28
+		g.offset_left = 14
+		g.offset_right = 36
 		g.offset_top = -11
 		g.offset_bottom = 11
 		see.add_child(g)
@@ -353,7 +358,7 @@ func _footer(with_finish: bool, r: Dictionary = {}) -> Control:
 		h.add_child(see)
 	if with_finish:
 		var fin := UIStyle.secondary_button("Finish rewards" if not r["taken"].is_empty() else "Skip remaining rewards", 16)
-		fin.custom_minimum_size = Vector2(230, 44)
+		fin.custom_minimum_size = Vector2(FOOTER_BUTTON_W, FOOTER_BUTTON_H)
 		fin.pressed.connect(func(): gs.send({"t": "reward_finish"}))
 		h.add_child(fin)
 	return v

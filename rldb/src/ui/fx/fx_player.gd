@@ -386,6 +386,8 @@ func play(events: Array, prev_mv: Dictionary) -> void:
 			snd = ""   # F12: shown (with its sound) at the impact of the killing blow
 		elif k in STATUS_FX:
 			snd = FxStatus.sound_for(e)   # L8: one cue per status ("status_poison" ...), ward, tick, expiry
+		elif k == "draw" and not UIStyle.reduce_motion:
+			snd = ""   # owner (10 Nov): each card plays its own card_draw (GameHandView / draw_opp)
 		if snd != "":
 			var st0 := maxf(t, attack_end) if k == "attack" else (t + 0.2 if k == "game_over" else (st_status if k in STATUS_FX else t))
 			sched.append([st0, Sfx.play.bind(snd, 0.0, 0.04), "sfx:" + snd])

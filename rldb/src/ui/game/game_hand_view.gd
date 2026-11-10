@@ -6,6 +6,9 @@ extends RefCounted
 
 const SPAN_MAX := 1000.0
 const CARD_GAP := 8.0
+## Owner (10 Nov): seconds between drawn cards leaving the deck (each with its own card_draw); also
+## the opponent's draw ghosts (FxResourceEffects.draw_opp). Was 0.07, which read as all at once.
+const DRAW_STEP := 0.22
 ## #31: the hand's ground, a dark-wood rail along the bottom of the play area: its height, its darkest
 ## alpha at the screen edge and its gold top line.
 const RAIL_H := 64.0
@@ -104,7 +107,9 @@ func layout(new_ids: Array, instant: bool) -> void:
 			w.scale = Vector2(0.5, 0.5)
 			w.modulate.a = 0.0
 			var tw := gs.create_tween()
-			tw.tween_interval(UIStyle.dur(0.07) * new_i)
+			# Owner (10 Nov): each drawn card leaves the deck on its own beat with its own card_draw.
+			tw.tween_interval(UIStyle.dur(DRAW_STEP) * new_i)
+			tw.tween_callback(Sfx.play.bind("card_draw", 0.0, 0.04))
 			tw.tween_property(w, "modulate:a", 1.0, UIStyle.dur(0.06))
 			tw.parallel().tween_property(w, "position", Vector2.ZERO, UIStyle.dur(0.28)).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 			tw.parallel().tween_property(w, "scale", Vector2.ONE, UIStyle.dur(0.28)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

@@ -121,7 +121,8 @@ func draw_opp(p: int, n: int) -> void:
 		_fx.add_node(g)
 		var dest := _fx.fx_pos(to) - g.size / 2.0
 		var tw := _fx.new_tween()
-		tw.tween_interval(UIStyle.dur(0.07) * i)
+		tw.tween_interval(UIStyle.dur(GameHandView.DRAW_STEP) * i)
+		tw.tween_callback(Sfx.play.bind("card_draw", 0.0, 0.04))   # one draw per card, on its beat
 		tw.set_parallel(false)
 		tw.tween_property(g, "modulate:a", 1.0, UIStyle.dur(0.05))
 		tw.set_parallel(true)
