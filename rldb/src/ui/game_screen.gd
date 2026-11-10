@@ -122,6 +122,10 @@ var _coin: CoinFlip
 var _deal_shown: Dictionary = {}
 ## L14: seconds from a game 2+ first view to its opening deal (the series modal leaves meanwhile).
 const OPENING_DEAL_DELAY := 0.3
+## M batch: the shuffle cue's head start on the opening deal (s), so the deck is heard shuffling first.
+const SHUFFLE_LEAD := 0.45
+## M batch: true while the opening shuffle plays before the deal (the hands are still hidden).
+var _shuffling: bool = false
 
 
 func _init() -> void:
@@ -524,12 +528,19 @@ func _maybe_opening_deal() -> void:
 ## Shows the hands once the coin flip is done: mine dealt in from the draw pile, the opponent's
 ## faded in. Runs once per coin (finished, or the coin leaving early).
 func _deal_after_coin() -> void:
-	if hand.layer.modulate.a >= 1.0:
+	if hand.layer.modulate.a >= 1.0 or _shuffling:
 		return
-	hand.layer.modulate.a = 1.0
-	Sfx.play("card_shuffle", 0.0, 0.0)   # L1: the deck is shuffled as the opening hand is dealt
-	hand.deal_all()
-	create_tween().tween_property(board.opp_hand_box, "modulate:a", 1.0, UIStyle.dur(0.3))
+	# M batch (owner, 10 Nov): the deck is shuffled (the owner's wash shuffle) while the hand stays
+	# hidden, then the hand shows as it is dealt with the normal card_draw per card. (The old shuffle cue
+	# played over the deal and sounded like an extra draw.)
+	_shuffling = true
+	Sfx.play("card_shuffle", 0.0, 0.0)
+	get_tree().create_timer(UIStyle.dur(SHUFFLE_LEAD)).timeout.connect(func():
+		_shuffling = false
+		if is_instance_valid(self) and is_inside_tree():
+			hand.layer.modulate.a = 1.0
+			hand.deal_all()
+			create_tween().tween_property(board.opp_hand_box, "modulate:a", 1.0, UIStyle.dur(0.3)), CONNECT_ONE_SHOT)
 
 
 ## New presentation events since the last view; empty (skip animations) on first load,

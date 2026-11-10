@@ -135,8 +135,8 @@ func show_card(id: int) -> void:
 	_preview_card = CardWidget.new().setup(MatchView.summary_view(s), "big")
 	_preview_card.show_tooltip = false
 	_preview_card.tooltip_text = "Right-click to inspect"      # D15: no Inspect button; right-click is enough
-	_preview_card.right_pressed.connect(func(_w): inspect_card(id))
-	_preview_card.pressed.connect(func(_w): inspect_card(id))
+	_preview_card.right_pressed.connect(func(pw): inspect_card(id, pw))
+	_preview_card.pressed.connect(func(pw): inspect_card(id, pw))
 	_preview_holder.add_child(_preview_card)
 	_details.show_card(MatchView.summary_view(s))
 	_facts.show_card(id, _details.sections.has("rules"))
@@ -161,12 +161,12 @@ func preview_is_empty() -> bool:
 	return _preview_empty.visible
 
 
-## Opens the shared inspector for card `id`.
-func inspect_card(id: int) -> CardInspector:
-	# #87: the card flies out of its catalogue cell when that cell is on screen.
-	var w := browser.cell_widget(id)
-	var from := w.get_global_rect() if w != null and w.is_visible_in_tree() else Rect2()
-	return CardInspector.open(self, MatchView.summary_view(_summary(id)), Callable(), from)
+## Opens the shared inspector for card `id`. `from_widget` is the card that was clicked (the
+## preview card); the zoom starts from it (M7). Without one it starts from the card's catalogue
+## cell when that cell is on screen.
+func inspect_card(id: int, from_widget: Control = null) -> CardInspector:
+	var w: Control = from_widget if from_widget != null else browser.cell_widget(id)
+	return CardInspector.open(self, MatchView.summary_view(_summary(id)), Callable(), CardInspector.source_rect(w))
 
 
 func _show_empty_preview() -> void:

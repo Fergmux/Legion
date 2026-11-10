@@ -391,12 +391,12 @@ func saved_row(n: String) -> Control:
 	return null
 
 
-## Opens the shared card inspector for card `id`; the working deck is untouched.
-func inspect_card(id: int) -> CardInspector:
-	# #87: the card flies out of its catalogue cell when that cell is on screen.
-	var w := browser.cell_widget(id)
-	var from := w.get_global_rect() if w != null and w.is_visible_in_tree() else Rect2()
-	return CardInspector.open(self, MatchView.summary_view(_summary(id)), Callable(), from)
+## Opens the shared card inspector for card `id`; the working deck is untouched. `from_widget` is
+## the card that was right-clicked (the preview card, a deck tile); the zoom starts from it (M7).
+## Without one it starts from the card's catalogue cell when that cell is on screen.
+func inspect_card(id: int, from_widget: Control = null) -> CardInspector:
+	var w: Control = from_widget if from_widget != null else browser.cell_widget(id)
+	return CardInspector.open(self, MatchView.summary_view(_summary(id)), Callable(), CardInspector.source_rect(w))
 
 
 ## Shows card `id` big in the preview column (deck-construction stats, F19) and selects it.
@@ -1007,7 +1007,7 @@ func _show(id: int) -> void:
 		_preview_card.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		_preview_card.show_tooltip = false
 		_preview_card.tooltip_text = ""
-		_preview_card.right_pressed.connect(func(_w): inspect_card(id))
+		_preview_card.right_pressed.connect(func(pw): inspect_card(id, pw))
 		_set_art_h(_art_h)
 		_preview_holder.add_child(_preview_card)
 		_apply_fit_step(int(_fit_cache.get(id, 0)))
@@ -1018,13 +1018,12 @@ func _show(id: int) -> void:
 	_update_facts()
 
 
-## The details-pane view of card `id` (H25): the catalogue summary plus its rules split by timing
-## (MatchView.rules_parts), so the pane draws one block per effect with its timing heading
-## ("Materials", "On Summon", "Once per turn", ...) like the match's card details panel.
+## The details-pane view of card `id` (H25): the catalogue summary view, which carries the rules
+## split by timing (M6: MatchView.summary_view includes text_parts), so the pane draws one block per
+## effect with its timing heading ("Materials", "On Summon", "Once per turn", ...) like every
+## other card details panel.
 func details_view(id: int) -> Dictionary:
-	var v := MatchView.summary_view(_summary(id))
-	v["text_parts"] = MatchView.rules_parts(CardDB.get_def(id))
-	return v
+	return MatchView.summary_view(_summary(id))
 
 
 ## How the details pane fits (H25): {"room": its height, "need": the content's height with the
@@ -1165,7 +1164,7 @@ func _make_tile(id: int) -> Control:
 	w.mouse_entered.connect(func(): _on_hover(id))
 	w.hover_sound = true
 	w.pressed.connect(func(_w): _on_tile_clicked(id))
-	w.right_pressed.connect(func(_w): inspect_card(id))
+	w.right_pressed.connect(func(tw): inspect_card(id, tw))
 	tile.add_child(w)
 	var slot := Control.new()
 	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE

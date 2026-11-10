@@ -10,7 +10,8 @@ const SCORE_SIZE := 44
 const LOSER_SCORE_ALPHA := 0.6
 const HERO_CTA_W := 240.0
 
-const DECK_SORT := ["basic_unit", "unit", "spell", "trap", "power", "fusion", "ritual", "arcane"]
+## Card kinds in list order (CardDB.KIND_ORDER, M8).
+const DECK_SORT := CardDB.KIND_ORDER
 const PAUSE_W := 440.0
 ## Draft offer: scale of a hovered card, and the row height that leaves room for it.
 const DRAFT_HOVER_SCALE := 1.06
@@ -310,10 +311,12 @@ func _show_deck() -> void:
 		if not counts.has(c["id"]):
 			order.append(c)
 		counts[c["id"]] = counts.get(c["id"], 0) + 1
+	# M8: catalogue order (kind first, then the card list's order within the kind), like the deck builder.
+	var rank := CardDB.catalogue_rank()
 	order.sort_custom(func(a, b):
-		var ka := DECK_SORT.find(String(a["category"]))
-		var kb := DECK_SORT.find(String(b["category"]))
-		return ka < kb if ka != kb else String(a["name"]) < String(b["name"]))
+		var ra: int = rank.get(int(a["id"]), 1 << 30)
+		var rb: int = rank.get(int(b["id"]), 1 << 30)
+		return ra < rb if ra != rb else int(a["id"]) < int(b["id"]))
 	(pile_popup as HousePanel).set_tag("%d cards" % cards.size())
 	var head := HBoxContainer.new()
 	pile_box.add_child(head)
@@ -359,6 +362,12 @@ func render() -> void:
 	if sig == overlay_sig:
 		return
 	overlay_sig = sig
+	# M2: the opponent's draft progress alone updates its chip in place; rebuilding would free the
+	# offer cards under the pointer and drop their hover lift and tilt.
+	var forced := _force_rebuild
+	_force_rebuild = false
+	if not forced and stage == "decks" and overlay.visible and not gs.is_spectator() and decks != null and decks.update_in_place():
+		return
 	GameUi.clear(overlay_box)
 	if stage == "game" or stage == "":
 		overlay.visible = false
@@ -515,7 +524,13 @@ func mark_rendered() -> void:
 ## Forces the modal to rebuild now (after a local choice that the view does not reflect).
 func refresh() -> void:
 	overlay_sig = 0
+	_force_rebuild = true
 	render()
+
+
+## M2: set by refresh() so the next render rebuilds even when only the opponent's draft progress
+## changed (see DeckSelectView.update_in_place).
+var _force_rebuild := false
 
 
 ## Title of a series stage ("" for the game itself).

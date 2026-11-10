@@ -29,10 +29,17 @@ var gs: GameScreen
 var table: Control
 ## Decorative lines and glow between the two sides.
 var deco: BoardDeco
-## Table dust motes and their light cone (#23), as fractions of the play field.
+## Table dust motes (#23) and, M13 (owner, 9 Nov), the round light over the middle of the field.
 var dust: AmbientMotes
 const DUST_COUNT := AmbientMotes.DUST_COUNT
-const DUST_SHAFT := Rect2(0.3, 0.0, 0.4, 1.0)
+## M13: radii (px) of the overhead glow round the centre of the field (between the two unit grids):
+## a soft, nearly round pool a little wider than the zones and piles, so the lamp reads as hanging
+## over the table's middle.
+const GLOW_RADIUS := Vector2(500.0, 440.0)
+## M9 (owner, 9 Nov): the opponent's plate sits up at the top of the screen (its top edge, px), with the
+## icon Menu button beside it; both plates keep at least PLATE_CLEAR px from every zone and pile.
+const OPP_PLATE_Y := 6.0
+const PLATE_CLEAR := 12.0
 ## Layer the cards of this view live on.
 var layer: Control
 ## [top plate, bottom plate]
@@ -92,11 +99,12 @@ func build_table() -> void:
 	table.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	table.clip_contents = true
 	gs.add_child(table)
-	# #23: the table is never perfectly still: a few warm dust motes drift in a soft centre light
-	# cone (resting, faint, under reduce motion). Under the zones and cards; click-through.
+	# #23: the table is never perfectly still: a few warm dust motes drift (resting, faint, under
+	# reduce motion). M13 (owner, 9 Nov): in a soft round glow centred on the field, as if the lamp
+	# hung over the table (it was a cone from the top edge); placed in layout. Under the zones and
+	# cards; click-through.
 	dust = AmbientMotes.dust(DUST_COUNT)
-	dust.shaft = DUST_SHAFT
-	dust.shaft_color = AmbientMotes.DUST_COLOR
+	dust.glow_color = AmbientMotes.DUST_COLOR
 	table.add_child(dust)
 
 
@@ -254,12 +262,16 @@ func layout(w: float, h: float) -> void:
 			ps.position = Vector2(px + (i % 2) * (POWER_W + SLOT_GAP), _y0 + rows[int(i / 2)])
 			ps.size = Vector2(POWER_W, UNIT_SIZE)
 	# D5: the plates keep the HUD safe margin from the screen's left edge and from the sidebar.
-	(plates[0] as Control).position = Vector2(area.end.x - PLATE_W - UIStyle.SAFE_HUD, _y0 - 10.0)
+	# M9 (owner, 9 Nov): neither plate may overlap a zone; the opponent's moves up to the top edge
+	# (the icon Menu button sits to its left) and mine moves down (own_plate_y).
+	(plates[0] as Control).position = Vector2(area.end.x - PLATE_W - UIStyle.SAFE_HUD, OPP_PLATE_Y)
 	(plates[0] as Control).size = Vector2(PLATE_W, 0)
 	var ph := (plates[1] as Control).get_combined_minimum_size().y
-	(plates[1] as Control).position = Vector2(UIStyle.SAFE_HUD, _y0 + BOARD_H - ph + 8.0)
+	var py := own_plate_y(h, ph)
+	(plates[1] as Control).position = Vector2(UIStyle.SAFE_HUD, py)
 	(plates[1] as Control).size = Vector2(PLATE_W, 0)
-	controls.position = Vector2(UIStyle.SAFE_HUD, _y0 + BOARD_H + 8.0 + DuelControls.TOP_GAP)
+	controls.position = Vector2(UIStyle.SAFE_HUD, py + ph + DuelControls.TOP_GAP)
+	dust.set_glow(field_center(), GLOW_RADIUS)
 	opp_hand_box.position = Vector2(UIStyle.SAFE_HUD, OPP_HAND_Y)
 	deco.mid_y = _y0 + 365.0
 	deco.x0 = _ux - 30.0
@@ -267,6 +279,21 @@ func layout(w: float, h: float) -> void:
 	deco.top_edge = _y0 - 8.0
 	deco.bottom_edge = _y0 + BOARD_H + 8.0
 	deco.queue_redraw()
+
+
+## M9: top (px) of my plate (height `ph`) in a window `h` tall: below the whole field when that leaves
+## room for the duel controls under it and the HUD safe margin at the bottom, otherwise as low as that
+## room allows, and never higher than PLATE_CLEAR under the pile and Power columns beside it.
+func own_plate_y(h: float, ph: float) -> float:
+	var lo := _y0 + 509.0 + UNIT_SIZE + PLATE_CLEAR
+	var below := _y0 + BOARD_H + PLATE_CLEAR
+	var fit := h - UIStyle.SAFE_HUD - DuelControls.TOP_GAP - DuelControls.block_size().y - ph
+	return roundf(maxf(lo, minf(below, fit)))
+
+
+## M13: the centre of the playing field (between the two players' unit grids), screen-local.
+func field_center() -> Vector2:
+	return Vector2(_ux + BLOCK_W / 2.0, _y0 + BOARD_H / 2.0)
 
 
 ## Rebuilds the opponent's face-down hand fan (up to OPP_HAND_MAX backs).

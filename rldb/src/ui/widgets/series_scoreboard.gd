@@ -1,12 +1,14 @@
 class_name SeriesScoreboard
 extends Control
-## L26 (owner, 5 Nov): the series at a glance, always visible during a series game, in the middle
-## of the top strip above the board: a dark leather plaque with each player's name and their wins as
+## L26 (owner, 5 Nov): the series at a glance during a series game. M4 (owner, 9 Nov): it lives at
+## the top of the in-game menu (GameMenu scales it to fit), no longer in the top strip, where it hid
+## the opponent's hand. A dark leather plaque with each player's name and their wins as
 ## faceted gems in their seat colour (empty sockets for the wins still needed), my side on the left,
 ## and in the middle a raised cartouche with "BEST OF n" over one dot per game (the winner's colour;
 ## the game in play breathing). The leader's gems sit in a small gold laurel; the series winner's
 ## shine. When a game is won its gem pops into its socket with a burst and the series_point cue.
 ## Hovering shows the full SeriesResults card. Hidden in a single game (best of 1) and tutorials.
+## It centres itself (at its scale) in its parent Control.
 ##
 ##     var sb := SeriesScoreboard.new()
 ##     sb.show_model(SeriesResults.model(view, me))       # no animation
@@ -46,6 +48,19 @@ const CART_GAP := 10.0
 const POP_TIME := 0.55
 const POP_OVERSHOOT := 1.45
 
+## M batch (owner, 10 Nov), compact mode (the in-game menu): only the cartouche, narrower: "BEST OF n"
+## over [my name] dots [their name], the names in their seat colours (gold / blue, as in chat and the
+## lobby list) and each won game's dot filled in its winner's colour; no gems, sockets or laurel.
+const COMPACT_NAME_PX := 12
+## Room between a name and the dots in compact mode.
+const COMPACT_NAME_GAP := 10.0
+## The dots are a little larger in compact mode (they carry the whole score).
+const COMPACT_DOT_R := 4.6
+const COMPACT_DOT_STEP := 14.0
+
+## Emitted after the plaque re-sized itself for a new series model (its holder refits it).
+signal laid_out
+
 ## The series shown (SeriesResults.model).
 var m: Dictionary = {}
 ## Seconds clock (tests and frozen shots inject one).
@@ -60,11 +75,13 @@ var pop_k: float = 1.0:
 var shown: Array = [0, 0]
 ## Identity of the series shown (a different series never animates).
 var series_key: String = ""
-## True while the plaque has stepped aside for a mode banner in the same place (yield_to).
-var yielded: bool = false
+## The room (px) each name is fitted into (M4: the menu gives it less than NAME_MAX).
+var name_max: float = NAME_MAX
+## M batch: draw only the cartouche with names beside the dots (the in-game menu). Set before the first
+## show_model.
+var compact: bool = false
 var _breath: Control
 var _pop_tw: Tween
-var _yield_tw: Tween
 var _name_w: Array = [0.0, 0.0]
 ## The cartouche's width for the series shown (see CART_MIN_W).
 var cart_w: float = CART_MIN_W
@@ -128,24 +145,6 @@ func pop_point(seat: int) -> void:
 		queue_redraw())
 
 
-## Final review (2026-11-05): steps aside (`on`) for a banner that takes the middle of the top strip,
-## such as sacrifice mode's hint pill, fading out and ignoring the mouse; `on` false fades it back.
-## The two shared the same spot and the plaque hid the hint. Under reduce motion it is instant.
-func yield_to(on: bool) -> void:
-	if on == yielded:
-		return
-	yielded = on
-	mouse_filter = Control.MOUSE_FILTER_IGNORE if on else Control.MOUSE_FILTER_PASS
-	if _yield_tw != null and _yield_tw.is_valid():
-		_yield_tw.kill()
-	var to := 0.0 if on else 1.0
-	if UIStyle.reduce_motion or not is_inside_tree():
-		modulate.a = to
-		return
-	_yield_tw = create_tween()
-	_yield_tw.tween_property(self, "modulate:a", to, UIStyle.dur(0.18 if on else 0.3)).set_trans(Tween.TRANS_SINE)
-
-
 ## True while a point is popping in (tests).
 func popping() -> bool:
 	return pop_seat != -1
@@ -167,30 +166,39 @@ func _relayout() -> void:
 		return
 	var f := UIStyle.font_display(600)
 	var me: int = m["me"]
+	var npx := name_px()
 	for k in 2:
 		var seat: int = me if k == 0 else 1 - me
-		var nm := SeriesResults._fit(f, String(m["names"][seat]).to_upper(), NAME_MAX, NAME_PX)
-		_name_w[k] = f.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_PX).x
+		var nm := SeriesResults._fit(f, String(m["names"][seat]).to_upper(), name_max, npx)
+		_name_w[k] = f.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, npx).x
 	var n := int(m["best_of"])
 	var cap_w := caption_font().get_string_size(caption_text(), HORIZONTAL_ALIGNMENT_LEFT, -1, CAPTION_PX).x
-	var dots_w := DOT_STEP * float(n - 1) + 2.0 * (DOT_R + RING_GAP + 0.7)
-	cart_w = ceilf(maxf(CART_MIN_W, maxf(cap_w, dots_w) + 2.0 * CART_PAD))
-	var side := maxf(_name_w[0], _name_w[1]) + NAME_GAP + GEM_STEP * float(int(m["need"])) + 8.0 + (CART_GAP - 8.0)
-	var w := ceilf(2.0 * (PAD + side) + cart_w)
+	var dots_w := dot_step() * float(n - 1) + 2.0 * (dot_r() + RING_GAP + 0.7)
+	var w := 0.0
+	if compact:
+		# Symmetric about the dots: the longer name decides both sides.
+		var row := dots_w + 2.0 * (maxf(_name_w[0], _name_w[1]) + COMPACT_NAME_GAP)
+		cart_w = ceilf(maxf(cap_w, row) + 2.0 * CART_PAD)
+		w = cart_w
+	else:
+		cart_w = ceilf(maxf(CART_MIN_W, maxf(cap_w, dots_w) + 2.0 * CART_PAD))
+		var side := maxf(_name_w[0], _name_w[1]) + NAME_GAP + GEM_STEP * float(int(m["need"])) + 8.0 + (CART_GAP - 8.0)
+		w = ceilf(2.0 * (PAD + side) + cart_w)
 	custom_minimum_size = Vector2(w, H)
 	size = custom_minimum_size
 	tooltip_text = SeriesResults.summary(m)
 	place()
 	queue_redraw()
 	_breath.queue_redraw()
+	laid_out.emit()
 
 
-## Centres the plaque in its parent's width, in the middle of the strip's height.
+## Centres the plaque (at its scale) in its parent.
 func place() -> void:
 	var p := get_parent() as Control
 	if p == null:
 		return
-	position = Vector2(roundf((p.size.x - size.x) / 2.0), roundf((p.size.y - size.y) / 2.0))
+	position = ((p.size - size * scale) / 2.0).round()
 
 
 func _notification(what: int) -> void:
@@ -201,7 +209,7 @@ func _notification(what: int) -> void:
 
 
 func _process(_d: float) -> void:
-	if visible and not m.is_empty() and int(m["current"]) >= 0 and not UIStyle.reduce_motion:
+	if is_visible_in_tree() and not m.is_empty() and int(m["current"]) >= 0 and not UIStyle.reduce_motion:
 		_breath.queue_redraw()
 
 
@@ -221,12 +229,33 @@ func _make_custom_tooltip(_for_text: String) -> Object:
 ## Centre of the cartouche's dot for game `i`.
 func dot_pos(i: int) -> Vector2:
 	var n: int = m.get("best_of", 3)
-	var x0 := size.x / 2.0 - DOT_STEP * float(n - 1) / 2.0
-	return Vector2(x0 + DOT_STEP * i, DOT_Y)
+	var x0 := size.x / 2.0 - dot_step() * float(n - 1) / 2.0
+	return Vector2(x0 + dot_step() * i, DOT_Y)
 
 
-## The raised middle cartouche (local rect).
+## The game dots' radius and spacing (larger in compact mode).
+func dot_r() -> float:
+	return COMPACT_DOT_R if compact else DOT_R
+
+
+func dot_step() -> float:
+	return COMPACT_DOT_STEP if compact else DOT_STEP
+
+
+## The names' font size.
+func name_px() -> int:
+	return COMPACT_NAME_PX if compact else NAME_PX
+
+
+## Seat `seat`'s colour on this plaque (the game's seat colours, gold / blue).
+func seat_color(seat: int) -> Color:
+	return SeriesResults.SEAT_COLORS[seat]
+
+
+## The raised middle cartouche (local rect; the whole plaque in compact mode).
 func cartouche_rect() -> Rect2:
+	if compact:
+		return Rect2(Vector2.ZERO, size)
 	return Rect2(size.x / 2.0 - cart_w / 2.0, CART_TOP, cart_w, H - 2.0 * CART_TOP)
 
 
@@ -258,7 +287,7 @@ func caption_font() -> Font:
 ## The box the game dots take, the breathing ring round the game in play included (local rect).
 func dots_rect() -> Rect2:
 	var n: int = m.get("best_of", 3)
-	var r := DOT_R + RING_GAP + 0.7
+	var r := dot_r() + RING_GAP + 0.7
 	var a := dot_pos(0)
 	var b := dot_pos(n - 1)
 	return Rect2(a.x - r, DOT_Y - r, b.x - a.x + 2.0 * r, 2.0 * r)
@@ -273,6 +302,10 @@ func gem_pos(left: bool, i: int) -> Vector2:
 
 func _draw() -> void:
 	if m.is_empty():
+		return
+	if compact:
+		_draw_cartouche()
+		_draw_compact_names()
 		return
 	var r := Rect2(Vector2.ZERO, size)
 	# The plaque: a drop shadow, dark leather, a gold hairline rim with a lit top edge.
@@ -316,7 +349,7 @@ func _draw_side(seat: int, left: bool, leading: bool) -> void:
 		else:
 			PickPips.draw_socket(self, p, GEM_R)
 	var f := UIStyle.font_display(600)
-	var nm := SeriesResults._fit(f, String(m["names"][seat]).to_upper(), NAME_MAX, NAME_PX)
+	var nm := SeriesResults._fit(f, String(m["names"][seat]).to_upper(), name_max, NAME_PX)
 	var nw := f.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_PX).x
 	var edge := gem_pos(left, need - 1).x + dir * (GEM_R + NAME_GAP)
 	var x := edge - nw if left else edge
@@ -324,6 +357,24 @@ func _draw_side(seat: int, left: bool, leading: bool) -> void:
 	var winner := bool(m["over"]) and int(m["winner"]) == seat
 	draw_string(f, Vector2(x, y + 1), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_PX, Color(0, 0, 0, 0.85))
 	draw_string(f, Vector2(x, y), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_PX, UIStyle.GOLD_HI if winner else col.lightened(0.4))
+
+
+## Compact mode: my name left of the dots, the opponent's right, each in its seat colour (gold once the
+## series is theirs), on the dots' centre line.
+func _draw_compact_names() -> void:
+	var f := UIStyle.font_display(600)
+	var me: int = m["me"]
+	var n: int = m.get("best_of", 3)
+	var half := dot_step() * float(n - 1) / 2.0 + dot_r() + RING_GAP + 0.7 + COMPACT_NAME_GAP
+	var y := DOT_Y + float(COMPACT_NAME_PX) * 0.36
+	for k in 2:
+		var seat: int = me if k == 0 else 1 - me
+		var nm := SeriesResults._fit(f, String(m["names"][seat]).to_upper(), name_max, COMPACT_NAME_PX)
+		var nw := f.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, COMPACT_NAME_PX).x
+		var x := size.x / 2.0 - half - nw if k == 0 else size.x / 2.0 + half
+		var winner := bool(m["over"]) and int(m["winner"]) == seat
+		draw_string(f, Vector2(x, y + 1), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, COMPACT_NAME_PX, Color(0, 0, 0, 0.85))
+		draw_string(f, Vector2(x, y), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, COMPACT_NAME_PX, UIStyle.GOLD_HI if winner else seat_color(seat))
 
 
 ## The popping gem: it swells past its size and settles, with a ring of light spreading and fading.
@@ -354,20 +405,21 @@ func _draw_cartouche() -> void:
 	var res: Array = m["results"]
 	for i in int(m["best_of"]):
 		var p := dot_pos(i)
+		var dr := dot_r()
 		var popping_this := pop_seat != -1 and i == res.size() - 1
 		if i < res.size() and not popping_this:
-			var c: Color = SeriesResults.SEAT_COLORS[int(res[i])]
-			draw_circle(p, DOT_R + 1.0, Color(0, 0, 0, 0.6), true, -1.0, true)
-			draw_circle(p, DOT_R, c, true, -1.0, true)
+			var c: Color = seat_color(int(res[i]))
+			draw_circle(p, dr + 1.0, Color(0, 0, 0, 0.6), true, -1.0, true)
+			draw_circle(p, dr, c, true, -1.0, true)
 			draw_circle(p + Vector2(-0.9, -1.0), 1.0, Color(1, 1, 1, 0.6), true, -1.0, true)
 		elif popping_this:
-			var c2: Color = SeriesResults.SEAT_COLORS[int(res[i])]
-			draw_circle(p, DOT_R + 1.0, Color(0, 0, 0, 0.6), true, -1.0, true)
-			draw_circle(p, DOT_R * clampf(pop_k * 1.6, 0.0, 1.0), c2, true, -1.0, true)
+			var c2: Color = seat_color(int(res[i]))
+			draw_circle(p, dr + 1.0, Color(0, 0, 0, 0.6), true, -1.0, true)
+			draw_circle(p, dr * clampf(pop_k * 1.6, 0.0, 1.0), c2, true, -1.0, true)
 		else:
 			var dim := bool(m["over"])
-			draw_circle(p, DOT_R, Color(0.05, 0.04, 0.03), true, -1.0, true)
-			draw_arc(p, DOT_R, 0.0, TAU, 16, Color(UIStyle.BRONZE, 0.4 if dim else 0.8), 1.0, true)
+			draw_circle(p, dr, Color(0.05, 0.04, 0.03), true, -1.0, true)
+			draw_arc(p, dr, 0.0, TAU, 16, Color(UIStyle.BRONZE, 0.4 if dim else 0.8), 1.0, true)
 
 
 # The game in play's dot breathes (its own canvas item, H7).
@@ -376,4 +428,4 @@ func _draw_breath() -> void:
 		return
 	var p := dot_pos(int(m["current"]))
 	var k := 0.75 if UIStyle.reduce_motion else UIStyle.breathe(float(clock.call()), 0.35)
-	_breath.draw_arc(p, DOT_R + RING_GAP, 0.0, TAU, 20, Color(UIStyle.GOLD_HI, clampf(0.75 * k, 0.0, 1.0)), 1.4, true)
+	_breath.draw_arc(p, dot_r() + RING_GAP, 0.0, TAU, 20, Color(UIStyle.GOLD_HI, clampf(0.75 * k, 0.0, 1.0)), 1.4, true)

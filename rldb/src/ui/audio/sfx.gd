@@ -49,6 +49,11 @@ const NAMES: PackedStringArray = [
 	# Series, draft and menus (L3, L26, L28).
 	"game_start", "series_point", "draft_reveal", "draft_pick", "coin_flip", "slider_tick",
 	"customise_select",
+	# M batch (owner, 9 Nov): choosing an item in any dropdown (OptionButton). A missing file borrows
+	# another cue's file (FALLBACKS).
+	"dropdown_select",
+	# M batch (owner, 10 Nov): the draft offer's own hover (other card hovers keep card_hover).
+	"draft_hover",
 ]
 ## F22 / F25: UI sounds. One user action makes exactly one UI sound: within one frame only the request
 ## with the highest priority plays (a later, higher one stops the earlier voice, a lower or equal one is
@@ -58,8 +63,16 @@ const UI_PRIORITY := {
 	"select": 0, "click_secondary": 1, "click_primary": 2,
 	"tab": 2, "toggle_on": 2, "toggle_off": 2, "panel_open": 3, "panel_close": 3,
 	"deck_add": 3, "deck_remove": 3, "cancel": 3, "confirm": 3, "reward_pick": 3, "reward_reveal": 4, "deny": 4, "back": 5,
-	"slider_tick": 1, "customise_select": 3, "draft_pick": 3, "sacrifice_mode_on": 4, "sacrifice_mode_off": 4,
+	"slider_tick": 1, "dropdown_select": 2, "customise_select": 3, "draft_pick": 3, "sacrifice_mode_on": 4, "sacrifice_mode_off": 4,
 }
+## Cues that borrow another cue's file until their own asset exists (asset_path). The owner's chosen
+## take for a name replaces the borrowed one as soon as `<name>.wav` / `.ogg` lands in DIR.
+const FALLBACKS := {"dropdown_select": "select", "draft_hover": "card_hover"}
+## M batch: the cue of a user's choice in a dropdown (OptionButton.item_selected, which a scripted
+## select() never emits, so building a form is silent).
+const DROPDOWN_SFX := "dropdown_select"
+## Popup meta: the row the hover cue last sounded for (-1: none since the list opened).
+const POPUP_ROW_META := "_sfx_row"
 ## Hover cue (design review 1.4.6): at most one per HOVER_MIN_MS, pitch +/- HOVER_JITTER, quiet. It
 ## is not a UI action sound (it never replaces or blocks a click) and skips the game-sound limiter.
 const HOVER_SFX := "ui_hover"
@@ -124,6 +137,22 @@ class ButtonHook extends RefCounted:
 	func on_hovered(b: BaseButton) -> void:
 		if is_instance_valid(b):
 			Sfx.hover(b)
+
+	func on_item_selected(_index: int, ob: OptionButton) -> void:
+		if is_instance_valid(ob):
+			Sfx.dropdown_selected(ob)
+
+	func on_popup_input(ev: InputEvent, pm: PopupMenu) -> void:
+		if ev is InputEventMouseMotion and is_instance_valid(pm):
+			Sfx.popup_hover(pm, Sfx.popup_row_at(pm, (ev as InputEventMouseMotion).position.y))
+
+	func on_popup_focused(id: int, pm: PopupMenu) -> void:
+		if is_instance_valid(pm):
+			Sfx.popup_hover(pm, pm.get_item_index(id))
+
+	func on_popup_shown(pm: PopupMenu) -> void:
+		if is_instance_valid(pm):
+			pm.set_meta(Sfx.POPUP_ROW_META, -1)
 
 
 ## Plays sound `name` at `volume_db` with random pitch jitter (+/- fraction).
@@ -200,9 +229,10 @@ static func hover_item() -> bool:
 
 
 ## The hover cue of a card (hand, draft, rewards, catalogue, pile browser): the paper slide,
-## rate-limited with the other hover cues so sweeping across a row never chatters.
-static func hover_card() -> bool:
-	return hover_at(Time.get_ticks_msec(), CARD_HOVER_SFX)
+## rate-limited with the other hover cues so sweeping across a row never chatters. `cue` picks a
+## screen's own card hover (the draft offer's draft_hover).
+static func hover_card(cue: String = CARD_HOVER_SFX) -> bool:
+	return hover_at(Time.get_ticks_msec(), cue)
 
 
 ## L1: a volume slider step: the soft bead click, rate-limited with the hover cues so a fast drag
@@ -270,6 +300,7 @@ static func install_button_sounds() -> void:
 	tree.node_added.connect(_hook.on_added)
 	if tree.root != null:
 		_wire_tree(tree.root)
+	install_focus_watch()
 
 
 static func _wire_tree(n: Node) -> void:
@@ -278,13 +309,76 @@ static func _wire_tree(n: Node) -> void:
 		_wire_tree(c)
 
 
-## Gives button `n` its click once (no-op for other nodes or when already wired).
+## Gives button `n` its click once (no-op for other nodes or when already wired). A dropdown
+## (OptionButton) also gets the dropdown_select cue for a chosen item, and its list (and any other
+## PopupMenu) the hover cue as the pointer or the arrow keys move from item to item.
 static func wire_button(n: Node) -> void:
-	if not (n is BaseButton) or n.has_meta("_sfx_wired") or _hook == null:
+	if _hook == null:
+		return
+	if n is PopupMenu:
+		wire_popup(n as PopupMenu)
+		return
+	if not (n is BaseButton) or n.has_meta("_sfx_wired"):
 		return
 	n.set_meta("_sfx_wired", true)
 	(n as BaseButton).pressed.connect(_hook.on_pressed.bind(n))
 	(n as BaseButton).mouse_entered.connect(_hook.on_hovered.bind(n))
+	if n is OptionButton:
+		(n as OptionButton).item_selected.connect(_hook.on_item_selected.bind(n))
+		wire_popup((n as OptionButton).get_popup())
+
+
+## Gives PopupMenu `pm` the hover cue (once): a new row under the pointer, or a row reached with the
+## arrow keys, plays ui_hover through the shared hover limiter. No-op before install_button_sounds().
+static func wire_popup(pm: PopupMenu) -> void:
+	if _hook == null or pm == null or pm.has_meta("_sfx_wired"):
+		return
+	pm.set_meta("_sfx_wired", true)
+	pm.set_meta(POPUP_ROW_META, -1)
+	pm.window_input.connect(_hook.on_popup_input.bind(pm))
+	pm.id_focused.connect(_hook.on_popup_focused.bind(pm))
+	pm.about_to_popup.connect(_hook.on_popup_shown.bind(pm))
+
+
+## The dropdown cue for a user's choice in dropdown `ob`: one dropdown_select per choice (a UI
+## sound, so a handler's weightier cue in the same frame wins instead). Silent when the dropdown's
+## BUTTON_META is "none".
+static func dropdown_selected(ob: OptionButton) -> void:
+	if String(ob.get_meta(BUTTON_META, "")) == "none":
+		return
+	play(DROPDOWN_SFX, 0.0, 0.03)
+
+
+## The row of PopupMenu `pm` at local height `y` (px, the popup window's own coordinates), or -1
+## outside its items or on a separator / disabled item. Godot exposes no item rects, so the rows are
+## taken as equal slices of the panel's content height: right for the plain text lists the game
+## uses (no separators, no scrolling).
+static func popup_row_at(pm: PopupMenu, y: float) -> int:
+	var n := pm.item_count
+	if n <= 0:
+		return -1
+	var top := 0.0
+	var bottom := 0.0
+	var sb := pm.get_theme_stylebox(&"panel")
+	if sb != null:
+		top = sb.get_margin(SIDE_TOP)
+		bottom = sb.get_margin(SIDE_BOTTOM)
+	var h := float(pm.size.y) - top - bottom
+	if h <= 0.0 or y < top or y >= top + h:
+		return -1
+	var row := clampi(floori((y - top) / (h / float(n))), 0, n - 1)
+	if pm.is_item_separator(row) or pm.is_item_disabled(row):
+		return -1
+	return row
+
+
+## The hover cue for row `row` of PopupMenu `pm`: plays (rate-limited with every hover cue) only
+## when the row differs from the last one that sounded in this list. Returns true when it played.
+static func popup_hover(pm: PopupMenu, row: int) -> bool:
+	if row < 0 or int(pm.get_meta(POPUP_ROW_META, -1)) == row:
+		return false
+	pm.set_meta(POPUP_ROW_META, row)
+	return hover_at(Time.get_ticks_msec())
 
 
 static func _start(name: String, volume_db: float, pitch_jitter: float, limit: bool = true) -> AudioStreamPlayer:
@@ -316,6 +410,8 @@ static func for_fx(e: Dictionary, me: int) -> String:
 	match String(e.get("k", "")):
 		"draw":
 			return "card_draw"
+		"shuffle":   # M batch: cards shuffled into a deck (Spent recycled into Draw)
+			return "card_shuffle"
 		"play":
 			return "card_set" if String(e.get("zone", "")) == "backrow" else "card_play"
 		"summon":
@@ -393,16 +489,78 @@ static func is_muted() -> bool:
 	return _muted
 
 
-## Loads persisted settings (defaults: volume 0.5, unmuted) and applies them to the bus.
+## Loads persisted settings (defaults: volume 0.5, unmuted, sound kept when unfocused) and applies
+## them to the bus.
 static func load_settings() -> void:
 	_loaded = true
 	_volume = DEFAULT_VOLUME
 	_muted = false
+	_mute_unfocused = false
 	var cf := ConfigFile.new()
 	if cf.load(SETTINGS_PATH) == OK:
 		_volume = clampf(float(cf.get_value("audio", "volume", DEFAULT_VOLUME)), 0.0, 1.0)
 		_muted = bool(cf.get_value("audio", "muted", false))
+		_mute_unfocused = bool(cf.get_value("audio", "mute_unfocused", false))
 	_apply_bus()
+	_apply_focus_mute()
+
+
+# ---------------------------------------------------------------- mute when unfocused (M batch, 10 Nov)
+
+## Settings option: silence the whole game (music and effects, the Master bus) while its window is
+## not focused. Off by default; persisted with the other audio settings.
+static var _mute_unfocused: bool = false
+## True while the game window has lost focus (set by FocusWatch).
+static var _unfocused: bool = false
+static var _focus_watch: Node
+
+
+## Whether the game goes silent while its window is unfocused.
+static func mute_when_unfocused() -> bool:
+	return _mute_unfocused
+
+
+## Turns "mute when unfocused" on or off and persists it.
+static func set_mute_when_unfocused(on: bool) -> void:
+	_mute_unfocused = on
+	_apply_focus_mute()
+	_save()
+
+
+## Records the window's focus (FocusWatch, or a test) and applies the mute.
+static func set_window_focused(focused: bool) -> void:
+	_unfocused = not focused
+	_apply_focus_mute()
+
+
+## True while the Master bus is held silent by "mute when unfocused".
+static func focus_muted() -> bool:
+	return _mute_unfocused and _unfocused
+
+
+static func _apply_focus_mute() -> void:
+	AudioServer.set_bus_mute(0, focus_muted())
+
+
+## Adds the FocusWatch node to the tree once (idempotent; install_button_sounds calls it at startup).
+static func install_focus_watch() -> void:
+	if _focus_watch != null and is_instance_valid(_focus_watch):
+		return
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null or tree.root == null:
+		return
+	_focus_watch = FocusWatch.new()
+	_focus_watch.name = "SfxFocusWatch"
+	tree.root.add_child.call_deferred(_focus_watch)
+
+
+## Receives the OS's application focus notifications for "mute when unfocused".
+class FocusWatch extends Node:
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+			Sfx.set_window_focused(false)
+		elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+			Sfx.set_window_focused(true)
 
 
 ## Rate limiter with injectable clock: false if `name` repeated within MIN_INTERVAL_MS or more
@@ -430,6 +588,7 @@ static func _save() -> void:
 	var cf := ConfigFile.new()
 	cf.set_value("audio", "volume", _volume)
 	cf.set_value("audio", "muted", _muted)
+	cf.set_value("audio", "mute_unfocused", _mute_unfocused)
 	cf.save(SETTINGS_PATH)
 
 
@@ -450,12 +609,15 @@ static func _apply_bus() -> void:
 
 
 ## The asset path of sound `name`: `<name>.wav`, else `<name>.ogg` (L1: the ElevenLabs set may ship a
-## long cue as Ogg Vorbis), or "" when neither exists (the sound is then silent).
+## long cue as Ogg Vorbis), else the file of its FALLBACKS cue, or "" when none exists (the sound is
+## then silent).
 static func asset_path(name: String) -> String:
 	for ext in EXTENSIONS:
 		var path: String = DIR + name + ext
 		if ResourceLoader.exists(path):
 			return path
+	if FALLBACKS.has(name):
+		return asset_path(String(FALLBACKS[name]))
 	return ""
 
 

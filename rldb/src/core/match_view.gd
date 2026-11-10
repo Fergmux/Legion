@@ -166,7 +166,8 @@ static func def_view(id: int) -> Dictionary:
 
 
 ## Display view of a card summary (Series.card_summary) for menus, rewards, decks and the
-## spotlight: a full card face with no game instance behind it.
+## spotlight: a full card face with no game instance behind it. Carries the same `text_parts`
+## (rules by timing) and `abilities` as def_view, so its details read identically (M6).
 static func summary_view(c: Dictionary) -> Dictionary:
 	var kind := "ap"
 	match c["category"]:
@@ -178,8 +179,14 @@ static func summary_view(c: Dictionary) -> Dictionary:
 	var v := {"uid": -1000 - c["id"], "id": c["id"], "name": c["name"], "category": c["category"], "cost_kind": kind,
 		"cost_text": c["cost_text"], "cost": printed if printed != null else 0, "printed_cost": printed,
 		"race": c["race"], "type": c["type"], "atk": c["atk"], "def": c["def"], "printed_atk": c["atk"], "printed_def": c["def"],
-		"text": c["text"], "support": c["support"], "art": d["art"], "statuses": {}, "runes": 0, "zone": "pile"}
+		"text": c["text"], "text_parts": rules_parts(d), "keywords": d["keywords"], "support": c["support"],
+		"art": d["art"], "statuses": {}, "runes": 0, "zone": "pile"}
 	_add_evolve(v, d)
+	# M6: the rules split by timing and the activated abilities, exactly as def_view / card_view give
+	# them, so every inspect entry point draws the same coloured sections for a card.
+	var abs: Array = CardScripts.get_entry(int(c["id"])).get("abilities", [])
+	if not abs.is_empty():
+		v["abilities"] = ability_views(abs)
 	return v
 
 
@@ -251,13 +258,26 @@ static func _player_view(m: MatchEngine, p: int, viewer: int) -> Dictionary:
 		for uid in pl[z]:
 			v[z].append(null if uid == -1 else card_view(m, uid, viewer))
 	if p == viewer:
-		for z in ["hand", "spent", "exhaust", "extra"]:
+		for z in ["hand", "spent", "exhaust"]:
 			v[z] = pl[z].map(func(u): return card_view(m, u, viewer))
+		# M8: the Extra Deck has no order of its own; it lists in catalogue order (kind first).
+		v["extra"] = _catalogue_uids(m, pl["extra"]).map(func(u): return card_view(m, u, viewer))
 		# Own Draw inspection: contents in a display order unrelated to the real order.
 		var shown: Array = pl["draw"].duplicate()
 		shown.sort()
 		v["draw_inspect"] = shown.map(func(u): return card_view(m, u, viewer))
 	return v
+
+
+## M8: instance uids sorted by their card's catalogue position (CardDB.catalogue_rank), then uid.
+static func _catalogue_uids(m: MatchEngine, uids: Array) -> Array:
+	var rank := CardDB.catalogue_rank()
+	var out := uids.duplicate()
+	out.sort_custom(func(a, b):
+		var ra: int = rank.get(int(m.cards[a]["id"]), 1 << 30)
+		var rb: int = rank.get(int(m.cards[b]["id"]), 1 << 30)
+		return ra < rb if ra != rb else int(a) < int(b))
+	return out
 
 
 static func _pending_view(m: MatchEngine, viewer: int) -> Dictionary:

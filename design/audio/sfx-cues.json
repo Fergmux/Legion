@@ -189,7 +189,7 @@
     {"name": "poison_tick", "tier": "tick", "g": 0.8, "pi": 0.55, "len": [0.25, 0.7], "ctx": "Poison damage tick.",
      "p": ["Short wet sickly poison bubble pop with a small hiss"]},
 
-    {"name": "summon", "tier": "summon", "g": 2.0, "pi": 0.5, "len": [0.8, 2.0], "ctx": "Normal unit summon.",
+    {"name": "summon", "tier": "summon", "g": 1.2, "pi": 0.6, "len": [0.5, 2.0], "ctx": "Normal unit summon.",
      "p": ["Fantasy creature summoned onto a battlefield, a magical whoosh and shimmering burst landing with a deep thud",
            "Magical summoning, a short rising shimmer that lands with a deep warm impact and sparkling dust"]},
     {"name": "fusion_vortex", "tier": "build", "g": 1.6, "pi": 0.5, "len": [0.8, 1.1], "align": 0.72, "ctx": "Fusion build-up; crests at the climax (0.78 s).",
@@ -288,6 +288,10 @@
     {"name": "target_arm", "tier": "ui", "g": 0.8, "pi": 0.55, "len": [0.2, 0.7], "ctx": "Targeting arrow appears (L7).",
      "p": ["Bow string drawn back slowly, tense creak of wood, aiming"]},
     {"name": "target_lock", "tier": "ui_major", "g": 0.6, "pi": 0.6, "len": [0.15, 0.5], "ctx": "Target chosen (L7).",
-     "p": ["Magical target lock, crisp bright click with a short shimmering ping"]}
+     "p": ["Magical target lock, crisp bright click with a short shimmering ping"]},
+    {"name": "dropdown_select", "tier": "ui", "g": 0.5, "pi": 0.6, "len": [0.05, 0.3], "ctx": "An item is chosen in any dropdown (M batch, 2026-11-09).",
+     "p": ["Single soft click of a small brass latch snapping shut, short and clean, close-mic, dry"]},
+    {"name": "draft_hover", "tier": "hover", "g": 0.5, "pi": 0.7, "len": [0.06, 0.3], "ctx": "Pointer enters a draft offer card (M batch, 2026-11-09; other card hovers keep card_hover).",
+     "p": ["Very soft quick whoosh of a playing card lifted off a table, tiny airy swish, quiet, close-mic, dry"]}
   ]
 }

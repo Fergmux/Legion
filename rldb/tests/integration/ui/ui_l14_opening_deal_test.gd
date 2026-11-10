@@ -69,7 +69,10 @@ func test_l14_going_first_in_game_two_deals_the_opening_hand() -> void:
 	# Assert: the hand waits hidden for the deal, then each card flies in from the draw pile.
 	assert_float(gs.hand.layer.modulate.a).is_equal(0.0)
 	var dealt := false
-	for i in 90:
+	# Real time, not a frame count: the deal now follows the opening shuffle (M batch, SHUFFLE_LEAD),
+	# and headless frames run far faster than 60 fps.
+	var until := Time.get_ticks_msec() + 3000
+	while Time.get_ticks_msec() < until:
 		await await_idle_frame()
 		if gs.hand.layer.modulate.a >= 1.0 and cards.any(func(w): return is_instance_valid(w) and (w as CardWidget).scale.x < 0.99):
 			dealt = true

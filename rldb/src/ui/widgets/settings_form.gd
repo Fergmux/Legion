@@ -6,10 +6,10 @@ extends VBoxContainer
 ## grouped under SECTION headers:
 ##   Display    window mode and anti-aliasing (200x32 dropdowns)
 ##   Sound      music and effects volume: a 6 px inset track with a gold fill, an 18 px gem knob
-##              that glows on hover, a soft tick every 10%, and a 24 px speaker toggle for mute
+##              that glows on hover, a soft tick every 10%, and a 24 px speaker toggle for mute;
+##              then "Mute when the game is in the background" (M batch)
 ##   Interface  reduced motion, fast animations, the custom cursor (L22), any `extra` toggles of the caller, then the
-##              statistics-sharing toggle with its explanation (12 px MUTED, line height 1.35,
-##              aligned with the toggle's label)
+##              statistics-sharing toggle, its explanation in an info icon's tooltip (M batch)
 ## Toggles are full-width rows (HouseCheck): a 20 px bronze-bevel box whose tick draws on in 80 ms,
 ## a 6% gold row highlight on hover, and the toggle_on / toggle_off latch (Sfx's button hook).
 ## Values are read from and written through UIStyle, Music, Sfx and Telemetry; nothing else is kept.
@@ -58,6 +58,9 @@ func _init(on_reduce_motion: Callable = Callable(), extra: Array = []) -> void:
 	_section("Sound")
 	_volume_row("Music volume", "music", Music.get_volume(), Music.is_muted(), Music.set_volume, Music.set_muted)
 	_volume_row("Sound effects", "sfx", Sfx.get_volume(), Sfx.is_muted(), Sfx.set_volume, Sfx.set_muted)
+	# M batch (owner, 10 Nov): silence everything while the game window is in the background.
+	_toggle("mute_unfocused", "Mute when the game is in the background", Sfx.mute_when_unfocused(),
+		func(on): Sfx.set_mute_when_unfocused(on))
 	_section("Interface")
 	_toggle("reduce_motion", "Reduced motion (no travel, shake or particles)", UIStyle.reduce_motion, func(on):
 		UIStyle.set_reduce_motion(on)
@@ -67,17 +70,21 @@ func _init(on_reduce_motion: Callable = Callable(), extra: Array = []) -> void:
 	_toggle("custom_cursor", "Custom cursor (off: the system pointer)", CursorSkin.is_enabled(), func(on): CursorSkin.set_enabled(on))   # L22
 	for e in extra:
 		_toggle(String(e["key"]), String(e["text"]), bool(e["on"]), e["toggled"])
-	_toggle("share", "Share anonymous gameplay statistics", Telemetry.share_enabled(), func(on): Telemetry.set_share_enabled(on))
-	var note := UIStyle.label(Telemetry.PRIVACY_NOTE, NOTE_FONT, UIStyle.MUTED, true)
-	note.name = "ShareNote"
-	note.add_theme_constant_override("line_spacing", NOTE_LINE_SPACING)
-	note.custom_minimum_size = Vector2(LABEL_W + COL_GAP + CONTROL_W - NOTE_INDENT, 0)
-	var nm := MarginContainer.new()
-	nm.add_theme_constant_override("margin_left", NOTE_INDENT)
-	nm.add_theme_constant_override("margin_top", 0)
-	nm.add_theme_constant_override("margin_bottom", UIStyle.sp("xs"))
-	nm.add_child(note)
-	add_child(nm)
+	# M batch (owner, 10 Nov): the privacy explanation lives in an info icon's tooltip beside the
+	# toggle instead of a paragraph under it.
+	var share := _toggle("share", "Share anonymous gameplay statistics", Telemetry.share_enabled(), func(on): Telemetry.set_share_enabled(on))
+	var info := InfoDot.new(Telemetry.PRIVACY_NOTE)
+	info.name = "ShareInfo"
+	controls["share_info"] = info
+	share.add_child(info)
+	info.anchor_left = 1.0
+	info.anchor_right = 1.0
+	info.anchor_top = 0.5
+	info.anchor_bottom = 0.5
+	info.offset_left = -InfoDot.PX - UIStyle.sp("sm")
+	info.offset_right = -UIStyle.sp("sm")
+	info.offset_top = -InfoDot.PX / 2.0
+	info.offset_bottom = InfoDot.PX / 2.0
 
 
 ## Total width of the form's grid.
@@ -334,6 +341,30 @@ class HouseCheck extends CheckBox:
 			else:
 				draw_line(a, m, col, 2.6, true)
 				draw_line(m, m.lerp(b, (len - l1) / l2), col, 2.6, true)
+
+
+## Info icon (M batch, 10 Nov): an 18 px gold-rimmed "i" disc whose tooltip carries an explanation
+## (the statistics-sharing privacy note). It brightens on hover and shows the house tooltip.
+class InfoDot extends Control:
+	const PX := 18.0
+
+	func _init(tip: String = "") -> void:
+		tooltip_text = tip
+		custom_minimum_size = Vector2(PX, PX)
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		mouse_default_cursor_shape = Control.CURSOR_HELP
+		mouse_entered.connect(queue_redraw)
+		mouse_exited.connect(queue_redraw)
+
+	func _draw() -> void:
+		var hov := get_global_rect().has_point(get_global_mouse_position())
+		var c := size / 2.0
+		var r := minf(size.x, size.y) / 2.0 - 1.0
+		draw_circle(c, r, Color(UIStyle.GOLD, 0.18 if hov else 0.08), true, -1.0, true)
+		draw_arc(c, r, 0.0, TAU, 28, UIStyle.GOLD_HI if hov else UIStyle.GOLD, 1.4, true)
+		var ink := UIStyle.GOLD_HI if hov else UIStyle.GOLD
+		draw_circle(c + Vector2(0, -r * 0.45), r * 0.13, ink, true, -1.0, true)
+		draw_line(c + Vector2(0, -r * 0.12), c + Vector2(0, r * 0.52), ink, 1.8, true)
 
 
 ## Mute toggle: a 24 px speaker with sound waves, struck through (and dimmed) while muted.

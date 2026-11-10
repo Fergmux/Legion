@@ -21,8 +21,13 @@ func test_spell_trap_and_power_have_no_stat_race_or_type_section() -> void:
 		var p := _panel_for(_summary_view(id))
 		assert_array(p.sections).not_contains(["stats"])
 		var t := p.all_text()
-		for bad in ["No race", "No type", "ATK", "DEF", "?"]:
+		# M6 (10 Nov): the real rule sections now show, and rules text may name ATK ("+10 ATK"), so the
+		# stats check reads only what comes before the RULES heading.
+		var head := t.get_slice("RULES", 0)
+		for bad in ["No race", "No type", "?"]:
 			assert_str(t).not_contains(bad)
+		for bad in ["ATK", "DEF"]:
+			assert_str(head).not_contains(bad)
 
 
 func test_units_still_show_stats_race_and_type() -> void:

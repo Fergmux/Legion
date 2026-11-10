@@ -15,15 +15,19 @@ extends RefCounted
 
 ## The tables, in picker order. `veil`: the dark veil over the art on the board (0..1) that keeps
 ## zones, cards and text readable on that table; `thumb`: a small copy for the picker.
+## M batch (owner, 9 Nov: the tables are "a bit distracting"): in a match each table also recedes a
+## little behind the cards: `recede` is a faint extra black veil over the art (0..1, on top of
+## `veil`) and `desat` a slight loss of colour (0 = the art's own colours, 1 = grey). Tuned per table
+## so each still looks like itself: the bright, busy ones (leather, dragon) recede most.
 const TABLES := [
 	{"id": "ruins", "name": "Forest Ruins", "blurb": "Moss-grown flagstones in a forgotten grove",
-		"path": "res://assets/art/tables/table_ruins.jpg", "thumb": "res://assets/art/tables/thumbs/table_ruins.jpg", "veil": 0.36},
+		"path": "res://assets/art/tables/table_ruins.jpg", "thumb": "res://assets/art/tables/thumbs/table_ruins.jpg", "veil": 0.36, "recede": 0.06, "desat": 0.08},
 	{"id": "leather", "name": "Emerald Leather", "blurb": "Tooled green hide in a brass-cornered frame",
-		"path": "res://assets/art/tables/table_leather.jpg", "thumb": "res://assets/art/tables/thumbs/table_leather.jpg", "veil": 0.1},
+		"path": "res://assets/art/tables/table_leather.jpg", "thumb": "res://assets/art/tables/thumbs/table_leather.jpg", "veil": 0.1, "recede": 0.1, "desat": 0.12},
 	{"id": "parquet", "name": "Guildhall Parquet", "blurb": "Inlaid oak with bronze rosettes",
-		"path": "res://assets/art/tables/table_parquet.jpg", "thumb": "res://assets/art/tables/thumbs/table_parquet.jpg", "veil": 0.3},
+		"path": "res://assets/art/tables/table_parquet.jpg", "thumb": "res://assets/art/tables/thumbs/table_parquet.jpg", "veil": 0.3, "recede": 0.07, "desat": 0.08},
 	{"id": "dragon", "name": "Gilded Dragon", "blurb": "Parquet guarded by golden wyrms",
-		"path": "res://assets/art/tables/table_dragon.jpg", "thumb": "res://assets/art/tables/thumbs/table_dragon.jpg", "veil": 0.3},
+		"path": "res://assets/art/tables/table_dragon.jpg", "thumb": "res://assets/art/tables/thumbs/table_dragon.jpg", "veil": 0.3, "recede": 0.09, "desat": 0.14},
 ]
 ## The table of a new profile (owner, 5 Nov: the "Luxury Fantasy Table Background").
 const DEFAULT_TABLE := "ruins"
@@ -138,6 +142,16 @@ static func table_path() -> String:
 ## The board veil of the chosen table (0..1).
 static func table_veil() -> float:
 	return float(table()["veil"])
+
+
+## The chosen table's extra match-only darkening (0..1, over its veil; M batch).
+static func table_recede() -> float:
+	return float(table().get("recede", 0.0))
+
+
+## How much colour the chosen table loses in a match (0..1; M batch).
+static func table_desat() -> float:
+	return float(table().get("desat", 0.0))
 
 
 ## True when `id` names one of CARD_BACKS.

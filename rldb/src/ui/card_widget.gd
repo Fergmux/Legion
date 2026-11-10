@@ -57,6 +57,9 @@ var show_tooltip: bool = true
 ## Hover cue (design review #32 / #76): the pointer entering a shown card plays Sfx.hover_card (the
 ## paper slide, rate-limited). Off by default: the screens that list cards for picking turn it on.
 var hover_sound: bool = false
+## M batch (10 Nov): the cue hover_sound plays (Sfx.CARD_HOVER_SFX unless a screen picks its own, e.g.
+## the draft offer's draft_hover).
+var hover_cue: String = Sfx.CARD_HOVER_SFX
 var hovered: bool = false: set = _set_hovered
 var fx_flash: float = 0.0: set = _set_flash
 var fx_glow: Color = Color(1, 1, 1, 0): set = _set_glow
@@ -123,6 +126,11 @@ var _tip_key := 0
 static var face_epoch := 0
 
 
+## M2: true between this widget's mouse_entered and mouse_exited (the pointer is over it).
+func pointer_inside() -> bool:
+	return _mouse_in
+
+
 func _init() -> void:
 	item_rect_changed.connect(_on_rect_changed)
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -162,7 +170,7 @@ func _ready() -> void:
 		_self_hover = auto_hover
 		_mouse_in = true
 		if hover_sound and not view.is_empty():
-			Sfx.hover_card()
+			Sfx.hover_card(hover_cue)
 		request_face())
 	mouse_exited.connect(func(): _self_hover = false; _mouse_in = false; StatusTip.hide_for(self); request_face())
 	# Godot turns processing on at ready because _process exists: only redraw per frame while animating.

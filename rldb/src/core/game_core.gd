@@ -1017,3 +1017,4 @@ func recycle_spent(p: int) -> void:
 			cards[uid]["zone"] = "draw"
 	shuffle_array(players[p]["draw"])
 	add_log("%s recycles Spent: %d into Draw, %d to Extra Deck." % [pname(p), spent.size() - to_extra, to_extra])
+	add_fx({"k": "shuffle", "p": p})   # M batch: presentation only (the reshuffle sound)

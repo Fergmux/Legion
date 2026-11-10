@@ -1,15 +1,16 @@
 class_name AmbientMotes
 extends Control
 ## Ambient life for an idle screen (design review #6, 1.4.5 "Ambient"): drifting petal and gold
-## motes and, optionally, a soft light shaft that pulses on a slow sine. Click-through; drawn on one
+## motes and, optionally, a soft light shaft or a round overhead glow that pulses on a slow sine. Click-through; drawn on one
 ## Control with an additive material, every mote a quad of one cached disc texture (H7: tessellating
 ## AA circles per frame cost ~1.2 ms), so it is cheap. Deterministic (seeded): the same seed gives
 ## the same field. Reduce motion: the motes rest where they are (a static, faint field) and the
-## shaft holds its mid brightness.
+## shaft or glow holds its mid brightness.
 ##
 ##     var motes := AmbientMotes.new(26, [PETAL, GOLD])
 ##     motes.shaft = Rect2(0.52, 0.0, 0.2, 0.9)    # in fractions of the rect
 ##     backdrop.add_child(motes)
+##     dust.set_glow(Vector2(640, 400), Vector2(480, 420))   # M13: a round light over the table centre
 
 const PETAL := Color("e8a0b0")
 const GOLD := Color("f0cf7a")
@@ -26,12 +27,27 @@ const SWAY_PX := 22.0
 ## Light shaft pulse period (s) and its alpha range.
 const SHAFT_PERIOD := 4.0
 const SHAFT_ALPHA := Vector2(0.05, 0.11)
+## M13 (owner, 9 Nov): the overhead table glow's peak alpha range at its centre (inside the shaft's
+## range, and narrower, so it breathes gently) on the shaft's period. Its falloff: a gaussian of this
+## steepness over the radius, faded fully out from GLOW_FADE (fraction of the radius) to the rim.
+const GLOW_ALPHA := Vector2(0.06, 0.09)
+const GLOW_STEEP := 2.6
+const GLOW_FADE := 0.6
 
 ## Mote colours, picked in turn.
 var colors: Array = [PETAL, GOLD]
 ## The light shaft as fractions of the rect (x, y, w, h); a zero size draws none.
 var shaft: Rect2 = Rect2()
 var shaft_color: Color = Color("ffd9a0")
+## M13: centre (px, in this rect) and radii (px) of the round overhead glow; a zero radius draws none.
+var glow_center: Vector2 = Vector2.ZERO
+var glow_radius: Vector2 = Vector2.ZERO
+## The glow's colour (warm candle light).
+var glow_color: Color = Color("ffd9a0")
+## The glow's own canvas item (a radial gradient computed per pixel, dithered so it never bands),
+## drawn behind the motes; null until set_glow first gives it a size.
+var glow_rect: ColorRect
+static var _glow_shader: Shader
 ## Seconds clock (tests and frozen shots inject one).
 var clock: Callable = func() -> float: return float(Time.get_ticks_msec()) / 1000.0
 
@@ -132,6 +148,8 @@ func _draw() -> void:
 	var t := float(clock.call())
 	if shaft.size.x > 0.0 and shaft.size.y > 0.0:
 		_draw_shaft(t)
+	if glow_rect != null:
+		(glow_rect.material as ShaderMaterial).set_shader_parameter(&"strength", glow_alpha(t))
 	var disc := disc_texture()
 	for i in _motes.size():
 		var m: Dictionary = _motes[i]
@@ -189,3 +207,77 @@ func _draw_shaft(t: float) -> void:
 	var c2 := Color(shaft_color, 0.0)
 	draw_polygon(PackedVector2Array([top_l, top_r, mid_r, mid_l]), PackedColorArray([c0, c0, c1, c1]))
 	draw_polygon(PackedVector2Array([mid_l, mid_r, bot_r, bot_l]), PackedColorArray([c1, c1, c2, c2]))
+
+
+# ---------------------------------------------------------------- M13 overhead glow
+
+## M13 (owner, 9 Nov): a soft round glow of light centred on `center` (px, in this rect) with radii
+## `radius` (px), as if a lamp hung over that point; breathes gently with the shaft's period (holds its
+## mid brightness under reduce motion). A zero radius removes it. Called again on every layout.
+func set_glow(center: Vector2, radius: Vector2) -> void:
+	glow_center = center
+	glow_radius = radius
+	if radius.x <= 0.0 or radius.y <= 0.0:
+		if glow_rect != null:
+			glow_rect.visible = false
+		return
+	if glow_rect == null:
+		glow_rect = ColorRect.new()
+		glow_rect.name = "TableGlow"
+		glow_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		glow_rect.show_behind_parent = true      # under the motes
+		glow_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var mat := ShaderMaterial.new()
+		mat.shader = glow_shader()
+		glow_rect.material = mat
+		add_child(glow_rect, false, Node.INTERNAL_MODE_FRONT)
+	glow_rect.visible = true
+	var mat2 := glow_rect.material as ShaderMaterial
+	mat2.set_shader_parameter(&"center", center)
+	mat2.set_shader_parameter(&"radius", radius)
+	mat2.set_shader_parameter(&"tint", glow_color)
+	mat2.set_shader_parameter(&"steep", GLOW_STEEP)
+	mat2.set_shader_parameter(&"fade", GLOW_FADE)
+	mat2.set_shader_parameter(&"strength", glow_alpha(float(clock.call())))
+	queue_redraw()
+
+
+## The glow's peak alpha at clock time `t` (the middle of GLOW_ALPHA under reduce motion).
+func glow_alpha(t: float) -> float:
+	var k := 0.5 if UIStyle.reduce_motion else 0.5 + 0.5 * sin(t / SHAFT_PERIOD * TAU)
+	return lerpf(GLOW_ALPHA.x, GLOW_ALPHA.y, k)
+
+
+## The glow's alpha share (0..1 of its peak) at distance `d` from the centre in radii: the shader's
+## falloff, for tests.
+static func glow_falloff(d: float) -> float:
+	return exp(-d * d * GLOW_STEEP) * (1.0 - smoothstep(GLOW_FADE, 1.0, d))
+
+
+## The shared glow shader: additive, a gaussian falloff faded to nothing before the rim (no edge), and
+## a one-level ordered dither so the faint gradient never bands on an 8-bit target.
+static func glow_shader() -> Shader:
+	if _glow_shader == null:
+		_glow_shader = Shader.new()
+		_glow_shader.code = """shader_type canvas_item;
+render_mode blend_add, unshaded;
+uniform vec4 tint : source_color = vec4(1.0, 0.85, 0.63, 1.0);
+uniform vec2 center = vec2(0.0);
+uniform vec2 radius = vec2(400.0);
+uniform float steep = 2.6;
+uniform float fade = 0.6;
+uniform float strength = 0.075;
+varying vec2 local_pos;
+void vertex() {
+	local_pos = VERTEX;
+}
+void fragment() {
+	float d = length((local_pos - center) / radius);
+	float f = exp(-d * d * steep) * (1.0 - smoothstep(fade, 1.0, d));
+	vec3 c = tint.rgb * strength * f;
+	float n = fract(52.9829189 * fract(dot(FRAGCOORD.xy, vec2(0.06711056, 0.00583715))));
+	c += (n - 0.5) / 255.0 * step(0.5 / 255.0, strength * f);
+	COLOR = vec4(max(c, vec3(0.0)), 1.0);
+}
+"""
+	return _glow_shader

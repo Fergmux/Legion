@@ -66,6 +66,23 @@ static func open(parent: Node, card: Dictionary, on_closed: Callable = Callable(
 	return ins
 
 
+## M7: the on-screen global rect of `w` to fly the inspector's card out of, or an empty rect (no
+## fly) when `w` is missing, hidden, or scrolled entirely out of a clipping ancestor (a catalogue
+## cell far down a scroll list would otherwise fly in from off screen).
+static func source_rect(w: Control) -> Rect2:
+	if w == null or not is_instance_valid(w) or not w.is_visible_in_tree():
+		return Rect2()
+	var r := w.get_global_rect()
+	var vis := w.get_viewport_rect() if w.get_viewport() != null else r
+	var n := w.get_parent()
+	while n != null:
+		var c := n as Control
+		if c != null and c.clip_contents:
+			vis = vis.intersection(c.get_global_rect())
+		n = n.get_parent()
+	return r if r.intersects(vis) else Rect2()
+
+
 ## Number of inspectors open.
 static func open_count() -> int:
 	return _stack.size()
@@ -305,12 +322,22 @@ func _appear() -> void:
 func _fly_in() -> void:
 	if _closing or not is_inside_tree():
 		return
-	var ps := _panel.scale
-	_panel.scale = Vector2.ONE     # the card's resting rect, not the one inside the panel's pop
-	var to := _card_widget.get_global_rect()
-	_panel.scale = ps
-	if _fly(_from, to, true) == null:
+	if _fly(_from, rest_rect(), true) == null:
 		_card_widget.modulate.a = 1.0
+
+
+## M7: the big card's resting global rect: where it sits once the panel's appear pop is over (the
+## rect inside the panel at scale 1).
+func rest_rect() -> Rect2:
+	var ps := _panel.scale
+	_panel.scale = Vector2.ONE
+	var r := _card_widget.get_global_rect()
+	_panel.scale = ps
+	return r
+
+
+## M7: the rect the last opening flight ended on (tests and shot drivers compare it with rest_rect).
+var fly_landed: Rect2 = Rect2()
 
 
 ## A copy of the big card moving from global rect `a` to `b` along a short arc (`card_move`): on
@@ -341,14 +368,26 @@ func _fly(a: Rect2, b: Rect2, landing: bool) -> CardWidget:
 	if not landing:
 		_card_widget.modulate.a = 0.0
 	var d := UIStyle.motion("card_move") * FLY_K
-	var apex := (p0 + p1) / 2.0 + Vector2(0, -40.0)
 	var tw := g.create_tween()
-	tw.set_parallel(true)
+	# M7: a landing flight re-reads the card's resting rect every step, so it ends exactly where the
+	# card sits even when the panel's layout settles (or the window resizes) during the flight.
 	tw.tween_method(func(t: float) -> void:
-		if is_instance_valid(g):
-			g.position = p0.lerp(apex, t).lerp(apex.lerp(p1, t), t), 0.0, 1.0, d).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(g, "scale", Vector2(k_b, k_b), d).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	tw.chain().tween_callback(func() -> void:
+		if not is_instance_valid(g):
+			return
+		var e := p1
+		var k_e := k_b
+		if landing and is_instance_valid(_card_widget) and _card_widget.is_inside_tree():
+			var rr := rest_rect()
+			if rr.size.x >= 4.0:
+				e = inv * rr.position
+				k_e = rr.size.x / big.size.x
+		var apex := (p0 + e) / 2.0 + Vector2(0, -40.0)
+		g.position = p0.lerp(apex, t).lerp(apex.lerp(e, t), t)
+		var k := lerpf(k_a, k_e, t)
+		g.scale = Vector2(k, k)
+		if landing and t >= 1.0:
+			fly_landed = Rect2(get_global_transform() * g.position, big.size * k), 0.0, 1.0, d).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_callback(func() -> void:
 		if landing and is_instance_valid(_card_widget):
 			_card_widget.modulate.a = 1.0
 		if is_instance_valid(g):

@@ -144,31 +144,81 @@ func test_root_menu_has_options_instead_of_settings_and_credits() -> void:
 	assert_array(sections).contains_exactly(["settings", "customisation", "credits"])
 
 
-func test_opening_options_shows_settings_at_once() -> void:
+func test_m10_opening_options_selects_no_section() -> void:
+	# M batch (owner, 9 Nov): Options lists its sections with none chosen and the centre clear.
 	# Arrange
 	var mm := _menu()
 	# Act
 	mm.pick("@options")
 	await get_tree().process_frame
 	# Assert
-	assert_object(mm.find_child("SettingsForm", true, false)).is_not_null()
-	var active := []
+	assert_array(mm._menu_path).is_equal(["root", "options"])
+	assert_str(mm._menu_leaf).is_equal("")
+	assert_object(mm.find_child("SettingsForm", true, false)).is_null()
+	assert_int(mm._menu_center.get_child_count()).is_equal(0)
+	var labels := []
 	for mi in mm._menu_list.get_children():
-		if mi is MenuItem and (mi as MenuItem).active:
-			active.append((mi as MenuItem).label_text)
-	assert_array(active).contains_exactly(["Settings"])
+		if mi is MenuItem:
+			assert_bool((mi as MenuItem).active).override_failure_message("%s is selected" % (mi as MenuItem).label_text).is_false()
+			labels.append((mi as MenuItem).label_text)
+	assert_array(labels).contains_exactly(["Settings", "Customisation", "Credits", "Back"])
 
 
-func test_closing_an_options_section_returns_to_the_main_menu() -> void:
+func test_m10_closing_an_options_section_stays_in_options() -> void:
 	# Arrange
 	var mm := _menu()
 	mm.pick("@options")
 	mm.pick("customisation")
-	# Act
+	# Act: the section's Close (and Esc) close the section only.
 	mm.step_back()
+	# Assert
+	assert_array(mm._menu_path).is_equal(["root", "options"])
+	assert_str(mm._menu_leaf).is_equal("")
+	assert_int(mm._menu_center.get_child_count()).is_equal(0)
+	# Esc again returns to the main menu.
+	mm.step_back()
+	assert_array(mm._menu_path).is_equal(["root"])
+
+
+func test_m10_back_from_an_options_section_returns_to_the_main_menu() -> void:
+	# Arrange
+	var mm := _menu()
+	mm.pick("@options")
+	mm.pick("settings")
+	# Act
+	mm.back_out()
 	# Assert
 	assert_array(mm._menu_path).is_equal(["root"])
 	assert_str(mm._menu_leaf).is_equal("")
+
+
+func test_m12_match_table_recedes_behind_the_cards() -> void:
+	# M batch (owner, 9 Nov): every table gets a faint extra veil and a slight desaturation in a match.
+	for t in Customisation.TABLES:
+		# Arrange
+		Customisation.set_table(String(t["id"]))
+		# Act
+		var bg: Control = auto_free(UIStyle.table_background())
+		# Assert
+		var recede := bg.get_node_or_null("Recede") as ColorRect
+		assert_object(recede).override_failure_message("%s has no Recede veil" % t["id"]).is_not_null()
+		assert_float(recede.color.a).is_between(0.05, 0.12)
+		assert_float(recede.color.a).is_equal_approx(float(t["recede"]), 0.001)
+		assert_int(recede.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
+		var mat := (bg.get_child(0) as TextureRect).material as ShaderMaterial
+		assert_object(mat).is_not_null()
+		assert_float(float(mat.get_shader_parameter("desat"))).is_between(0.0, 0.2)
+		# The table's own veil is unchanged and sits under the new one.
+		assert_float((bg.get_child(1) as ColorRect).color.a).is_equal_approx(float(t["veil"]), 0.001)
+		assert_int(recede.get_index()).is_greater(1)
+
+
+func test_m12_menu_backdrop_keeps_the_full_art() -> void:
+	# Arrange / Act
+	var bg: Control = auto_free(UIStyle.background(MainMenu.BACKGROUND_DIM, UIStyle.MENU_BACKGROUND))
+	# Assert
+	assert_object(bg.get_node_or_null("Recede")).is_null()
+	assert_object((bg.get_child(0) as TextureRect).material).is_null()
 
 
 func test_options_sections_share_one_width() -> void:

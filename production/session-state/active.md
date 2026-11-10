@@ -5,7 +5,7 @@ Read this first after compaction/crash.
 - Spec: `rules/` 00–09; latest instruction `rules/09-PRODUCTION-QUALITY-PASS.md`.
 - Authority for rules: `design/decision-register-answers.md` (user answers) + C-03/C-04 in `design/decision-register.md`.
 - Playtest items: `design/playtest-improvements.md` (I-01..I-03 implemented, evidence recorded).
-- Godot root `rldb/`; exe `/c/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe`.
+- Godot root `rldb/`; Godot 4.7.2 (upgraded 2026-11-09 from 4.6.1). Exe `~/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe` (this PC: user Fergus; older notes say fergm). Python 3.13 at `~/AppData/Local/Programs/Python/Python313/python.exe`.
 - Branch `build/rldb-game` (never pushed). Latest: see `git log` (F02 pass after ace0329).
 - Settings (project.yaml): rigor full, review full, team studio, qa full, multiplayer true, testing.strict all true.
 - Latest work: `design/playtest-feedback-02.md` implemented; checklist `production/stories/playtest-feedback-02.md`; live driver `-- --f02-shots=<dir>`.
@@ -99,3 +99,22 @@ basic Race+Type change, coin flip, discard animation). Checklist:
 - At the end: full verify, version bump, export (Get-Process RLDB* first), then the publish-release skill (GitHub).
 - 2026-11-05: project on GitHub (PUBLIC) github.com/Fergmux/RLDB, default branch build/rldb-game; QA evidence stripped from the uploaded history. Release v0.3.10 (RLDB-friends.zip + RLDB-dev.zip). Skill /publish-release -> tools/publish_github.py (sync | release [--clobber]). Owner authorised pushing to that repo (supersedes "never push" for it).
 - Owner is testing match backgrounds: rldb/assets/art/background.jpg deleted on disk (uncommitted), candidates background1-4; originals in assets/art/backup (.gdignore).
+
+## CHECKPOINT 2026-11-10: M batch (owner feedback 9 Nov) — READ FIRST AFTER COMPACTION
+- New PC (user Fergus). Godot 4.7.2 (project upgraded from 4.6.1; full suite 2243/2243 on 4.7.2). Python 3.13, ffmpeg and uv
+  installed via winget (paths: ~/AppData/Local/Microsoft/WinGet/Packages/...). Export templates for 4.7.2 NOT yet installed.
+- Brief for agents: production/m-batch-brief.md. Owner's 13 items + 6 sound notes are in this conversation; log them to
+  design/owner-feedback-2026-11-09.md before committing.
+- Done (uncommitted, in this checkout): M1 menu clicks, M4 series score in menu, M9 plates + icon menu button, M13 round glow
+  (agent ae9d); M3 cursor 28px@100%, M10 Options opens empty, M12 table recede/desat, dropdown_select hook (agent ad5b);
+  M5 Curse/Cleanse FX order (agent acb5). Evidence: production/qa/evidence/2026-11-09-m-batch/.
+- Running: cards agent (M2 draft hover, M6 text_parts in summary_view, M7 deck-builder inspect origin, M8 new-card order).
+- Sounds: owner picks mastered into rldb/assets/audio/sfx/ (dropdown_select, draft_hover, draft_pick, draft_reveal,
+  game_start, defeat, victory, victory_big, card_draw, summon). design/audio/sfx-selection.json + sfx-cues.json updated;
+  tools/tests/test_sfx_set.py OK. Brief: design/audio/sfx-owner-notes-2026-11-09.md.
+- TODO after cards agent: wire draft_hover in the draft offer (deck_select_view / card_widget hover cue); Chat/Lobby popups
+  cover the opponent plate (game_chat.gd / game_spectate.gd); full suite; check d14 inspector test; review screenshots;
+  log batch; ask owner to commit; version bump + export need 4.7.2 templates.
+- Card backs: owner picks (wyrm 2, grove 1, tide 3, runes 3, stars 1, violet 1) resized to 512x768 WebP in
+  rldb/assets/art/card_backs/; Violet Sigil is now painted (card_back.gd STYLES). Source: ElevenLabs flow "RLDB card backs 9 Nov"
+  (GPT Image 2.5, edit of old back + Gilded Sun style ref). Update rldb/assets/CREDITS.md + data/credits.json.

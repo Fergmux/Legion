@@ -134,15 +134,15 @@ func test_l22_custom_cursor_is_on_by_default() -> void:
 
 func test_l22_turning_it_off_restores_every_system_cursor_at_once() -> void:
 	CursorSkin.install()
-	assert_str(String(CursorSkin.applied()[Input.CURSOR_ARROW])).is_equal("normal@32")
+	assert_str(String(CursorSkin.applied()[Input.CURSOR_ARROW])).is_equal("normal@28")
 	CursorSkin.set_mode(&"knife")
 	CursorSkin.set_enabled(false)
 	for shape in CursorSkin.SHAPES:
 		assert_str(String(CursorSkin.applied().get(shape, ""))).is_equal("")
 	assert_str(String(CursorSkin.current_art(Input.CURSOR_ARROW))).is_equal("")
 	CursorSkin.set_enabled(true)
-	assert_str(String(CursorSkin.applied()[Input.CURSOR_ARROW])).is_equal("knife@32")
-	assert_str(String(CursorSkin.applied()[Input.CURSOR_CROSS])).is_equal("target@32")
+	assert_str(String(CursorSkin.applied()[Input.CURSOR_ARROW])).is_equal("knife@28")
+	assert_str(String(CursorSkin.applied()[Input.CURSOR_CROSS])).is_equal("target@28")
 
 
 func test_l22_the_setting_persists_and_keeps_other_settings() -> void:
@@ -176,33 +176,38 @@ func test_l22_settings_form_has_the_custom_cursor_toggle() -> void:
 
 # ---------------------------------------------------------------- size
 
-func test_l22_size_is_the_baked_size_nearest_the_scaled_base() -> void:
-	# BASE_PX 36 x scale, nearest of 32/40/48/64/80; a tie takes the smaller.
-	assert_int(CursorSkin.size_for_scale(1.0)).is_equal(32)     # 36: tie 32/40
-	assert_int(CursorSkin.size_for_scale(1.08)).is_equal(40)
-	assert_int(CursorSkin.size_for_scale(1.25)).is_equal(48)    # 45
-	assert_int(CursorSkin.size_for_scale(1.5)).is_equal(48)     # 54
-	assert_int(CursorSkin.size_for_scale(2.0)).is_equal(64)     # 72: tie 64/80
-	assert_int(CursorSkin.size_for_scale(2.16)).is_equal(80)
-	assert_int(CursorSkin.size_for_scale(3.0)).is_equal(80)
+func test_m3_size_is_the_baked_size_nearest_the_scaled_base() -> void:
+	# M batch: BASE_PX 28 x scale, nearest of SIZES (24 28 32 36 42 48 56 64 72); a tie takes the smaller.
+	assert_int(CursorSkin.size_for_scale(1.0)).is_equal(28)
+	assert_int(CursorSkin.size_for_scale(1.25)).is_equal(36)    # 35
+	assert_int(CursorSkin.size_for_scale(1.5)).is_equal(42)
+	assert_int(CursorSkin.size_for_scale(1.75)).is_equal(48)    # 49
+	assert_int(CursorSkin.size_for_scale(2.0)).is_equal(56)
+	assert_int(CursorSkin.size_for_scale(2.5)).is_equal(72)     # 70
+	assert_int(CursorSkin.size_for_scale(3.0)).is_equal(72)     # the largest
 
 
-func test_l22_ui_scale_follows_the_window_and_the_screen_dpi() -> void:
-	# The 1600x1000 window: 32 px. 1080p full screen at 100%: 40 px. 1440p: 48 px. 4K: 80 px.
-	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(Vector2(1600, 1000), 96))).is_equal(32)
-	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(Vector2(1920, 1080), 96))).is_equal(40)
-	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(Vector2(2560, 1440), 96))).is_equal(48)
-	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(Vector2(3840, 2160), 96))).is_equal(80)
-	# A small window on a 150% screen still gets the 150% cursor.
-	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(Vector2(1600, 1000), 144))).is_equal(48)
-	# Never below the smallest size.
-	assert_float(CursorSkin.ui_scale(Vector2(800, 500), 96)).is_equal(1.0)
-	assert_float(CursorSkin.ui_scale(Vector2.ZERO, 0)).is_equal(1.0)
+func test_m3_size_follows_the_os_display_scaling_not_the_window() -> void:
+	# Windows reports the scaled DPI: 96 at 100%, 120 at 125%, 144 at 150%, 192 at 200%.
+	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(96))).is_equal(28)
+	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(120))).is_equal(36)
+	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(144))).is_equal(42)
+	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(192))).is_equal(56)
+	# Never below 100% (an unknown DPI reads as 0).
+	assert_float(CursorSkin.ui_scale(72)).is_equal(1.0)
+	assert_float(CursorSkin.ui_scale(0)).is_equal(1.0)
+
+
+func test_m3_cursor_is_smaller_than_before_at_every_common_setup() -> void:
+	# L22 sized it 32 px in the design window, 40 at 1080p, 48 at 1440p and 80 at 4K (all at 100%),
+	# 48 at 150%. Now: 28 at 100% whatever the window, 42 at 150%.
+	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(96))).is_less(32)
+	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(144))).is_less(48)
 
 
 func test_l22_retina_scale_is_counted_in_logical_points() -> void:
-	# macOS Retina: a 3200x2000 px window at scale 2 is 1600x1000 points: the 32 px cursor.
-	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(Vector2(3200, 2000), 192, 2.0))).is_equal(32)
+	# macOS Retina reports 192 DPI at screen scale 2: 96 points per inch, the 100% cursor.
+	assert_int(CursorSkin.size_for_scale(CursorSkin.ui_scale(192, 2.0))).is_equal(28)
 
 
 func test_l22_hotspots_land_on_a_pixel_centre_at_every_size() -> void:
@@ -210,7 +215,8 @@ func test_l22_hotspots_land_on_a_pixel_centre_at_every_size() -> void:
 	assert_object(CursorSkin.hotspot_px(Vector2(3, 3), 48)).is_equal(Vector2i(2, 2))
 	assert_object(CursorSkin.hotspot_px(Vector2(3, 3), 64)).is_equal(Vector2i(3, 3))
 	assert_object(CursorSkin.hotspot_px(Vector2(32, 32), 32)).is_equal(Vector2i(16, 16))
-	assert_object(CursorSkin.hotspot_px(Vector2(3, 3), 80)).is_equal(Vector2i(3, 3))
+	assert_object(CursorSkin.hotspot_px(Vector2(3, 3), 28)).is_equal(Vector2i(1, 1))
+	assert_object(CursorSkin.hotspot_px(Vector2(32, 32), 42)).is_equal(Vector2i(21, 21))
 	for key in CursorSkin.ART:
 		for n in CursorSkin.SIZES:
 			var u := CursorSkin.hotspot_units(key)

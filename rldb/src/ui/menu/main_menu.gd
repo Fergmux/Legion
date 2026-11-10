@@ -6,8 +6,12 @@ extends Control
 ## that leaves the menu is a signal handled by Main.
 ##
 ## L28 (owner, 5 Nov): the top-level "Settings" became "Options", a sub-level whose items are its
-## sections (Settings, Customisation, Credits; more can be added to MENU["options"]). Opening it
-## shows its first section at once, and a section's Close leaves Options.
+## sections (Settings, Customisation, Credits; more can be added to MENU["options"]).
+##
+## M batch (owner, 9 Nov: "when you go to the options menu it should not automatically select
+## settings"): Options opens like every other sub-level, its sections listed with none chosen and the
+## centre clear (the menu painting shows, as under Play and Decks). A section's Close (and Esc) closes
+## the section and stays in Options; Esc again (or Back) returns to the main menu.
 
 ## Emitted when a game against the bot is chosen.
 signal bot_requested
@@ -42,9 +46,6 @@ const MENU := {
 	"decks": [["Deck builder", "builder"], ["Card list", "cards"], ["Statistics", "stats"]],
 	"options": [["Settings", "settings"], ["Customisation", "customisation"], ["Credits", "credits"]],
 }
-## The section a sub-level opens with (L28: Options lands on Settings, like the old Settings item).
-## In these levels a section's Close (and Esc) leaves the level instead of leaving it empty.
-const LEVEL_OPENS := {"options": "settings"}
 ## Top item of the root level for a profile that has not played yet (F04-09); opens lesson 1.
 const PLAY_TUTORIAL_ITEM := ["Play tutorial", "play_tutorial"]
 ## Third-party asset credits shown under Credits, and the height of their scroll area.
@@ -339,8 +340,8 @@ func pick(target: String) -> void:
 	if target.begins_with("@"):
 		var level := target.substr(1)
 		_menu_path.append(level)
-		_menu_leaf = String(LEVEL_OPENS.get(level, ""))
-		_set_center(null if _menu_leaf == "" else _leaf_panel(_menu_leaf))
+		_menu_leaf = ""
+		_set_center(null)
 		_build_menu_level()
 		return
 	match target:
@@ -373,12 +374,10 @@ func back_out() -> void:
 	_build_menu_level()
 
 
-## Esc: closes the shown leaf panel, else goes up one level (nothing at the root). In a level that
-## opens with a section (Options), closing its section leaves the level too.
+## Esc (and a panel's Close): closes the shown leaf panel and stays in its level, else goes up one
+## level (nothing at the root).
 func step_back() -> void:
-	if _menu_leaf != "" and LEVEL_OPENS.has(String(_menu_path[-1])):
-		back_out()
-	elif _menu_leaf != "":
+	if _menu_leaf != "":
 		Sfx.play("back")   # F22
 		_menu_leaf = ""
 		_set_center(null)

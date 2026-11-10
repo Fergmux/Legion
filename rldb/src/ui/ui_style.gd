@@ -819,11 +819,47 @@ static func background(dim: float = 0.0, path: String = "") -> Control:
 
 
 ## The game table (L28): the art of the player's chosen table (Customisation) under that table's
-## own veil, so every table reads equally well behind zones and cards.
+## own veil, so every table reads equally well behind zones and cards. M batch (owner, 9 Nov): in the
+## match the table also recedes a little: its art loses a touch of colour (Customisation.table_desat,
+## a small shader on the art) and a faint extra black veil "Recede" (table_recede) lies over the
+## first one. Only the match table: the menu backdrop and the picker thumbnails keep the full art.
 static func table_background() -> Control:
 	var bg := background(Customisation.table_veil(), Customisation.table_path())
 	bg.name = "Table_" + Customisation.table_id()
+	var art := bg.get_child(0) as TextureRect
+	var desat := Customisation.table_desat()
+	if desat > 0.0:
+		var mat := ShaderMaterial.new()
+		mat.shader = _table_recede_shader()
+		mat.set_shader_parameter("desat", desat)
+		art.material = mat
+	var recede := Customisation.table_recede()
+	if recede > 0.0:
+		var veil := ColorRect.new()
+		veil.name = "Recede"
+		veil.color = Color(0, 0, 0, recede)
+		veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bg.add_child(veil)
 	return bg
+
+
+static var _recede_shader: Shader
+
+
+## The match table's colour shader (M batch): mixes the art toward its own luminance by `desat`.
+static func _table_recede_shader() -> Shader:
+	if _recede_shader == null:
+		_recede_shader = Shader.new()
+		_recede_shader.code = """shader_type canvas_item;
+uniform float desat : hint_range(0.0, 1.0) = 0.0;
+void fragment() {
+	vec4 c = COLOR;   // in a canvas_item fragment, COLOR is already the texture times the modulate
+	float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+	COLOR = vec4(mix(c.rgb, vec3(l), desat), c.a);
+}
+"""
+	return _recede_shader
 
 
 ## Drop shadow / glow on a button style (depth instead of a flat slab).

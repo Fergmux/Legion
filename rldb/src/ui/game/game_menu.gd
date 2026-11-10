@@ -1,14 +1,20 @@
 class_name GameMenu
 extends RefCounted
-## Top strip of the match screen (connection state + Menu button), the in-game menu (Settings,
-## Return to menu, Concede game, Quit to desktop), the interface settings popup and the
-## confirmation dialogs for leaving or conceding.
+## Top strip of the match screen (connection state, Chat and the icon Menu button beside the
+## opponent's plate), the in-game menu (the series score, Settings, Return to menu, Concede game, Quit
+## to desktop), the interface settings popup and the confirmation dialogs for leaving or conceding.
 
 const SETTINGS_W := 400.0
-## Menu button (design review #15): the standard small height that fits the 44 px top strip (the
-## review's 40 px at 16 px from the top needs a taller strip, GameScreen.TOP_H), 96 px wide with
-## the ☰ glyph; Chat beside it takes the same size.
-const MENU_BUTTON := Vector2(96, 36)
+## M9 (owner, 9 Nov): the Menu button is an icon (a drawn three-bar glyph, MenuGlyph), square at the
+## strip's small button height, immediately left of the opponent's plate (PLATE_GAP between them).
+const MENU_BUTTON := Vector2(36, 36)
+## Chat beside it keeps the strip's text-button size (design review #15).
+const CHAT_BUTTON := Vector2(96, 36)
+const PLATE_GAP := 12.0
+## M4 (owner, 9 Nov): the series score sits at the top of the in-game menu. The scoreboard plaque
+## scales down to fit SERIES_W (px) and fits each name into SERIES_NAME_MAX (px at full size).
+const SERIES_W := 340.0
+const SERIES_NAME_MAX := 96.0
 ## Veil behind the in-game settings (design review #13: the standard modal veil).
 const SETTINGS_VEIL := Color(0, 0, 0, 0.55)
 ## In-game menu opening (design review #14): it grows out of the Menu button corner.
@@ -31,10 +37,18 @@ var game_menu: PanelContainer
 var settings_popup: PanelContainer
 ## The in-game menu's buttons by key (settings, spectators, concede, return, stop, quit).
 var items: Dictionary = {}
-## The Menu button in the top strip.
+## The icon Menu button in the top strip (left of the opponent's plate).
 var menu_button: Button
-## L26: the compact series scoreboard in the middle of the top strip.
+## L26 / M4: the series scoreboard, at the top of the in-game menu (hidden in a single game).
 var scoreboard: SeriesScoreboard
+## M4: the menu's series section (the scoreboard, a status line and a divider); shown with the
+## scoreboard.
+var series_box: VBoxContainer
+## M4: the series status line under the scoreboard ("Game 2 · first to 2 wins").
+var series_status: Label
+var _sb_holder: Control
+## The top strip's button row (its right end follows the opponent's plate).
+var _row: HBoxContainer
 ## The veil behind the in-game settings (shown with it).
 var settings_veil: ColorRect
 ## The shared settings form inside the settings popup.
@@ -59,34 +73,41 @@ func build_top_strip() -> void:
 	top_strip.z_index = UiLayers.TOP_STRIP     # UI review F12: the Menu button is never under a burst
 	gs.add_child(top_strip)
 	var row := HBoxContainer.new()
+	row.name = "TopRow"
 	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	row.offset_left = UIStyle.sp("md")
-	row.offset_right = -UIStyle.sp("lg")
-	row.offset_top = (GameScreen.TOP_H - MENU_BUTTON.y) / 2.0
-	row.offset_bottom = -(GameScreen.TOP_H - MENU_BUTTON.y) / 2.0
+	row.offset_right = -UIStyle.sp("lg")   # layout() ends it at the opponent's plate
+	# M9: level with the top of the opponent's plate.
+	row.offset_top = GameBoardView.OPP_PLATE_Y
+	row.offset_bottom = GameBoardView.OPP_PLATE_Y + MENU_BUTTON.y - GameScreen.TOP_H
 	row.add_theme_constant_override("separation", UIStyle.sp("md"))
 	top_strip.add_child(row)
+	_row = row
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(gap)
 	conn_label = UIStyle.label("", 14, UIStyle.MUTED)
 	conn_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(conn_label)
-	var menu_b := UIStyle.secondary_button("☰  Menu", 15)
+	# M9 (owner, 9 Nov): an icon button, no "Menu" text (the tooltip names it).
+	var menu_b := UIStyle.secondary_button("", 15)
 	menu_b.name = "MenuButton"
 	menu_b.custom_minimum_size = MENU_BUTTON
+	menu_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	menu_b.tooltip_text = "Menu"
 	menu_b.pressed.connect(toggle)
+	var glyph := MenuGlyph.new()
+	glyph.name = "MenuGlyph"
+	menu_b.add_child(glyph)
+	menu_b.mouse_entered.connect(glyph.queue_redraw)
+	menu_b.mouse_exited.connect(glyph.queue_redraw)
 	row.add_child(menu_b)
 	menu_button = menu_b
-	# L26 (owner, 5 Nov): the series at a glance, centred in the strip over the board (hidden in a
-	# single game); GameSidebar.update_scoreboard keeps it current and pops each new point in.
-	scoreboard = SeriesScoreboard.new()
-	top_strip.add_child(scoreboard)
 	# A1 / A2: Chat sits right before Menu; the spectator badge (and Watch button) before Chat.
 	gs.chat.build(row, menu_b)
 	if gs.chat.button != null:
-		gs.chat.button.custom_minimum_size = MENU_BUTTON   # review #15: Chat matches Menu, 12 px apart
+		gs.chat.button.custom_minimum_size = CHAT_BUTTON   # review #15: the strip's button size, 12 px apart
+		gs.chat.button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		gs.chat.button.add_theme_font_size_override("font_size", 15)
 	gs.spectate.build(row, gs.chat.button)
 
@@ -114,12 +135,25 @@ func build_popups() -> void:
 	# Design review #14: 16 px inset, 12 px between items, a divider before the destructive group,
 	# which uses the Danger family (Concede game, Quit to desktop). J13 (owner, 22 Oct): Concede game
 	# comes below Return to menu.
+	# L13 (owner, 5 Nov): a click anywhere off the open menu closes it (with its close cue and
+	# motion). A transparent catcher under the menu takes that click, so it never reaches the board.
+	# M1 (owner, 9 Nov): GUI input picks controls by tree order, not z_index, so the catcher must come
+	# BEFORE the menu among the screen's children (added after it, it swallowed every click on the menu).
+	outside_catcher = Control.new()
+	outside_catcher.name = "MenuOutsideCatcher"
+	outside_catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+	outside_catcher.z_index = UiLayers.GAME_MENU - 1
+	outside_catcher.visible = false
+	outside_catcher.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	outside_catcher.gui_input.connect(_on_outside_input)
+	gs.add_child(outside_catcher)
 	var menu_plate := HousePanel.new("Menu", "", Vector2(UIStyle.sp("lg"), UIStyle.sp("lg")), UIStyle.sp("md"))
 	game_menu = menu_plate
 	game_menu.visible = false
 	game_menu.z_index = UiLayers.GAME_MENU
 	gs.add_child(game_menu)
 	var gmv := menu_plate.body
+	_build_series(gmv)
 	# A2: "Spectators" for online players, "Stop watching" instead of conceding / returning for a
 	# spectator (refresh_items shows the right set for the current view).
 	for it in [["settings", "Settings", func(): game_menu.visible = false; _show_popup(settings_popup)],
@@ -140,16 +174,6 @@ func build_popups() -> void:
 		gmv.add_child(gb)
 		items[it[0]] = gb
 	refresh_items()
-	# L13 (owner, 5 Nov): a click anywhere off the open menu closes it (with its close cue and
-	# motion). A transparent catcher under the menu takes that click, so it never reaches the board.
-	outside_catcher = Control.new()
-	outside_catcher.name = "MenuOutsideCatcher"
-	outside_catcher.mouse_filter = Control.MOUSE_FILTER_STOP
-	outside_catcher.z_index = UiLayers.GAME_MENU - 1
-	outside_catcher.visible = false
-	outside_catcher.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	outside_catcher.gui_input.connect(_on_outside_input)
-	gs.add_child(outside_catcher)
 	game_menu.visibility_changed.connect(func(): outside_catcher.visible = game_menu.visible and not _closing)
 	# Settings (design review #12, #13): the shared SettingsForm (the same builder as the main
 	# menu's Settings), centred on the board over the standard veil, with a 44 px Close.
@@ -184,10 +208,83 @@ func build_popups() -> void:
 	sv.add_child(row)
 
 
-## Places the top strip over the play field and the popups under it, against the sidebar.
+## M4: the series section at the top of the in-game menu: the scoreboard plaque (scaled to fit), a
+## status line and a divider before the menu items. Hidden with the scoreboard (a single game, the
+## tutorial): GameSidebar.update_scoreboard keeps the scoreboard current.
+func _build_series(parent: Control) -> void:
+	series_box = VBoxContainer.new()
+	series_box.name = "MenuSeries"
+	series_box.visible = false
+	series_box.add_theme_constant_override("separation", UIStyle.sp("sm"))
+	parent.add_child(series_box)
+	_sb_holder = Control.new()
+	_sb_holder.name = "ScoreboardHolder"
+	_sb_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	series_box.add_child(_sb_holder)
+	scoreboard = SeriesScoreboard.new()
+	scoreboard.compact = true   # M batch (owner, 10 Nov): only the middle section, names in seat colours
+	scoreboard.name_max = SERIES_NAME_MAX
+	_sb_holder.add_child(scoreboard)
+	scoreboard.laid_out.connect(_fit_scoreboard)
+	scoreboard.visibility_changed.connect(func(): series_box.visible = scoreboard.visible)
+	series_status = UIStyle.label("", 13, UIStyle.MUTED)
+	series_status.name = "SeriesStatus"
+	series_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	series_box.add_child(series_status)
+	var rule := Ornate.Rule.new(Color(UIStyle.GOLD, 0.45), true, 10.0)
+	rule.name = "SeriesDivider"
+	series_box.add_child(rule)
+
+
+## M4: scales the scoreboard to the menu's series width and refreshes the status line.
+func _fit_scoreboard() -> void:
+	var sb := scoreboard
+	var k := minf(1.0, SERIES_W / maxf(1.0, sb.size.x))
+	sb.scale = Vector2(k, k)
+	_sb_holder.custom_minimum_size = (sb.size * k).ceil()
+	sb.place()
+	series_status.text = series_status_text(sb.m)
+
+
+## M4: the line under the menu's scoreboard: "Game 2 · first to 2 wins", or "Ana wins the series".
+static func series_status_text(md: Dictionary) -> String:
+	if md.is_empty():
+		return ""
+	if bool(md["over"]):
+		var w := int(md["winner"])
+		return "%s wins the series" % String(md["names"][w]) if w in [0, 1] else "Series over"
+	return "Game %d · first to %d wins" % [int(md["current"]) + 1, int(md["need"])]
+
+
+## Places the top strip over the play field and the popups under it, against the sidebar. M9: the
+## button row ends PLATE_GAP left of the opponent's plate, so the Menu button sits beside it.
 func layout(w: float) -> void:
 	top_strip.position = Vector2.ZERO
 	top_strip.size = Vector2(w - gs.sidebar_w, GameScreen.TOP_H)
+	_row.offset_right = -(top_strip.size.x - menu_anchor_right())
+
+
+## M9: x (screen-local) of the Menu button's right edge: PLATE_GAP left of the opponent's plate.
+func menu_anchor_right() -> float:
+	var plates: Array = gs.board.plates if gs.board != null else []
+	if plates.is_empty():
+		return gs.size.x - gs.sidebar_w - UIStyle.sp("lg")
+	return (plates[0] as Control).position.x - PLATE_GAP
+
+
+## M9: the top edge of a popover opened from the top-right button row (menu, chat, lobby list): just
+## under the buttons, which sit level with the opponent's plate.
+static func popup_top() -> float:
+	return GameBoardView.OPP_PLATE_Y + MENU_BUTTON.y + POPUP_GAP
+
+
+## M9: places the in-game menu under the Menu button, right edges aligned (it grows out of that
+## corner), kept on screen.
+func _place_menu() -> void:
+	game_menu.reset_size()
+	var mw := game_menu.get_combined_minimum_size().x
+	var x := maxf(float(UIStyle.SAFE_HUD), menu_anchor_right() - mw)
+	game_menu.position = Vector2(roundf(x), popup_top())
 
 
 ## Places the settings popup and the menu (called after the banner and pause are placed).
@@ -201,8 +298,8 @@ func layout_popups(w: float) -> void:
 	settings_popup.position = Vector2(floorf((board_w - sw) / 2.0), maxf(GameScreen.TOP_H, floorf((h - ss.y) / 2.0)))
 	settings_veil.position = Vector2.ZERO
 	settings_veil.size = Vector2(w, h)
-	game_menu.reset_size()
-	game_menu.position = Vector2(w - gs.sidebar_w - game_menu.get_combined_minimum_size().x - 10.0, GameScreen.TOP_H + POPUP_GAP)
+	if not (game_menu.visible or _closing):
+		_place_menu()
 
 
 ## Connection state in the top strip (network games only). A1 (owner feedback 20 Oct): a healthy
@@ -332,6 +429,8 @@ func _show_popup(p: Control) -> void:
 	p.reset_size()
 	if p == settings_popup:
 		layout_popups(gs.size.x)
+	elif p == game_menu:
+		_place_menu()
 	var hp := p as HousePanel
 	hp.appear()
 	if p == game_menu:
@@ -460,6 +559,34 @@ func close_dialog() -> bool:
 
 func _confirm_concede() -> void:
 	_dialog("Concede this game?", "Your opponent wins this game; the series continues.", "Concede", func(): gs.send({"t": "concede"}), "Concede", "danger")
+
+
+## M9 (owner, 9 Nov): the Menu button's icon: three rounded gold bars in the house style, with a soft
+## dark under-stroke; brighter while the button is hovered. Click-through.
+class MenuGlyph extends Control:
+	## Bar length and thickness, and the step between bars, as shares of the glyph's size.
+	const BAR_W := 0.46
+	const BAR_H := 0.072
+	const BAR_STEP := 0.17
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	func _draw() -> void:
+		var b := get_parent() as BaseButton
+		var lit := b != null and b.is_hovered()
+		var col := UIStyle.GOLD_HI if lit else UIStyle.GOLD
+		var s := minf(size.x, size.y)
+		var c := size / 2.0
+		var half := s * BAR_W / 2.0
+		var th := maxf(2.0, s * BAR_H)
+		for i in 3:
+			var y := c.y + (float(i) - 1.0) * s * BAR_STEP
+			draw_line(Vector2(c.x - half, y + 1.0), Vector2(c.x + half, y + 1.0), Color(0, 0, 0, 0.55), th + 1.0, true)
+			draw_line(Vector2(c.x - half, y), Vector2(c.x + half, y), col, th, true)
+			draw_circle(Vector2(c.x - half, y), th / 2.0, col, true, -1.0, true)
+			draw_circle(Vector2(c.x + half, y), th / 2.0, col, true, -1.0, true)
 
 
 ## Music and sound-effect volume sliders with mute boxes (game settings and main menu).

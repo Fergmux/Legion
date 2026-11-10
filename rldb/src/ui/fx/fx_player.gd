@@ -94,6 +94,24 @@ var last_lethal_mode := ""
 var last_plan: Array = []
 
 
+## M5: for each status event of `events` (by index), the kind of the next status event on the same card
+## ("status", "status_expire", ...), absent when it is the card's last. Curse / Cleanse clearing
+## statuses come from the rules as the application followed by one "status_expire" per cleared status.
+static func next_status_kinds(events: Array) -> Dictionary:
+	var out := {}
+	var last := {}   # card slot key -> index of its latest status event so far
+	for i in events.size():
+		var e: Dictionary = events[i]
+		if not (String(e.get("k", "")) in STATUS_FX):
+			continue
+		var at: Dictionary = e.get("at", {})
+		var sk := "%d:%s:%d" % [int(at.get("p", -1)), String(at.get("zone", "")), int(at.get("slot", -1))]
+		if last.has(sk):
+			out[int(last[sk])] = String(e["k"])
+		last[sk] = i
+	return out
+
+
 ## True while any effect, banner or spotlight is still running, or a view waits to be shown (the bot and
 ## the dev drivers wait on this).
 func busy() -> bool:
@@ -331,6 +349,8 @@ func play(events: Array, prev_mv: Dictionary) -> void:
 			add_cleanup_on(lp, func(p: PlayerPlate) -> void: p.release_hp(true))
 	var mats := {}   # player -> material events of the special summon that follows (F03-17 / D8)
 	var status_next := {}   # L8: card slot -> earliest time its next status look may start
+	var status_after := next_status_kinds(events)   # M5: event index -> kind of the next status event on its card
+	_status.hold_badges(events, prev_mv)   # M5: each card's status row changes as its events play
 	for i in events.size():
 		var e: Dictionary = events[i]
 		var k := String(e["k"])
@@ -340,7 +360,11 @@ func play(events: Array, prev_mv: Dictionary) -> void:
 			var sat: Dictionary = e.get("at", {})
 			var sk := "%d:%s:%d" % [int(sat.get("p", -1)), String(sat.get("zone", "")), int(sat.get("slot", -1))]
 			st_status = maxf(t, float(status_next.get(sk, 0.0)))
-			status_next[sk] = st_status + (0.12 if fast else FxStatus.STAGGER)
+			status_next[sk] = st_status + FxStatus.gap_after(e, String(status_after.get(i, "")), fast)
+			# M5: the card's own status row follows (the badge lands, or leaves as its fade starts).
+			var step := _status.badge_step(e)
+			if step.is_valid():
+				sched.append([st_status + FxStatus.badge_delay(e, fast), step, "badges:" + k])
 		# F12: the attack was declared in an earlier batch (trap window): the killing blow plays here.
 		if lstrike and int(lethal["attack"]) < 0 and i == int(lethal["start"]):
 			var st_l := maxf(t, attack_end)

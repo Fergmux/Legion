@@ -70,6 +70,7 @@ static func has(id: int) -> bool:
 
 ## All definitions in source order (the 2026-10-18 export repeats some indices; ties go by id).
 ## A card with no sheet index (the 3 Nov 2026 new cards: null) sorts after every indexed card.
+## Rules code iterates this; lists the player sees use catalogue order (collectible, sort_ids).
 static func all() -> Array:
 	ensure_loaded()
 	var out := _defs.values()
@@ -109,9 +110,60 @@ static func is_collectible(id: int) -> bool:
 	return not _evolution_bases().has(id)
 
 
-## L23: every collectible definition, in source order (CardDB.all() filtered by is_collectible).
+## M8: every collectible definition (is_collectible) in catalogue order (catalogue_before): by card
+## kind first, so a card with no sheet index sits among the other cards of its kind. Every card
+## list the player sees (deck builder catalogue and deck, card library, pile views) follows it.
 static func collectible() -> Array:
-	return all().filter(func(d): return is_collectible(int(d["id"])))
+	var out := all().filter(func(d): return is_collectible(int(d["id"])))
+	out.sort_custom(func(a, b): return catalogue_before(a, b))
+	return out
+
+
+## M8: card kinds in the order every list shows them (the sheet's own grouping): Basic units, Units,
+## Spells, Traps, Powers, then the Extra Deck's Fusions, Rituals and Arcanes.
+const KIND_ORDER := ["basic_unit", "unit", "spell", "trap", "power", "fusion", "ritual", "arcane"]
+
+
+## M8: position of card kind `category` in KIND_ORDER (an unknown kind after every known one).
+static func kind_rank(category: String) -> int:
+	var i := KIND_ORDER.find(category)
+	return KIND_ORDER.size() if i == -1 else i
+
+
+## M8: catalogue comparison of two definitions: by kind (KIND_ORDER), then source order within the
+## kind (_order_before: sheet index, a card without one after the indexed cards of its kind, by id).
+## all() keeps plain source order (rules code draws from it; its order feeds seeded draws).
+static func catalogue_before(a: Dictionary, b: Dictionary) -> bool:
+	var ka := kind_rank(String(a["category"]))
+	var kb := kind_rank(String(b["category"]))
+	if ka != kb:
+		return ka < kb
+	return _order_before(a, b)
+
+
+## M8: card id -> position in catalogue order over every definition (evolution-only forms included,
+## so any id a list may hold has a place). Built once.
+static func catalogue_rank() -> Dictionary:
+	if _rank.is_empty():
+		var defs := all()
+		defs.sort_custom(func(a, b): return catalogue_before(a, b))
+		for i in defs.size():
+			_rank[int(defs[i]["id"])] = i
+	return _rank
+
+
+static var _rank: Dictionary = {}
+
+
+## M8: card ids (ints; duplicates kept) in catalogue order; unknown ids last, by id.
+static func sort_ids(ids: Array) -> Array:
+	var rank := catalogue_rank()
+	var out := ids.duplicate()
+	out.sort_custom(func(a, b):
+		var ra: int = rank.get(int(a), 1 << 30)
+		var rb: int = rank.get(int(b), 1 << 30)
+		return ra < rb if ra != rb else int(a) < int(b))
+	return out
 
 
 ## L23: the collectible card an evolution-only form evolves from (the start of its chain:

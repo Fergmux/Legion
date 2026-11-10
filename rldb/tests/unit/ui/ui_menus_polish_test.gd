@@ -36,10 +36,31 @@ func test_settings_form_extra_toggles_and_share_note() -> void:
 	assert_bool(cb is SettingsForm.HouseCheck).is_true()
 	assert_bool(cb.button_pressed).is_true()
 	assert_float((cb as SettingsForm.HouseCheck).tick).is_equal(1.0)
-	var note: Label = f.find_child("ShareNote", true, false)
-	assert_str(note.text).is_equal(Telemetry.PRIVACY_NOTE)
-	assert_int(note.get_theme_font_size("font_size")).is_equal(SettingsForm.NOTE_FONT)
-	assert_int((note.get_parent() as MarginContainer).get_theme_constant("margin_left")).is_equal(SettingsForm.NOTE_INDENT)
+	# M batch (10 Nov): the privacy note moved from a paragraph into the info icon's tooltip.
+	assert_object(f.find_child("ShareNote", true, false)).is_null()
+	var info: Control = f.controls["share_info"]
+	assert_bool(info is SettingsForm.InfoDot).is_true()
+	assert_str(info.tooltip_text).is_equal(Telemetry.PRIVACY_NOTE)
+	assert_object(info.get_parent()).is_same(f.controls["share"])
+
+
+func test_settings_form_has_mute_when_unfocused() -> void:
+	# Arrange
+	var was := Sfx.mute_when_unfocused()
+	var f: SettingsForm = auto_free(SettingsForm.new())
+	var cb: CheckBox = f.controls["mute_unfocused"]
+	# Act / Assert: the toggle reflects the option, and with it on an unfocused window mutes Master.
+	assert_bool(cb.button_pressed).is_equal(was)
+	Sfx._mute_unfocused = true
+	Sfx.set_window_focused(false)
+	assert_bool(AudioServer.is_bus_mute(0)).is_true()
+	Sfx.set_window_focused(true)
+	assert_bool(AudioServer.is_bus_mute(0)).is_false()
+	Sfx._mute_unfocused = false
+	Sfx.set_window_focused(false)
+	assert_bool(AudioServer.is_bus_mute(0)).is_false()
+	Sfx.set_window_focused(true)
+	Sfx._mute_unfocused = was
 
 
 func test_settings_form_mute_is_a_speaker_toggle() -> void:

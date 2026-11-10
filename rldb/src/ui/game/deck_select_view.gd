@@ -24,6 +24,13 @@ const OFFER_TALL_H := 960.0
 const OFFER_GAP := 48
 const OFFER_TILT_DEG := 2.0
 const OFFER_FLIP := 0.12
+## M2: margin after a reveal flip before a card under the pointer is caught as hovered (s).
+const REVEAL_SETTLE := 0.05
+## M batch (owner, 10 Nov): how long after a pick the next offer's reveal (draft_reveal and the flips)
+## waits, so the pick's swish is not drowned by the deal (s; scaled by fast animations).
+const PICK_SETTLE := 0.5
+## When this player last picked a draft card (Time msec; -1 hour: none yet).
+var _pick_ms: int = -3600000
 ## Draft pips (review #57): diamond size, pitch, the extra gap every PIP_GROUP pips, the most shown.
 const PIP_R := 6.0
 const PIP_PITCH := 16.0
@@ -51,6 +58,8 @@ func _init(overlay: GameSeriesOverlay) -> void:
 func render() -> bool:
 	list_area = null
 	_tiles.clear()
+	_draft_rest_sig = 0
+	_opp_chip = null
 	var gs := ov.gs
 	var view := gs.view
 	var p := gs.me()
@@ -425,8 +434,13 @@ func _draft(box: VBoxContainer) -> void:
 	pt.show_underline = false
 	TitleText.apply(pick, TitleText.Tier.SECTION, 18)
 	var od: Dictionary = dr.get("opponent", {})
-	if not od.is_empty() and not gs.view["deck_ready"][1 - gs.me()]:
-		strip.add_child(ov.rewards._info_chip("%s %s" % [String(gs.view["names"][1 - gs.me()]), _opponent_doing(dr)], false))
+	if not od.is_empty():
+		# M2: kept even once the opponent is ready (hidden then), so update_in_place can follow it.
+		_opp_chip = ov.rewards._info_chip(_opponent_line(), false)
+		_opp_chip.name = "OpponentProgress"
+		_opp_chip.visible = not gs.view["deck_ready"][1 - gs.me()]
+		strip.add_child(_opp_chip)
+	_draft_rest_sig = draft_rest_sig()
 	# Category folder tabs (the basic unit at the right of the strip) joined to the pane with the offer.
 	var ft := category_tabs(dr)
 	box.add_child(ft)
@@ -474,9 +488,11 @@ func _draft(box: VBoxContainer) -> void:
 		cw.custom_minimum_size = card
 		cw.tooltip_text = "Pick %s" % c["name"]
 		cw.hover_sound = true
+		cw.hover_cue = "draft_hover"   # M batch: the owner's draft-only hover take
 		var idx: int = i
 		cw.pressed.connect(func(_w):
 			Sfx.play("draft_pick")
+			_pick_ms = Time.get_ticks_msec()
 			gs.send({"t": "draft_pick", "index": idx}))
 		cw.right_pressed.connect(gs.inspect.inspect_widget)
 		cw.mouse_entered.connect(func():
@@ -489,6 +505,17 @@ func _draft(box: VBoxContainer) -> void:
 		cards.append(cw)
 	if fresh:
 		_reveal(cards)
+	# M2: a card built under a pointer that has not moved gets no mouse_entered; catch it once the
+	# row is laid out so it comes back hovered.
+	if not cards.is_empty() and (cards[0] as Control).is_inside_tree():
+		var tree := (cards[0] as Control).get_tree()
+		tree.process_frame.connect(func():
+			tree.process_frame.connect(func(): _catch_hover(cards), CONNECT_ONE_SHOT), CONNECT_ONE_SHOT)
+		if fresh and not UIStyle.reduce_motion:
+			# The reveal flip shrinks each card to a sliver, which can take it out from under the
+			# pointer (mouse_exited) and back without a mouse_entered: catch again once it has played.
+			var reveal := pick_settle_delay(Time.get_ticks_msec() - _pick_ms) + UIStyle.dur(OFFER_FLIP * (cards.size() + 1)) + REVEAL_SETTLE
+			tree.create_timer(reveal).timeout.connect(func(): _catch_hover(cards))
 
 
 ## The draft's category tabs as folder tabs: each shows its icon, name and picks left; the open one
@@ -685,11 +712,20 @@ func _tilt(cw: CardWidget, on: bool) -> void:
 func _reveal(cards: Array) -> void:
 	if cards.is_empty() or not (cards[0] as Control).is_inside_tree():
 		return
-	Sfx.play("draft_reveal")
+	# M batch (owner, 10 Nov): right after a pick the new offer waits for the pick's card swish to be
+	# heard (the deal cue used to start in the same instant and drown it).
+	var wait := pick_settle_delay(Time.get_ticks_msec() - _pick_ms)
+	if wait > 0.0:
+		var first := cards[0] as Control
+		first.get_tree().create_timer(wait).timeout.connect(func(): Sfx.play("draft_reveal"), CONNECT_ONE_SHOT)
+	else:
+		Sfx.play("draft_reveal")
 	for i in cards.size():
 		var cw: CardWidget = cards[i]
 		cw.modulate.a = 0.0
 		var tw := cw.create_tween()
+		if wait > 0.0:
+			tw.tween_interval(wait)
 		if UIStyle.reduce_motion:
 			tw.tween_property(cw, "modulate:a", 1.0, UIStyle.motion("reduced"))
 			continue
@@ -702,6 +738,101 @@ func _reveal(cards: Array) -> void:
 			cw.modulate.a = 1.0
 			Sfx.play("card_flip"))
 		tw.tween_property(cw, "scale", Vector2.ONE, UIStyle.dur(OFFER_FLIP * 2.0)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+## Seconds a new offer's reveal waits so the pick's draft_pick swish (about 0.54 s) is heard first,
+## given `since_pick_ms` since the pick (0 once that time has passed, or with no recent pick).
+static func pick_settle_delay(since_pick_ms: int) -> float:
+	if since_pick_ms < 0 or since_pick_ms >= int(PICK_SETTLE * 1000.0):
+		return 0.0
+	return UIStyle.dur(PICK_SETTLE - float(since_pick_ms) / 1000.0)
+
+
+# ---------------------------------------------------------------- M2: in-place draft updates
+## Signature of what the draft screen shows apart from the opponent's progress (its draft step and
+## whether it is ready), as last built by _draft; 0 when the draft is not what is shown.
+var _draft_rest_sig: int = 0
+## The "<opponent> is drafting (pick N of M)" chip of the shown draft (null when none).
+var _opp_chip: Control
+
+
+## M2: signature of the current view's draft screen without the opponent's progress: the series view
+## (no match) with the draft's `opponent` entry and the opponent's ready flag left out, plus the
+## open tab, the open deck tile and a held deck. 0 when the view has no draft.
+func draft_rest_sig() -> int:
+	var gs := ov.gs
+	var view := gs.view
+	if not view.has("draft"):
+		return 0
+	var vv := view.duplicate()
+	vv.erase("match")
+	var dr: Dictionary = (view["draft"] as Dictionary).duplicate()
+	dr.erase("opponent")
+	vv["draft"] = dr
+	var ready: Array = (view["deck_ready"] as Array).duplicate()
+	ready[1 - gs.me()] = false
+	vv["deck_ready"] = ready
+	return hash([vv, ov.deck_open, tab, held])
+
+
+## M2: when the only change since the draft was built is the opponent's progress, updates its chip
+## in place and returns true, so the offer cards (and a hover on one) are kept. False when the
+## screen must be rebuilt.
+func update_in_place() -> bool:
+	var gs := ov.gs
+	if _draft_rest_sig == 0 or not gs.view.has("draft") or bool(gs.view["deck_ready"][gs.me()]):
+		return false
+	if draft_rest_sig() != _draft_rest_sig:
+		return false
+	var od: Dictionary = gs.view["draft"].get("opponent", {})
+	var have := _opp_chip != null and is_instance_valid(_opp_chip) and _opp_chip.is_inside_tree()
+	if od.is_empty() != (not have):
+		return false
+	if have:
+		_opp_chip.visible = not gs.view["deck_ready"][1 - gs.me()]
+		var labels := _opp_chip.find_children("*", "Label", true, false)
+		if not labels.is_empty():
+			(labels[0] as Label).text = _opponent_line()
+	return true
+
+
+## The opponent progress chip's text: "<name> is drafting (pick N of M)…".
+func _opponent_line() -> String:
+	var gs := ov.gs
+	return "%s %s" % [String(gs.view["names"][1 - gs.me()]), _opponent_doing(gs.view["draft"])]
+
+
+## M2: an offer card under the pointer that got no mouse_entered (built under a still pointer) is
+## lifted and tilted as if hovered, then dropped when the pointer leaves its column; a later real
+## mouse_entered / mouse_exited takes over from the watch.
+func _catch_hover(cards: Array) -> void:
+	for c in cards:
+		if not is_instance_valid(c):
+			continue   # the offer was rebuilt or the screen closed meanwhile
+		var cw := c as CardWidget
+		if cw == null or not cw.is_inside_tree() or cw.pointer_inside():
+			continue
+		var holder := cw.get_parent() as Control
+		if holder == null or not holder.get_global_rect().has_point(holder.get_global_mouse_position()):
+			continue
+		ov._lift(cw, GameSeriesOverlay.DRAFT_HOVER_SCALE)
+		_tilt(cw, true)
+		_watch_hover(cw, holder)
+		return
+
+
+## M2: per frame, drops the caught hover of `cw` once the pointer leaves `holder` (unless a real
+## mouse_entered arrived meanwhile, which then owns the hover).
+func _watch_hover(cw: CardWidget, holder: Control) -> void:
+	if not is_instance_valid(cw) or not cw.is_inside_tree() or not is_instance_valid(holder):
+		return
+	if cw.pointer_inside():
+		return
+	if not holder.get_global_rect().has_point(holder.get_global_mouse_position()):
+		ov._lift(cw, 1.0)
+		_tilt(cw, false)
+		return
+	cw.get_tree().process_frame.connect(func(): _watch_hover(cw, holder), CONNECT_ONE_SHOT)
 
 
 ## What the other seat is doing in a draft (its progress only; its offers are never sent).

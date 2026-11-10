@@ -55,12 +55,13 @@ func build() -> void:
 	gs.add_child(side_root)
 	var col := VBoxContainer.new()
 	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# D5 / #109: the HUD safe margin on the screen edge (right), lg top and bottom, md between panels.
-	col.offset_left = UIStyle.sp("xs")
-	col.offset_right = -UIStyle.SAFE_HUD
-	col.offset_top = UIStyle.sp("lg")
-	col.offset_bottom = -UIStyle.sp("lg")
-	UIStyle.pad(col, "md")
+	# M batch (owner, 10 Nov): the panels run right up to the screen's edges (no table showing round
+	# them) with only a hairline xs gap between sections. Replaces D5 / #109's HUD-safe outer margin.
+	col.offset_left = 0
+	col.offset_right = 0
+	col.offset_top = 0
+	col.offset_bottom = 0
+	UIStyle.pad(col, "xs")
 	side_root.add_child(col)
 	# Turn bar
 	var tp := GameUi.side_panel()
@@ -319,7 +320,7 @@ func render_series() -> void:
 		res.append(0 if int(h["winner"]) == gs.me() else 1)
 	medallion = SeriesMedallion.new().setup(int(view.get("best_of", 3)), res, -1 if stage == "over" else history.size())
 	medallion.name = "SeriesMedallion"
-	# L26: the gems in each player's seat colour (the top strip scoreboard and lobby list use them too).
+	# L26: the gems in each player's seat colour (the menu's scoreboard and lobby list use them too).
 	medallion.colors = [SeriesResults.SEAT_COLORS[gs.me()], SeriesResults.SEAT_COLORS[1 - gs.me()]]
 	series_box.add_child(_gap(UIStyle.sp("sm")))
 	series_box.add_child(medallion)
@@ -342,9 +343,11 @@ func render_series() -> void:
 var _sb_sig: int = 0
 
 
-## L26: keeps the top strip's series scoreboard current. Hidden outside a series (best of 1, the
-## tutorial). A game just won is held back until the victory / defeat presentation has played (the
-## strip is under its dim); then the point pops in, a beat after the series modal opens.
+## L26: keeps the series scoreboard current (M4: it lives in the in-game menu). Hidden outside a
+## series (best of 1, the tutorial). A game just won is held back until the victory / defeat
+## presentation has played; then, if the menu is open, the point pops in a beat after the series
+## modal opens (with its cue); with the menu closed it is simply shown, so no cue plays for a plaque
+## nobody can see.
 func update_scoreboard() -> void:
 	var sb: SeriesScoreboard = gs.menu.scoreboard if gs.menu != null else null
 	if sb == null:
@@ -367,7 +370,8 @@ func update_scoreboard() -> void:
 	var before: int = (sb.m["results"] as Array).size() if same_series else -1
 	var now: int = (md["results"] as Array).size()
 	var hist: Array = view.get("history", [])
-	if before >= 0 and now == before + 1 and int(sb.m.get("me", -1)) == int(md["me"]) and not bool(hist[-1].get("forfeit", false)):
+	if before >= 0 and now == before + 1 and int(sb.m.get("me", -1)) == int(md["me"]) and not bool(hist[-1].get("forfeit", false)) \
+			and sb.is_visible_in_tree():
 		var seat := int(md["results"][-1])
 		sb.hold_point(md, seat)
 		var tw := gs.create_tween()

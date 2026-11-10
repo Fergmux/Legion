@@ -242,19 +242,27 @@ func rebuild_history() -> void:
 	_refresh_empty()
 
 
-## Places the popover under the top strip, against the sidebar, and the preview under the button.
+## Places the popover under the button row, right edge level with the row's end (left of the
+## opponent's plate, M9 owner feedback 9 Nov: it used to cover the plate), and the preview under the button.
 func layout(w: float) -> void:
 	panel.size = Vector2(W, H)
-	panel.position = Vector2(w - gs.sidebar_w - W - 10.0, GameScreen.TOP_H + 4.0)
+	var right := _row_right(w)
+	panel.position = Vector2(roundf(maxf(float(UIStyle.SAFE_HUD), right - W)), GameMenu.popup_top())
 	_place_peek()
+
+
+## The right edge popovers line up with: the end of the top-right button row.
+func _row_right(w: float) -> float:
+	if gs.menu != null and gs.board != null:
+		return gs.menu.menu_anchor_right()
+	return w - gs.sidebar_w - 10.0
 
 
 func _place_peek() -> void:
 	if peek == null or button == null or not button.is_inside_tree():
 		return
 	var tip_x := button.get_global_rect().get_center().x - gs.get_global_rect().position.x
-	var right := gs.size.x - gs.sidebar_w - 10.0
-	peek.place(tip_x, right, GameScreen.TOP_H + 2.0)
+	peek.place(tip_x, _row_right(gs.size.x), GameMenu.popup_top() - 6.0)
 
 
 ## True while the box is open (not while it plays its closing motion).

@@ -5,10 +5,10 @@ extends RefCounted
 ## Customisation (Customisation.card_back_id). It is a local display choice, so it dresses every
 ## face-down card on this screen, the opponent's too, and never reaches the network.
 ##
-## Two kinds of back share the frame, so every back has the same silhouette at every size:
-##   procedural  "violet", the house back: an inner gradient and a gold sigil emblem (vector).
-##   painted     a painted centre (STYLES[id].art, 512x768 WebP with mipmaps) drawn cover-fit inside
-##               the same inset and frame line, on its own body / border colours.
+## Every back is painted (M11, 10 Nov: the Violet Sigil became a painted back too): a painted centre
+## (STYLES[id].art, 512x768 WebP with mipmaps) drawn cover-fit inside the same inset and frame line,
+## on its own body / border colours, so every back has the same silhouette at every size. A back
+## without "art" still falls back to the procedural vector sigil (_draw_sigil).
 ## Textures load once and are shared (one draw call per painted back).
 ##
 ##     CardBack.draw(painter, 6.0)                 # the chosen back
@@ -31,9 +31,10 @@ const GLOW_RINGS := 4
 ## How each back of Customisation.CARD_BACKS is drawn: the body and border of the card frame, the
 ## alpha of the thin gold frame line around the art, and (painted backs) the art and an optional
 ## "tint" that modulates it (the ivory Gilded Sun is calmed so it does not glare on the table). A
-## back with no "art" is the procedural violet sigil.
+## back with no "art" would be drawn as the procedural sigil.
 const STYLES := {
-	"violet": {"body": Color("1d1630"), "border": Color("6e5a9a"), "frame_a": 0.35},
+	"violet": {"body": Color("1d1630"), "border": Color("6e5a9a"), "frame_a": 0.5,
+		"art": "res://assets/art/card_backs/back_violet.webp"},
 	"wyrm": {"body": Color("240b0b"), "border": Color("8c3b2c"), "frame_a": 0.55,
 		"art": "res://assets/art/card_backs/back_wyrm.webp"},
 	"grove": {"body": Color("0d1a0f"), "border": Color("56763a"), "frame_a": 0.55,

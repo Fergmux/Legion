@@ -67,7 +67,7 @@ func _lengthen(u: int, n: int) -> void:
 func test_art_crop_yields_to_a_long_cards_rules() -> void:
 	# Arrange
 	var u := TB.unit(m, me, AKIRAMARI, 4)
-	_lengthen(u, 18)
+	_lengthen(u, 28)   # M batch: the flush sidebar gives the pane ~56 px more, so more lines to overflow
 	# Act
 	await _select(u)
 	# Assert: at the full crop the card would overflow; the crop shrank (not below its floor) and
@@ -102,7 +102,7 @@ func test_scroll_cue_names_the_evolve_section_when_it_is_below_the_fold() -> voi
 	var u := TB.unit(m, me, SPAWN, 4)
 	for s in ["eternal", "nimble", "pierce"]:
 		m.apply_status(u, s, 1)
-	_lengthen(u, 24)
+	_lengthen(u, 36)   # M batch: the flush sidebar's taller pane
 	# Act
 	await _select(u)
 	# Assert

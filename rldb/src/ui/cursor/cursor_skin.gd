@@ -16,10 +16,15 @@ extends RefCounted
 ## the reticle, then the knife again). `set_suspended(true)` hides every mode without forgetting it
 ## (a menu or modal over the board).
 ##
-## Size. The art is baked at 32, 40, 48, 64 and 80 px (src/dev/cursor_bake.gd). `install()` picks the
-## size from the window's UI scale and the screen's DPI (ui_scale / size_for_scale: the baked size
-## nearest BASE_PX x scale) and picks again when the window is resized or its DPI changes, so the
-## cursor grows with the UI: 32 px in the 1600x1000 window, 40 at 1080p, 48 at 1440p, 80 at 4K.
+## Size. M batch (owner, 9 Nov: "the cursor is good but too big"): the cursor follows the operating
+## system's display scaling, like the system pointer, and no longer the window size. The art is baked
+## at every SIZES px (src/dev/cursor_bake.gd, from the SVGs, so each size is crisp); `install()` picks
+## the baked size nearest BASE_PX x the screen's DPI scale (ui_scale / size_for_scale) and picks again
+## when the window moves to a screen with another DPI. BASE_PX 28 gives a 28 px cursor at 100%, 36 at
+## 125%, 42 at 150%, 56 at 200%: the gilded arrow is then 25 px tall at 100%, a little above the
+## Windows arrow (about 19 px of a 32 px cursor), which keeps its jewel and facets legible; 24 is
+## baked too if it should match exactly. (L22 grew it with the window instead: 40 px at 1080p, 80 at
+## 4K.)
 ##
 ## Setting. "Custom cursor" (Settings > Interface, default on) is saved in the UI settings file
 ## (TEST_SETTINGS_PATH in automated runs). Off: every custom shape is cleared at once and the system
@@ -31,12 +36,14 @@ extends RefCounted
 
 ## Folder of the baked images (<key>_<size>.png); the SVG sources are in DIR/src.
 const DIR := "res://assets/cursors"
-## Baked sizes (px, square), smallest first.
-const SIZES := [32, 40, 48, 64, 80]
-## The design viewport (project.godot window/size): UI scale 1.0.
-const BASE_VIEWPORT := Vector2(1600, 1000)
-## Cursor size (px) at UI scale 1.0; the baked size nearest BASE_PX x scale is used (ties: smaller).
-const BASE_PX := 36.0
+## Baked sizes (px, square), smallest first: the nearest one to BASE_PX at each common Windows
+## scaling step (100, 125, 150, 175, 200, 250, 300%) plus neighbours.
+const SIZES := [24, 28, 32, 36, 42, 48, 56, 64, 72]
+## Cursor size (px) at 100% display scaling (96 DPI); the baked size nearest BASE_PX x scale is used
+## (ties: smaller). The one knob for the cursor's size.
+const BASE_PX := 28.0
+## The screen DPI of 100% display scaling.
+const BASE_DPI := 96.0
 ## The art: hotspot in the 64-unit design grid of the SVG (the pixel the click lands on), and an
 ## optional glow baked around it.
 const ART := {
@@ -83,7 +90,7 @@ static var settings_path_override: String = ""
 static var _loaded := false
 static var _modes: Array[StringName] = []
 static var _suspended := false
-static var _size: int = 32
+static var _size: int = int(BASE_PX)
 ## Shape -> "<art>@<size>" currently applied ("" = system cursor).
 static var _applied: Dictionary = {}
 static var _textures: Dictionary = {}
@@ -140,7 +147,7 @@ static func uninstall() -> void:
 	_applied.clear()
 	_loaded = false
 	enabled = true
-	_size = 32
+	_size = int(BASE_PX)
 
 
 # ---------------------------------------------------------------- the setting
@@ -257,24 +264,22 @@ static func size_for_scale(s: float) -> int:
 	return best
 
 
-## The cursor's UI scale: the larger of the window's content scale (the 1600x1000 design stretched
-## to `window_px`) and the screen's DPI scale (`dpi` / 96), both in logical pixels (divided by
-## `screen_scale`, 2.0 on a macOS Retina screen), and never below 1.
-static func ui_scale(window_px: Vector2, dpi: int, screen_scale: float = 1.0) -> float:
+## The cursor's scale: the operating system's display scaling, read as the screen's DPI over 96
+## (Windows reports 144 at 150%), in logical pixels (divided by `screen_scale`, 2.0 on a macOS Retina
+## screen, where the system scales the cursor itself). Never below 1 (an unknown DPI reads as 0).
+## The window's size plays no part (M batch).
+static func ui_scale(dpi: int, screen_scale: float = 1.0) -> float:
 	var ss := maxf(screen_scale, 1.0)
-	var ws := 1.0
-	if window_px.x > 0.0 and window_px.y > 0.0:
-		ws = minf(window_px.x / BASE_VIEWPORT.x, window_px.y / BASE_VIEWPORT.y) / ss
-	var ds := float(dpi) / 96.0 / ss if dpi > 0 else 1.0
-	return maxf(1.0, maxf(ws, ds))
+	var ds := float(dpi) / BASE_DPI / ss if dpi > 0 else 1.0
+	return maxf(1.0, ds)
 
 
-## ui_scale() of the main window on its current screen.
+## ui_scale() of the main window's current screen.
 static func live_scale() -> float:
 	if DisplayServer.get_name() == "headless":
 		return 1.0
 	var scr := DisplayServer.window_get_current_screen()
-	return ui_scale(Vector2(DisplayServer.window_get_size()), DisplayServer.screen_get_dpi(scr), DisplayServer.screen_get_scale(scr))
+	return ui_scale(DisplayServer.screen_get_dpi(scr), DisplayServer.screen_get_scale(scr))
 
 
 ## The size in use (px).
@@ -282,7 +287,8 @@ static func current_size() -> int:
 	return _size
 
 
-## Picks the size again (window resized, DPI changed) and re-applies when it changed.
+## Picks the size again (window resized or moved to another screen, DPI changed) and re-applies
+## when it changed.
 static func refresh_size() -> void:
 	var n := size_for_scale(live_scale())
 	if n != _size:

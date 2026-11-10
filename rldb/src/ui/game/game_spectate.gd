@@ -150,11 +150,13 @@ func attach(c: SeatClient) -> void:
 	_sig = 0
 
 
-## Places the list popover under the top strip, against the sidebar.
+## Places the list popover under the button row, right edge level with the row's end (left of the
+## opponent's plate, M9 owner feedback 9 Nov: it used to cover the plate).
 func layout(w: float) -> void:
 	panel.reset_size()
 	panel.size = Vector2(LIST_W, 0)
-	panel.position = Vector2(w - gs.sidebar_w - LIST_W - 10.0, GameScreen.TOP_H + 4.0)
+	var right := gs.menu.menu_anchor_right() if gs.menu != null and gs.board != null else w - gs.sidebar_w - 10.0
+	panel.position = Vector2(roundf(maxf(float(UIStyle.SAFE_HUD), right - LIST_W)), GameMenu.popup_top())
 	_cursor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 

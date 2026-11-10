@@ -48,7 +48,7 @@ func test_new_profile_uses_the_violet_sigil() -> void:
 	# Arrange: no settings file. Act / Assert
 	assert_str(Customisation.DEFAULT_CARD_BACK).is_equal("violet")
 	assert_str(Customisation.card_back_id()).is_equal("violet")
-	assert_bool(CardBack.is_painted()).is_false()
+	assert_bool(CardBack.is_painted()).is_true()   # M11 (10 Nov): the Violet Sigil is painted too
 
 
 func test_six_new_backs_follow_the_default_with_names_and_blurbs() -> void:
@@ -155,9 +155,10 @@ func test_painted_back_textures_are_loaded_once() -> void:
 	# Arrange / Act
 	var a := CardBack.texture("runes")
 	var b := CardBack.texture("runes")
-	# Assert: one shared texture, and none for the procedural back.
+	# Assert: one shared texture; the Violet Sigil is painted too since M11 (10 Nov).
 	assert_object(a).is_same(b)
-	assert_object(CardBack.texture("violet")).is_null()
+	assert_object(CardBack.texture("violet")).is_not_null()
+	assert_bool(CardBack.is_painted("violet")).is_true()
 
 
 func test_painting_is_cropped_to_the_card_never_stretched() -> void:
