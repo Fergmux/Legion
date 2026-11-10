@@ -41,8 +41,8 @@ python -I -X utf8 tools/export_all.py --godot <path-to-console-exe> --build-dir 
 
 - It **refuses to run** (exit 1, nothing written) while any `RLDB*` process is running, or if the process
   list cannot be read. It never kills a process. Close the game yourself.
-- Godot comes from `--godot`, then `$GODOT`, then the Downloads path in the script. It needs Godot 4.6.1 and
-  the 4.6.1 export templates including `macos.zip` (`%APPDATA%\Godot\export_templates\4.6.1.stable`).
+- Godot comes from `--godot`, then `$GODOT`, then the Downloads path in the script. It needs Godot 4.7.2 and
+  the 4.7.2 export templates including `macos.zip` (`%APPDATA%\Godot\export_templates\4.7.2.stable`).
 - The macOS zip is exported to a scratch folder, checked, then moved to `build/macos/RLDB-macos.zip`; a bad
   export never replaces a good zip. Checks: all `.app` members and the signature present, a universal
   (2-architecture) binary, no `tests/`, `gdUnit4`, `rldb_export` or `reports/` in the pck, and both S3TC

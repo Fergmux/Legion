@@ -1,6 +1,6 @@
 # RLDB
 
-A two-player roguelike deck-builder card game in **Godot 4.6.1 (GDScript)**, built from the
+A two-player roguelike deck-builder card game in **Godot 4.7.2 (GDScript)**, built from the
 specification in [`rules/`](rules/00-START-HERE.md). Play hot-seat, over LAN (dev harness) or
 over Steam (lobbies + friend invites).
 
@@ -9,7 +9,7 @@ over Steam (lobbies + friend invites).
 | What | How |
 | --- | --- |
 | Exported Windows build | `build/windows/RLDB.exe` (re-export: see *Build* below; `build/` is git-ignored) |
-| From source | Open `rldb/project.godot` in Godot 4.6.1, press Play (main scene `res://main.tscn`) |
+| From source | Open `rldb/project.godot` in Godot 4.7.2, press Play (main scene `res://main.tscn`) |
 | Headless/CLI | `godot --path rldb -- --local` (hot-seat), `-- --bot` (vs bot), `-- --host=24680`, `-- --join=127.0.0.1:24680` |
 
 Main menu: **Play vs Bot** (you against the computer; the bot picks a random starter deck),
@@ -117,5 +117,5 @@ Host migration and recovering a series after the host process exits are not impl
 
 ## Build
 
-Export templates for 4.6.1 must be installed (Editor → Manage Export Templates). Then:
+Export templates for 4.7.2 must be installed (Editor → Manage Export Templates). Then:
 `godot --headless --path rldb --export-release "Windows Desktop" ../build/windows/RLDB.exe`

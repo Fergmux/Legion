@@ -32,7 +32,7 @@ import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT = os.path.join(ROOT, "rldb")
-DEFAULT_GODOT = r"C:\Users\fergm\Downloads\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe"
+DEFAULT_GODOT = os.path.join(os.path.expanduser("~"), "Downloads", "Godot_v4.7.2-stable_win64.exe", "Godot_v4.7.2-stable_win64_console.exe")
 WINDOWS_PRESET = "Windows Desktop"
 MACOS_PRESET = "macOS"
 WINDOWS_FILES = ["RLDB.exe", "RLDB.pck", "libgodotsteam.windows.template_release.x86_64.dll", "steam_api64.dll",
@@ -181,7 +181,7 @@ def export_macos(godot_exe, build_dir):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--only", choices=["windows", "macos"], help="export just one platform")
-    ap.add_argument("--godot", default=os.environ.get("GODOT", DEFAULT_GODOT), help="Godot 4.6.1 console exe")
+    ap.add_argument("--godot", default=os.environ.get("GODOT", DEFAULT_GODOT), help="Godot 4.7.2 console exe")
     ap.add_argument("--build-dir", default=os.path.join(ROOT, "build"))
     ap.add_argument("--skip-import", action="store_true", help="skip the `--import` pass (the .godot cache is fresh)")
     ap.add_argument("--check", action="store_true", help="only check that an export is allowed, then stop")

@@ -2,10 +2,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Engine Version** | Godot 4.6 |
-| **Installed at pin time** | NOT DETERMINED — `/setup-engine` §3 probes the installed editor and records the result here. |
+| **Engine Version** | Godot 4.7.2 |
+| **Installed at pin time** | 4.7.2 stable (2026-11-09; project upgraded from 4.6.1, full suite 2243/2243 passed on 4.7.2 before the switch) |
 | **Release Date** | January 2026 |
-| **Project Pinned** | 2026-02-12 |
+| **Project Pinned** | 2026-11-09 |
 | **Last Docs Verified** | 2026-02-12 |
 | **LLM Knowledge Cutoff** | May 2025 |
 
