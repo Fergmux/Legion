@@ -26,7 +26,7 @@ const OFFER_TILT_DEG := 2.0
 const OFFER_FLIP := 0.12
 ## M2: margin after a reveal flip before a card under the pointer is caught as hovered (s).
 const REVEAL_SETTLE := 0.05
-## M batch (owner, 10 Nov): how long after a pick the next offer's reveal (draft_reveal and the flips)
+## M batch (owner, 10 Nov): how long after a pick the next offer's reveal (the card flips)
 ## waits, so the pick's swish is not drowned by the deal (s; scaled by fast animations).
 const PICK_SETTLE := 0.5
 ## When this player last picked a draft card (Time msec; -1 hour: none yet).
@@ -706,7 +706,7 @@ func _tilt(cw: CardWidget, on: bool) -> void:
 	UIStyle.tween_token(tw, cw, "rotation_degrees", OFFER_TILT_DEG * side if on else 0.0, "hover" if on else "hover_out")
 
 
-## A new offer's reveal: the draft_reveal cue, then each card flips open (its width grows from an
+## A new offer's reveal (owner, 10 Nov: no separate cue): each card flips open (its width grows from an
 ## edge-on sliver) OFFER_FLIP after the one before, with a card_flip each; under reduce motion they
 ## fade in together.
 func _reveal(cards: Array) -> void:
@@ -714,12 +714,8 @@ func _reveal(cards: Array) -> void:
 		return
 	# M batch (owner, 10 Nov): right after a pick the new offer waits for the pick's card swish to be
 	# heard (the deal cue used to start in the same instant and drown it).
+	# Owner (10 Nov): no separate offer cue; each card's own card_flip is the sound of the offer.
 	var wait := pick_settle_delay(Time.get_ticks_msec() - _pick_ms)
-	if wait > 0.0:
-		var first := cards[0] as Control
-		first.get_tree().create_timer(wait).timeout.connect(func(): Sfx.play("draft_reveal"), CONNECT_ONE_SHOT)
-	else:
-		Sfx.play("draft_reveal")
 	for i in cards.size():
 		var cw: CardWidget = cards[i]
 		cw.modulate.a = 0.0
@@ -727,6 +723,8 @@ func _reveal(cards: Array) -> void:
 		if wait > 0.0:
 			tw.tween_interval(wait)
 		if UIStyle.reduce_motion:
+			if i == 0:
+				tw.tween_callback(func(): Sfx.play("card_flip"))   # one flip as the cards fade in together
 			tw.tween_property(cw, "modulate:a", 1.0, UIStyle.motion("reduced"))
 			continue
 		tw.tween_interval(UIStyle.dur(OFFER_FLIP * i))

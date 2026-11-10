@@ -75,6 +75,7 @@ Follow-ups (verbatim):
 | - | Stats info tooltip | done | The privacy note is now an info icon's tooltip beside the sharing toggle. |
 | - | Menu score plaque | done | Compact: only the cartouche, "BEST OF n" over names and dots in the seat colours (gold / blue, owner-approved); gems removed. |
 | - | Draft pick drowned out | done | Owner: "the shuffle effect is totally overriding it". The next offer's deal cue started with the pick; the reveal now waits `PICK_SETTLE` (0.5 s) so the card swish is heard first. |
+| - | Draft offer cue removed | done | Owner: "If there's already a flip sound just play that for each card and remove this extra sound effect." The new offer plays only each card's `card_flip` (one flip under reduced motion); `draft_reveal` is no longer played. |
 | - | Violet Sigil v3 | done | Owner pick 2 of the "rich but crisp" set (reference: Gilded Sun, Tide, Starfield). |
 
 All sound takes: ElevenLabs flow "RLDB sound options 9 Nov"; selections in `design/audio/sfx-selection.json`, mastered by
