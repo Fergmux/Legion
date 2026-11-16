@@ -377,29 +377,29 @@ func _overextend_board() -> Dictionary:
 	return {"m": m, "trap": trap, "big": big, "small": small, "mine": mine, "third": third}
 
 
-func test_f03_19_overextend_can_choose_a_non_highest_unit() -> void:
+## 2026-11-10: Overextend no longer asks for a unit (F03-19's choice of one unit, -20, is gone): it
+## resolves at once on every opposing unit.
+func test_f03_19_overextend_resolves_without_asking_for_a_unit() -> void:
 	var b := _overextend_board()
 	var m: MatchEngine = b["m"]
-	assert_int(int(m.pending["player"])).is_equal(0)
-	assert_str(TB.choose_uids(m, [b["small"]])).is_empty()
-	assert_int(m.atk_of(b["small"])).is_equal(4)
-	assert_int(m.atk_of(b["big"])).is_equal(30)
+	assert_bool(m.pending.is_empty()).override_failure_message(str(m.pending)).is_true()
+	assert_int(m.atk_of(b["big"])).is_equal(30 - 10)
 
 
-func test_f03_19_overextend_offers_every_opposing_unit_and_no_friendly_unit() -> void:
+## 2026-11-10: every opposing unit permanently loses 10 ATK; no friendly unit does.
+func test_f03_19_overextend_weakens_every_opposing_unit_and_no_friendly_unit() -> void:
 	var b := _overextend_board()
 	var m: MatchEngine = b["m"]
-	var offered := _option_uids(m)
-	assert_array(offered).contains_exactly_in_any_order([b["big"], b["small"], b["third"]])
-	assert_bool(b["mine"] in offered).is_false()
-	assert_str(TB.choose_uids(m, [b["mine"]])).contains("Invalid")
+	assert_int(m.atk_of(b["big"])).is_equal(30 - 10)
+	assert_int(m.atk_of(b["small"])).is_equal(24 - 10)
+	assert_int(m.atk_of(b["third"])).is_equal(0)             # Basic Mage (Fire), 8 ATK: floored at 0
+	assert_int(m.atk_of(b["mine"])).is_equal(12)
 
 
 func test_f03_19_overextend_reduction_floors_at_zero_and_lasts_on_field() -> void:
 	var b := _overextend_board()
-	var m: MatchEngine = b["m"]
-	TB.choose_uids(m, [b["third"]])                         # Basic Mage (Fire), 8 ATK
-	assert_int(m.atk_of(b["third"])).is_equal(0)
+	var m: MatchEngine = b["m"]                             # no choice since 2026-11-10: every opposing unit
+	assert_int(m.atk_of(b["third"])).is_equal(0)            # Basic Mage (Fire), 8 ATK
 	m.submit(1, {"t": "next_phase"})
 	m.submit(1, {"t": "next_phase"})
 	m.submit(1, {"t": "next_phase"})                        # end of turn 2
@@ -407,20 +407,19 @@ func test_f03_19_overextend_reduction_floors_at_zero_and_lasts_on_field() -> voi
 	assert_int(m.atk_of(b["third"])).is_equal(0)            # still reduced on a later turn
 
 
-func test_f03_19_overextend_text_names_the_choice() -> void:
+## 2026-11-10: the sheet states the new rule (all the opponent's units, -10), so the importer's F03-19
+## wording correction is dropped and the effect has no target prompt any more.
+func test_f03_19_overextend_text_names_every_opposing_unit() -> void:
 	var df := CardDB.get_def(OVEREXTEND)
-	# Owner wording, 3 Nov (verbatim); the controller still chooses the Unit (F03-19).
-	assert_str(String(df["on_summon"])).is_equal("One of your opponent's Units Permanently loses -20 ATK.")
+	assert_str(String(df["on_summon"])).is_equal("Your opponent's Units Permanently lose -10 ATK.")
 	assert_str(String(df["condition"])).contains("3 or more Units")
-	# The choice is still named where the player makes it: the target prompt.
-	var prompt := String(CardScripts.get_entry(OVEREXTEND)["trap"]["ops"][0]["prompt"])
-	assert_str(prompt).starts_with("Choose one of your opponent's units")
+	for op in CardScripts.get_entry(OVEREXTEND)["trap"]["ops"]:
+		assert_str(String(op["op"])).is_not_equal("choose")
 
 
 func test_f03_18_chosen_target_stat_event_carries_the_source_for_both_seats() -> void:
-	var b := _overextend_board()
+	var b := _overextend_board()                            # no choice since 2026-11-10: every opposing unit
 	var m: MatchEngine = b["m"]
-	TB.choose_uids(m, [b["small"]])
 	for seat in [0, 1]:
 		var found := {}
 		for entry in MatchView.build(m, seat)["log"]:
@@ -430,12 +429,22 @@ func test_f03_18_chosen_target_stat_event_carries_the_source_for_both_seats() ->
 		assert_dict(found.get("from", {})).is_equal({"p": 0, "zone": "backrow", "slot": 1})
 
 
+## 2026-11-10: Overextend (the old fixture) no longer asks for a target; Perfect Dodge's "a Unit in this
+## Column" choice is the pending choice now, from the same zone (backrow, slot 1).
 func test_f03_18_pending_choice_carries_its_effect_source() -> void:
-	var b := _overextend_board()
-	var m: MatchEngine = b["m"]
+	var m := TB.make()
+	TB.to_turn2(m)
+	var trap := TB.set_card(m, 0, 50, 1)                     # Perfect Dodge, column 2
+	TB.to_battle(m)
+	var a := TB.unit(m, 1, TB.WATER, 1, "atk", 10)
+	var d := TB.unit(m, 0, TB.WATER, 1)
+	TB.unit(m, 0, TB.WATER, 4)                              # a second unit in the column: a real choice
+	assert_str(TB.attack(m, a, d)).is_empty()
+	assert_str(TB.choose(m, ["Activate Perfect Dodge"])).is_empty()
+	assert_int(int(m.pending.get("player", -1))).is_equal(0)
 	var mine_view: Dictionary = MatchView.build(m, 0)["pending"]
 	assert_dict(mine_view["source"]).is_equal({"p": 0, "zone": "backrow", "slot": 1})
-	assert_int(int(mine_view["source_uid"])).is_equal(b["trap"])
+	assert_int(int(mine_view["source_uid"])).is_equal(trap)
 	# The opponent learns where the effect comes from (the Trap is face up now), nothing more.
 	var opp_view: Dictionary = MatchView.build(m, 1)["pending"]
 	assert_dict(opp_view["source"]).is_equal({"p": 0, "zone": "backrow", "slot": 1})

@@ -256,7 +256,16 @@ func refs(f: Dictionary, ref) -> Array:
 		elif ref.begins_with("event."):
 			var v = f["event"].get(ref.substr(6), -1)
 			out = v.duplicate() if v is Array else [v]
-	return out.filter(func(u): return u is int and cards.has(u))
+	return _trap_immune_filter(f, out.filter(func(u): return u is int and cards.has(u)))
+
+
+## The Lone Warrior (38, 2026-11-10): "This Unit is Unaffected by Trap Effects": an effect whose
+## source is a Trap neither selects nor reaches a unit with the `trap_immune` flag.
+func _trap_immune_filter(f: Dictionary, uids: Array) -> Array:
+	var src: int = int(f.get("src", -1))
+	if not cards.has(src) or category(src) != "trap":
+		return uids
+	return uids.filter(func(u): return not (unit_on_field(u) and has_flag(u, "trap_immune")))
 
 
 ## Returns uids matching a selector, relative to frame f.
@@ -290,7 +299,7 @@ func select(f: Dictionary, sel: Dictionary) -> Array:
 		for u in out:
 			low = mini(low, atk_of(u))
 		out = out.filter(func(u): return atk_of(u) == low)
-	return out
+	return _trap_immune_filter(f, out)
 
 
 func _matches(f: Dictionary, uid: int, sel: Dictionary) -> bool:
@@ -355,6 +364,11 @@ func _matches(f: Dictionary, uid: int, sel: Dictionary) -> bool:
 				if has_any_debuff(uid) != want: return false
 			"has_status":
 				if status_count(uid, want) <= 0: return false
+			"not_has_status":
+				if status_count(uid, want) > 0: return false
+			"protects_src":
+				# 2026-11-10 (Solomon, the Tyrannical): the front-row unit protecting the source.
+				if not unit_on_field(src) or (protector_of(src) == uid) != want: return false
 			"revealed":
 				if (status_count(uid, "reveal") > 0) != want: return false
 			"face_down":
@@ -377,6 +391,9 @@ func _matches(f: Dictionary, uid: int, sel: Dictionary) -> bool:
 				if not (category(uid) in ["basic_unit", "unit"]): return false
 			"name_prefix":
 				if not name_of(uid).begins_with(want): return false
+			"card_id":
+				# 2026-11-10: a specific card (Divine Serpent - Soul names the Head, Body and Tail).
+				if int(cards[uid]["id"]) != int(want): return false
 			"playable":
 				# A Power put into play by an effect still obeys its own activation limit.
 				if want and has_flag_raw(uid, "abyss_ap") and _deck_has_zero_cost(f["ctl"]): return false
@@ -534,6 +551,15 @@ func eval_cond(f: Dictionary, cond: Dictionary) -> bool:
 				if eval_cond(f, v): return false
 			"pile_has_zero_cost":
 				pass
+			"and":
+				for c in v:
+					if not eval_cond(f, c): return false
+			"self_status":
+				# 2026-11-10 (Edwin / Solomon Evolve): the frame's card has this status applied.
+				if not cards.has(f["src"]) or status_count(f["src"], String(v)) <= 0: return false
+			"self_atk_above_base":
+				# 2026-11-10 (Edwin / Solomon Evolve): "ATK is more than Base".
+				if not unit_on_field(f["src"]) or (atk_of(f["src"]) > base_atk(f["src"])) != v: return false
 	return true
 
 
@@ -841,14 +867,27 @@ func _trap_eligible(uid: int, p: int, ev: Dictionary) -> bool:
 			# other (GameBoardView draws both sides' columns in the same order).
 			if tr.get("attacker_column", false):
 				if int(ev.get("attacker_column", -9)) != cards[uid]["slot"]: return false
+			# 2026-11-10 (Perfect Dodge, Defensive Rally): "an Attack on a Unit in this Column".
+			if tr.get("target_column", false):
+				var tu: int = int(ev.get("target", -1))
+				if tu == -1 or not cards.has(tu) or not unit_on_field(tu) or column_of(tu) != int(cards[uid]["slot"]): return false
 		"summon":
 			if ev["player"] == p: return false
+			# 2026-11-10 Trap Holes: only a Summon in this Trap's column (column i faces column i).
+			if tr.get("summon_column", false):
+				var sc: int = int(ev.get("card", -1))
+				if not cards.has(sc) or not unit_on_field(sc) or column_of(sc) != int(cards[uid]["slot"]): return false
 		"activate":
 			if ev["player"] == p: return false
 			if tr.get("power_only", false) and category(ev["card"]) != "power": return false
 			if tr.get("effect_only", false) and ev.get("play", false): return false
 		"destroyed":
 			if ev["ctl"] != p: return false
+			if tr.get("by_effect", false) and ev["cause"] != "effect": return false
+			if tr.get("by_opponent", false) and ev.get("by_player", -1) != opp(p): return false
+		"card_destroyed":
+			# 2026-11-10 Shared Fate: any card of the responder (Unit, Spell, Trap or Power).
+			if int(ev.get("ctl", -1)) != p or int(ev.get("self", -1)) == uid: return false
 			if tr.get("by_effect", false) and ev["cause"] != "effect": return false
 			if tr.get("by_opponent", false) and ev.get("by_player", -1) != opp(p): return false
 		"st_destroyed":
@@ -956,10 +995,9 @@ func destroy(uid: int, cause: String, by_uid: int, by_player: int, battle_vs: Di
 	if not on_field(uid) and not (cards.has(uid) and cards[uid]["zone"] == "limbo"):
 		return false
 	var inst: Dictionary = cards[uid]
-	# Snow Tiger Paladin (190), Protected by a Unit at the start of its controller's turn: that
-	# player's Traps on the Field (set or face up) cannot be Destroyed, by any cause, until the
-	# start of their next turn. A Trap that was used or sent elsewhere still leaves normally.
-	if inst["zone"] == "backrow" and category(uid) == "trap" and turn_effect_active(inst["ctl"], TFX_TRAPS_INDESTRUCTIBLE):
+	# Snow Tiger Paladin (190): while one is Protected by a Unit, its controller's Traps on the Field
+	# (set or face up) cannot be Destroyed, by any cause (2026-11-10: continuous; was set at turn start).
+	if inst["zone"] == "backrow" and category(uid) == "trap" and snow_tiger_active(int(inst["ctl"]), "protected"):
 		var lab := public_label(uid)
 		add_log("%s cannot be destroyed (Snow Tiger Paladin)." % (lab.substr(0, 1).to_upper() + lab.substr(1)))
 		return false
@@ -976,6 +1014,8 @@ func destroy(uid: int, cause: String, by_uid: int, by_player: int, battle_vs: Di
 			decrement_status(uid, "eternal")
 			add_log("Eternal prevents the destruction of %s (Eternal -1)." % name_of(uid))
 			return false
+	if _mithral_replacement(uid):
+		return false
 	var p: int = inst["ctl"]
 	var label := public_label(uid)
 	var was_unit: bool = inst["zone"] == "unit"
@@ -1010,7 +1050,10 @@ func destroy(uid: int, cause: String, by_uid: int, by_player: int, battle_vs: Di
 		emit("unit_destroyed", {"victim": uid, "ctl": p, "type": snap.get("type_now", ""), "cause": cause, "player": active, "by": by_uid})
 		window_queue.append({"name": "destroyed", "self": uid, "ctl": p, "cause": cause, "by_player": by_player,
 			"by": by_uid, "player": active, "text": "%s destroyed" % label})
-	elif was_spell_trap:
+	# 2026-11-10 Shared Fate: "If your card is Destroyed by an Effect" (any card on the Field).
+	window_queue.append({"name": "card_destroyed", "self": uid, "ctl": p, "cause": cause, "by_player": by_player,
+		"by": by_uid, "player": active, "text": "%s destroyed" % label})
+	if was_spell_trap:
 		# Counter Transmutation (2026-10-18) responds to any destroyed Spell/Trap. Named only when it
 		# was public: a set card that was destroyed face down stays unnamed.
 		# was_set / set_turn / column: a set Trap answering its own destruction (Do Not Open Box)
@@ -1020,6 +1063,21 @@ func destroy(uid: int, cause: String, by_uid: int, by_player: int, battle_vs: Di
 			"was_public": label != "a set Spell/Trap", "was_set": snap["zone"] == "backrow" and not snap["face_up"],
 			"set_turn": int(snap.get("set_turn", -1)), "column": snap["slot"] if snap["zone"] == "backrow" else -1})
 	return true
+
+
+## Mithral Dome (192, 2026-11-10): "If your Spell, Trap or Power would be Destroyed, you can Destroy this
+## card instead." A Dome of the card's controller (not the card itself) is destroyed in its place. The
+## replacement is always taken (a choice cannot be asked inside a destruction); true when it was.
+func _mithral_replacement(uid: int) -> bool:
+	if not (cards[uid]["zone"] in ["backrow", "power"]):
+		return false
+	for dome in power_cards(int(cards[uid]["ctl"])):
+		if dome != uid and has_flag(dome, "mithral_dome"):
+			var lab := public_label(uid)
+			add_log("%s is destroyed instead of %s." % [name_of(dome), lab])
+			destroy(dome, "effect", dome, int(cards[dome]["ctl"]))
+			return true
+	return false
 
 
 ## Man's Best Friend: if your Warrior in its column would be destroyed, give it Eternal and destroy MBF.

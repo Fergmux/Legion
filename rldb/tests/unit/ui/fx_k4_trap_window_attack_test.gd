@@ -7,9 +7,8 @@ extends GdUnitTestSuite
 ## whichever batch the battle resolves, and never when the Trap stopped the attack. Every case is read
 ## from the real rules engine, for both seats (each one's redacted log, as online).
 
-const DAMAGE_CONVERSION := 47   # Trap: an attack on one of your units in this column; the attack goes on
+const DAMAGE_CONVERSION := 47   # Trap: an attack by the opponent's unit in this column (a direct one too); the attack goes on
 const MIRROR_FORCE := 46        # Trap: destroys every opposing ATK-stance unit (opponent controls 4+ cards)
-const RUSHED_RECKLESSLY := 51             # Trap: any attack (also a direct one); +8 DEF to your units in this column
 const ATTACKER := 1
 const DEFENDER := 0
 const STRIKES := ["attack", "direct", "lethal"]
@@ -186,13 +185,13 @@ func test_bot_defender_answer_plays_the_strike_after_its_choice() -> void:
 
 
 func test_direct_attack_waits_for_the_trap_prompt_too() -> void:
-	# Arrange: the defender has no unit and a Trap that answers any attack
+	# Arrange: the defender has no unit and a Trap that answers an attack from its column, a direct one too
 	var gs := _screen()
 	await await_idle_frame()
 	var m := TB.make()
 	TB.p1_battle(m)
 	var att := TB.unit(m, ATTACKER, TB.WATER, 0, "atk", 10, 10)
-	TB.set_card(m, DEFENDER, RUSHED_RECKLESSLY, 0)
+	TB.set_card(m, DEFENDER, DAMAGE_CONVERSION, 0)        # the attacker's column (Defensive Rally answers only an attack on a unit since 2026-11-10)
 	var since0 := _since(m)
 	assert_str(TB.attack(m, att, -1)).is_empty()
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")
@@ -214,7 +213,7 @@ func test_killing_blow_after_a_trap_prompt_plays_once_after_it() -> void:
 	var m := TB.make()
 	TB.p1_battle(m)
 	var att := TB.unit(m, ATTACKER, TB.WATER, 0, "atk", 30, 10)
-	TB.set_card(m, DEFENDER, RUSHED_RECKLESSLY, 0)
+	TB.set_card(m, DEFENDER, DAMAGE_CONVERSION, 0)        # the attacker's column (Defensive Rally answers only an attack on a unit since 2026-11-10)
 	m.players[DEFENDER]["hp"] = 12
 	var since0 := _since(m)
 	assert_str(TB.attack(m, att, -1)).is_empty()
@@ -242,7 +241,7 @@ func test_zero_damage_direct_attack_still_strikes_when_it_resolves() -> void:
 	var m := TB.make()
 	TB.p1_battle(m)
 	var att := TB.unit(m, ATTACKER, TB.WATER, 0, "atk", 0, 10)
-	TB.set_card(m, DEFENDER, RUSHED_RECKLESSLY, 0)
+	TB.set_card(m, DEFENDER, DAMAGE_CONVERSION, 0)        # the attacker's column (Defensive Rally answers only an attack on a unit since 2026-11-10)
 	assert_str(TB.attack(m, att, -1)).is_empty()
 	var since := _since(m)
 	var hp: int = m.players[DEFENDER]["hp"]

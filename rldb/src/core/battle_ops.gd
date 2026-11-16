@@ -6,12 +6,19 @@ extends FusionOps
 
 # ---------------------------------------------------------------- combat
 
+## The Great Leviathan (197, 2026-11-10): "If your opponent Controls a Unit: this Unit can make a second
+## attack." True while unit `uid` has attacked once this turn and may attack again.
+func _second_attack_ok(uid: int) -> bool:
+	return has_flag(uid, "second_attack") and int(cards[uid].get("attacks_n", 1)) < 2 \
+			and not field_units(opp(int(cards[uid]["ctl"]))).is_empty()
+
+
 func _attack_check(p: int, uid: int, mode: String = "") -> String:
 	var inst: Dictionary = cards[uid]
 	if inst["ctl"] != p or inst["zone"] != "unit": return "Not your unit."
 	if phase != PHASE_BATTLE: return "Attacks happen in the Battle Phase."
 	if inst["stance"] != "atk": return "Only Attack-stance units can attack."
-	if inst["attacked_turn"] == turn: return "This unit already attacked this turn."
+	if inst["attacked_turn"] == turn and not _second_attack_ok(uid): return "This unit already attacked this turn."
 	if status_count(uid, "paralyse") > 0: return "Paralysed."
 	var why := _cannot_attack_reason(uid)
 	if why != "": return why
@@ -137,6 +144,7 @@ func _op_attack_declare(f: Dictionary, op: Dictionary) -> int:
 	var uid: int = f["src"]
 	var p: int = f["ctl"]
 	var target: int = f["vars"]["target"]
+	cards[uid]["attacks_n"] = int(cards[uid].get("attacks_n", 0)) + 1 if cards[uid]["attacked_turn"] == turn else 1
 	cards[uid]["attacked_turn"] = turn
 	var desc := "%s attacks %s" % [name_of(uid), pname(opp(p)) + " directly" if target == -1 else name_of(target)]
 	add_log("%s%s." % [desc, " (Blind: random target)" if f["vars"].get("blind", false) else ""])

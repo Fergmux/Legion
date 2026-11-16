@@ -62,7 +62,7 @@ func _setup(method: String) -> Dictionary:
 			var dr := TB.unit(m, 0, DRAGON, 2)
 			# Seppuku keeps its zone until after the summon: the Fusion unit takes a material's zone.
 			d.merge({"src": sp, "mats": [b, dr], "cmd": {"t": "ability", "uid": sp, "idx": 0},
-				"answers": [wyrm, b, dr, 1], "cost": "activates Seppuku", "after": "Seppuku is destroyed"})
+				"answers": [wyrm, b, dr, 1], "cost": "activates Zeph, Monk of Ancient Wisdom", "after": "Zeph, Monk of Ancient Wisdom is destroyed"})
 		"basilisk":
 			var vb := TB.unit(m, 0, BASILISK, 0)
 			var b := TB.card(m, 0, BEAST, "spent")
@@ -98,7 +98,7 @@ func _setup(method: String) -> Dictionary:
 			var b := TB.unit(m, 0, BEAST, 1)
 			var dr := TB.unit(m, 0, DRAGON, 2)
 			d.merge({"src": poly, "mats": [b, dr], "cmd": {"t": "activate_set", "uid": poly},
-				"answers": [wyrm, b, dr, 1], "cost": "activates set Spell Fusion Ceremony"})
+				"answers": [wyrm, b, dr, 1], "cost": "activates set Spell Fusion Configuration"})
 		"unstable":
 			TB.power(m, 0, UNSTABLE)
 			var poly := TB.card(m, 0, POLY, "hand")
@@ -191,7 +191,7 @@ func test_f04_22_sepukku_destroyed_after_the_summon_and_its_zone_is_not_offered(
 	_answer(m, 1)
 	assert_str(m.cards[sp]["zone"]).is_equal("spent")
 	assert_int(m.cards[d["wyrm"]]["slot"]).is_equal(1)
-	assert_int(TB.log_index(m, "Seppuku is destroyed")).is_greater(TB.log_index(m, "summons " + WYRM_NAME))
+	assert_int(TB.log_index(m, "Zeph, Monk of Ancient Wisdom is destroyed")).is_greater(TB.log_index(m, "summons " + WYRM_NAME))
 
 
 func test_f04_22_tag_team_trigger_cancel_and_stance() -> void:

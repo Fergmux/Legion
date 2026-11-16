@@ -6,7 +6,7 @@ const PLAN_B := 163
 const SHARED_FATE := 87
 const MAGIC_CYLINDER := 45
 const DAMAGE_CONVERSION := 47
-const CHIDORI_MONK := 24       # 16/14; On Summon: 1 Infiltrate on itself
+const CHIDORI_MONK := 24       # 14 ATK (2026-11-10); On Summon: 1 Infiltrate on itself
 const ALEXANDERS_ARROW := 103
 
 
@@ -34,7 +34,7 @@ func test_plan_b_over_network_resolves_depth_first_heals_last_and_client_view_ma
 	assert_bool(await _await_pending(m, 1, "attack_target")).is_true()
 	_client_choose(["Basic Warrior"])
 	assert_bool(await _await_pending(m, 0, "trap_response")).is_true()
-	assert_array(_labels(hpend())).not_contains(["Activate Magic Cylinder"])   # column 3, not eligible
+	assert_array(_labels(hpend())).not_contains(["Activate Dimensional Redirect"])   # column 3, not eligible
 	_host_choose(["Plan B"])
 	assert_bool(await _await_pending(m, 0, "select")).is_true()
 	# The waiting client sees only that the host is choosing.
@@ -67,7 +67,7 @@ func test_plan_b_over_network_resolves_depth_first_heals_last_and_client_view_ma
 	assert_bool(await _wait(func(): return cview()["match"]["log"].map(func(e): return e["text"]) == want)).is_true()
 	# Nothing about the unselected face-down card ever reached the client.
 	var blob := _blob()
-	assert_bool(blob.contains("Magic Cylinder")).is_false()
+	assert_bool(blob.contains("Dimensional Redirect")).is_false()
 	assert_bool(blob.contains("\"uid\":%d" % decoy)).is_false()
 
 
@@ -91,10 +91,10 @@ func test_column_traps_answer_only_a_direct_attack_from_their_column_over_networ
 	assert_bool(await _await_pending(m, 0, "trap_response")).is_true()
 	# Assert: only the column-1 Trap answers, and the client is told nothing about it
 	var offered: Array = _labels(hpend()).filter(func(l): return String(l).begins_with("Activate"))
-	assert_array(offered).is_equal(["Activate Magic Cylinder"])
+	assert_array(offered).is_equal(["Activate Dimensional Redirect"])
 	var act: Array = m.pending["options"].filter(func(o): return String(o["label"]).begins_with("Activate"))
 	assert_int(int(act[0]["v"])).is_equal(mc)                  # the column-1 Cylinder, not column 3's
-	assert_bool(_blob().contains("Magic Cylinder")).is_false()
+	assert_bool(_blob().contains("Dimensional Redirect")).is_false()
 	_host_choose(["Skip"])
 	assert_bool(await _await_idle(m)).is_true()
 	assert_int(m.players[0]["hp"]).is_equal(60 - 10)
@@ -122,4 +122,4 @@ func test_on_summon_resolves_before_summon_trap_prompt_over_network() -> void:
 	assert_int(m.status_count(monk, "infiltrate")).is_equal(1)
 	_host_choose(["Alexander"])
 	assert_bool(await _await_idle(m)).is_true()
-	assert_int(m.atk_of(monk)).is_equal(16 - 8)
+	assert_int(m.atk_of(monk)).is_equal(14 - 8)                # Chidori, Monk of Speed: 14 ATK since 2026-11-10

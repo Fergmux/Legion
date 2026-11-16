@@ -119,7 +119,7 @@ func test_d13_activate_then_skip_then_pass_for_the_turn() -> void:
 	var gs: GameScreen = r[0]
 	var m: MatchEngine = r[2]
 	assert_str(String(m.pending["options"][0]["label"])).is_equal("Skip")    # the engine lists Skip first
-	assert_array(_list_texts(gs)).is_equal(["Activate Damage Conversion", "Skip", "Skip for the rest of this turn"])
+	assert_array(_list_texts(gs)).is_equal(["Activate Dimensional Conversion", "Skip", "Skip for the rest of this turn"])
 	await await_idle_frame()
 	var btns := gs.prompt.banner_list.find_children("*", "Button", true, false)
 	# Activate on top; Skip and Skip for the rest of this turn below it: side by side when Skip fits

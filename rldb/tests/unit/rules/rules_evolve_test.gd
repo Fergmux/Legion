@@ -3,14 +3,14 @@ extends GdUnitTestSuite
 ## mechanic. Symbiote Spawn (155) evolves into Symbiote Larva (156), which evolves into Symbiote
 ## Siphonophore (157). At the start of its controller's turn each evolvable unit gets an
 ## "Evolve <card> into <next>?" prompt (Evolve / Skip, free); the evolved card replaces the instance
-## for the rest of the game, keeps its state, and is not a Summon.
+## for the rest of the game and keeps its state. 2026-11-10: an evolution is a Summon.
 
 const SPAWN := 155
 const LARVA := 156
 const SIPHONOPHORE := 157
 const MAGE := TB.FILLER                  # Basic Mage (Water) 8/8
 const SHEN := 21                         # "If your opponent Summons a Unit, that Unit permanently loses -10 ATK"
-const SUMMON_TRAP := 49                  # a Trap answering a Summon (Paralyse 3)
+const SUMMON_TRAP := 49                  # a Trap answering a Summon in its column (2 Paralyse)
 
 
 ## Player 1's Spawn on the Field (placed on turn 1), then player 1's turn starts: the Evolve prompt.
@@ -51,25 +51,22 @@ func test_evolve_replaces_the_card_and_keeps_zone_stance_statuses_and_changes() 
 	assert_int(m.status_count(spawn, "rune")).is_equal(1)
 	assert_int(m.atk_of(spawn)).is_equal(6)                     # Larva's base 0 plus the kept +6
 	assert_int(m.def_of(spawn)).is_equal(2)
-	assert_int(m.current_cost(spawn)).is_equal(3)               # Larva's printed 2 plus the kept +1
+	assert_int(m.current_cost(spawn)).is_equal(2)               # Larva's printed 1 (2026-11-10) plus the kept +1
 	assert_int(m.players[1]["ap"]).is_equal(ap_before)          # free
 	assert_int(m.players[1]["units"][4]).is_equal(spawn)
 
 
-func test_evolve_is_not_a_summon() -> void:
+func test_evolve_is_a_summon() -> void:
+	# 2026-11-10 (owner): an evolution is a Summon: summon effects apply and the summon-response window opens.
 	var m := TB.make()
 	TB.unit(m, 0, SHEN, 0)                                     # the opponent's Shen
-	TB.set_card(m, 0, SUMMON_TRAP, 1)                          # and a Trap answering a Summon
-	var spawn := TB.unit(m, 1, SPAWN, 3)
-	m.apply_status(spawn, "eternal", 1)
+	TB.set_card(m, 0, SUMMON_TRAP, 0)                          # Trap Hole of Ensnarement, column 1
+	var spawn := TB.unit(m, 1, SPAWN, 3)                       # column 1
 	TB.to_turn2(m)
 	TB.choose(m, ["Evolve"])
 	assert_int(int(m.cards[spawn]["id"])).is_equal(LARVA)
-	assert_bool(m.pending.is_empty()).override_failure_message(str(m.pending)).is_true()   # no Trap window
-	assert_int(m.status_count(spawn, "eternal")).is_equal(1)   # Larva's On Summon (Eternal) did not fire
-	assert_int(m.atk_of(spawn)).is_equal(0)                    # Shen's -10 did not apply
-	assert_array(m.cards[spawn]["mods"]).is_empty()
-	assert_int(m.status_count(spawn, "paralyse")).is_equal(0)
+	assert_str(TB.pend_kind(m)).is_equal("trap_response")
+	assert_bool(m.cards[spawn]["mods"].is_empty()).is_false()  # Shen's -10 applied
 
 
 func test_skip_keeps_the_card() -> void:

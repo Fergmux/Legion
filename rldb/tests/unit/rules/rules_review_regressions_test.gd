@@ -12,7 +12,7 @@ func test_no_gain_unit_does_not_block_buff_to_other_targets() -> void:
 	var ally := TB.unit(m, 0, TB.WATER, 3, "atk", 8, 8)
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 1)
 	TB.attack(m, a, m.players[0]["units"][0])
-	TB.choose(m, ["Activate Rushed Recklessly"])
+	TB.choose(m, ["Activate Defensive Rally"])
 	assert_int(m.def_of(ally)).is_equal(16)
 
 
@@ -90,8 +90,8 @@ func test_magic_cylinder_uses_attacker_last_known_atk_after_mirror_force() -> vo
 		TB.unit(m, 1, TB.WATER, s, "def")
 	var d := TB.unit(m, 0, TB.WATER, 0)
 	TB.attack(m, a, d)
-	TB.choose(m, ["Activate Mirror Force"])
-	TB.choose(m, ["Activate Magic Cylinder"])
+	TB.choose(m, ["Activate Sorcerer's Forcefield"])
+	TB.choose(m, ["Activate Dimensional Redirect"])
 	assert_int(m.players[1]["hp"]).is_equal(30)
 
 
@@ -207,18 +207,18 @@ func test_trap_without_a_legal_target_is_not_offered() -> void:
 	assert_str(TB.pend_kind(m)).is_not_equal("trap_response")
 
 
-## Owner feedback 2026-10-18 (reverses feedback 07 for Wabuku): a direct attack still activates
-## Wabuku, even with no unit in its column; it then has no target and the attack goes on.
-func test_wabuku_is_offered_on_a_direct_attack_with_an_empty_column() -> void:
+## Owner feedback 2026-10-18 had a direct attack activate Wabuku even with no unit in its column.
+## 2026-11-10 (Perfect Dodge): it answers only an attack on a unit in its column, so a direct attack
+## opens no window and goes through.
+func test_perfect_dodge_is_not_offered_on_a_direct_attack() -> void:
 	var m := TB.make()
 	TB.to_turn2(m)
-	TB.set_card(m, 0, 50, 0)                                 # Wabuku in column 1, no unit of player 0 there
+	TB.set_card(m, 0, 50, 0)                                 # Perfect Dodge in column 1, no unit of player 0 there
 	TB.to_battle(m)
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 10)
 	var hp: int = m.players[0]["hp"]
 	assert_str(TB.attack(m, a, -1)).is_empty()
-	assert_str(TB.pend_kind(m)).is_equal("trap_response")
-	TB.choose(m, ["Activate Wabuku"])
+	assert_str(TB.pend_kind(m)).is_not_equal("trap_response")
 	assert_int(m.players[0]["hp"]).is_equal(hp - 10)
 
 
@@ -247,7 +247,7 @@ func test_mirror_force_leaves_the_attackers_traps_and_powers() -> void:
 	var pw := TB.power(m, 1, 88)
 	TB.to_battle(m)
 	TB.attack(m, a1, -1)
-	assert_str(TB.choose(m, ["Activate Mirror Force"])).is_empty()
+	assert_str(TB.choose(m, ["Activate Sorcerer's Forcefield"])).is_empty()
 	assert_str(m.cards[a1]["zone"]).is_equal("spent")
 	assert_str(m.cards[a2]["zone"]).is_equal("spent")
 	assert_str(m.cards[d1]["zone"]).is_equal("unit")             # Defense stance survives
@@ -343,7 +343,7 @@ func test_sepukku_prevented_self_destroy_still_fuses_and_stays() -> void:
 	var mbf := TB.unit(m, 0, 73, 3)                            # Man's Best Friend, same column
 	var fire := TB.unit(m, 0, TB.FIRE, 1)
 	var warrior := TB.unit(m, 0, 3, 2)
-	var sol := TB.card(m, 0, 181, "extra")                     # Warrior + Fire
+	var sol := TB.card(m, 0, 36, "extra")                      # Dante: Warrior + Fire (Solomon, the Tyrannical until 2026-11-10)
 	assert_str(TB.ability(m, sep)).is_empty()
 	TB.choose_uids(m, [sol])
 	assert_bool(sep in CF.offered(m)).is_true()                # a Warrior: it may be its own material
@@ -354,7 +354,7 @@ func test_sepukku_prevented_self_destroy_still_fuses_and_stays() -> void:
 	assert_str(m.cards[sol]["zone"]).is_equal("unit")
 	assert_str(m.cards[sep]["zone"]).is_equal("unit")          # saved by Man's Best Friend
 	assert_str(m.cards[mbf]["zone"]).is_equal("spent")         # which is destroyed instead
-	assert_int(TB.log_index(m, "summons Solomon, the Tyrannical")).is_less(TB.log_index(m, "Man's Best Friend is destroyed"))
+	assert_int(TB.log_index(m, "summons Dante")).is_less(TB.log_index(m, "Man's Best Friend is destroyed"))
 
 
 ## Ambush: a Bahatia-blocked Basic Unit does not use up a free zone.

@@ -132,7 +132,7 @@ func test_network_client_records_each_duel_once_and_the_series() -> void:
 
 
 func test_facts_summarise_record_streaks_cards_and_decks() -> void:
-	var a := {"mode": "steam", "turns": 8, "ms": 600000, "deck": "Spirit Bomb", "cards": {"33": 2, "61": 1}, "plays": {"33": 3}, "summons": 2, "spells": 1, "damage": 30, "best_hit": 12}
+	var a := {"mode": "steam", "turns": 8, "ms": 600000, "deck": "Spirit, the Virtuous", "cards": {"33": 2, "61": 1}, "plays": {"33": 3}, "summons": 2, "spells": 1, "damage": 30, "best_hit": 12}
 	for won in [true, true, false, true, true, true]:
 		var d := a.duplicate(true)
 		d["won"] = won
@@ -161,7 +161,7 @@ func test_facts_summarise_record_streaks_cards_and_decks() -> void:
 	assert_str(String(_fact(f, "Most played card")["value"])).is_equal(PlayerStats._name("33"))
 	assert_str(String(_fact(f, "Most played card")["detail"])).is_equal("played 18 times")
 	assert_str(String(_fact(f, "Your best card")["detail"])).is_equal("won 6 of 7 duels it was in your deck")
-	assert_str(String(_fact(f, "Favourite deck")["value"])).is_equal("Spirit Bomb")
+	assert_str(String(_fact(f, "Favourite deck")["value"])).is_equal("Spirit, the Virtuous")
 	assert_str(String(_fact(f, "Most drafted card")["detail"])).is_equal("picked 2 times in 1 drafts")
 	assert_str(String(_fact(f, "Time in duels")["value"])).is_equal("1 h 11 min")
 

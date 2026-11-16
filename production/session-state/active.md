@@ -122,3 +122,11 @@ basic Race+Type change, coin flip, discard animation). Checklist:
   Ritual/Arcane set pieces now use one long cue each (ritual_full / arcane_full) with FxSummon.CLIMAX on the measured
   impact. ElevenLabs credits are exhausted (74 left); image work can use the owner's OpenAI key (Windows user env
   OPENAI_API_KEY, read at run time, never printed) via a gpt-image-2.5-sunburst script.
+
+## 2026-11-10 card database update (CD - JB edit) - in progress
+- Plan + owner answers + decisions: `design/card-database-update-2026-11-10.md`. Source pinned: `RLDB Master - Card Database (2026-11-10).csv`.
+- Done (uncommitted): importer (Evolution: conditions, ids 196/197, material/typo corrections), evolution = Summon + on-card Evolve
+  action (MatchEngine._op_evolve, CardScripts.evolve_abil), new cards 192-197 + behaviour changes in card_scripts, CardDB.DISABLED (44),
+  starter decks, new art (owner picks), credits, tests `tests/unit/cards/cards_db_update_2026_11_10_test.gd`, python importer tests,
+  evidence `production/qa/evidence/2026-11-10-card-db/` via `-- --carddb1110-shots=<dir>`.
+- Next: full suite (log scratchpad suite7.log), fix stale tests, rebuild, commit when told.

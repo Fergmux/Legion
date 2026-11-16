@@ -48,7 +48,7 @@ const STEADFAST_SOLDIER := 39
 const WINGS_OF_AURENTHOR := 80
 const FUSION_CEREMONY := 82
 const SACRED_OFFERINGS := 83
-const MAGIC_CYLINDER := 45
+const DIMENSIONAL_REDIRECT := 45   # was Magic Cylinder (renamed 2026-11-10; costs 2)
 const BASTION_WYRM := 93
 const RAGING_INFERNO := 98
 const GRANDMOTHER_KAYA := 170
@@ -228,7 +228,7 @@ static func _spells_traps() -> Dictionary:
 	var cards := [
 		_c("p_warrior", BASIC_WARRIOR_WATER, PLAYER, "unit", 1, "def"),
 		_c("p_offer", SACRED_OFFERINGS, PLAYER, "hand"),
-		_c("p_cyl", MAGIC_CYLINDER, PLAYER, "hand"),
+		_c("p_cyl", DIMENSIONAL_REDIRECT, PLAYER, "hand"),
 		_c("p_h0", BASIC_MAGE_FIRE, PLAYER, "hand"),
 		_c("p_h1", BASIC_BEAST_FIRE, PLAYER, "hand"),
 		_c("o_warrior", BASIC_WARRIOR_FIRE, OPPONENT, "unit", 1),
@@ -238,18 +238,18 @@ static func _spells_traps() -> Dictionary:
 		"title": "Lesson 4 · Spells and Traps",
 		"summary": "Cast [kw]Spells[/kw] on your turn; set [kw]Traps[/kw] face down and activate them on the Rival's turn when their condition is met.",
 		"learned": ["[kw]Spells[/kw] are cast from your Hand on your turn", "[kw]Traps[/kw] are set face down and pay [stat]AP[/stat] when set", "A Trap springs on the Rival's turn, then goes to [zone]Spent[/zone]"],
-		"setup": {"first": OPPONENT, "turn": 2, "hp": [START_HP, START_HP], "cards": cards},
+		"setup": {"first": OPPONENT, "turn": 2, "hp": [START_HP, START_HP], "cards": cards, "bonus_ap": 1},
 		"steps": [
 			_read("Spells and Traps", "[kw]Spells[/kw] are cast from your Hand in your Setup or Recovery Phase.\n\n[kw]Traps[/kw] are set face down and spring on the Rival's turn when their condition is met.", [{"card": "p_offer"}, {"card": "p_cyl"}]),
 			_do("Cast a Spell", "Click [card]Sacred Offerings[/card] in your [zone]Hand[/zone] and click [btn]Cast[/btn].\n\nIt costs [stat]1 AP[/stat].", [{"t": "cast", "card": "p_offer"}]),
 			_do("Choose its target", "Click your [type]Water[/type] Warrior to give it a [kw]Rune[/kw].\n\n(Runes are counters used for Ritual summons.)", [{"t": "choose", "opt": {"card": "p_warrior"}}]),
 			_read("Into Spent", "The Spell resolved and went to your [zone]Spent[/zone] pile.\n\nYour Warrior now carries a [kw]Rune[/kw].", [{"pile": ["me", "spent"]}, {"slot": ["me", "unit", 1]}]),
-			_do("Set a Trap", "Click [card]Magic Cylinder[/card] and click [btn]Set[/btn].\n\nYou pay its [stat]AP[/stat] now, not when it activates.", [{"t": "set", "card": "p_cyl"}]),
-			_do("Same column", "[card]Magic Cylinder[/card] springs when a Rival unit in its column declares an attack.\n\nSet it in the middle Trap/Spell zone, in the column of the Rival's Warrior.", [{"t": "choose", "opt": {"slot": 1}}]),
+			_do("Set a Trap", "Click [card]Dimensional Redirect[/card] and click [btn]Set[/btn].\n\nYou pay its [stat]AP[/stat] now, not when it activates.", [{"t": "set", "card": "p_cyl"}]),
+			_do("Same column", "[card]Dimensional Redirect[/card] springs when a Rival unit in its column declares an attack.\n\nSet it in the middle Trap/Spell zone, in the column of the Rival's Warrior.", [{"t": "choose", "opt": {"slot": 1}}]),
 			_do("End your turn", "Click the phase button until your turn ends:\n[btn]Go to Battle Phase[/btn], [btn]Go to Recovery[/btn], then [btn]End turn[/btn].", [{"t": "next_phase"}], THEIR_TURN),
 			_wait("The Rival attacks", "Watch: the Rival's [type]Fire[/type] Warrior attacks your Warrior.", {"pending_kind": "trap_response", "pending_player": PLAYER}),
-			_do("Spring the Trap", "Your Trap's condition is met.\n\n[btn]Skip[/btn] would let this attack through; [btn]Skip for the rest of this turn[/btn] stops Trap offers until the turn ends.\n\nClick [btn]Activate Magic Cylinder[/btn].", [{"t": "choose", "opt": {"card": "p_cyl"}}]),
-			_wait("The battle goes on", "[card]Magic Cylinder[/card] makes the Rival take [stat]Damage[/stat] equal to the attacker's [stat]ATK[/stat] (8); then the attack continues.", MY_TURN),
+			_do("Spring the Trap", "Your Trap's condition is met.\n\n[btn]Skip[/btn] would let this attack through; [btn]Skip for the rest of this turn[/btn] stops Trap offers until the turn ends.\n\nClick [btn]Activate Dimensional Redirect[/btn].", [{"t": "choose", "opt": {"card": "p_cyl"}}]),
+			_wait("The battle goes on", "[card]Dimensional Redirect[/card] makes the Rival take [stat]Damage[/stat] equal to the attacker's [stat]ATK[/stat] (8); then the attack continues.", MY_TURN),
 			_read("Lesson complete", "Your Warrior defended with [stat]8 DEF[/stat] +6 ([type]Water[/type] is effective against [type]Fire[/type]) = 14.\nThe attacker's controller took the difference as Damage: [stat]6 more Damage[/stat].\n\nThe used Trap went to [zone]Spent[/zone].", [{"plate": "opp"}, {"pile": ["me", "spent"]}]),
 		],
 		"opponent": [

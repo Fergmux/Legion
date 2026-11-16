@@ -14,7 +14,7 @@ const TAG_TEAM_X := 12
 const DA_MAGE := 15
 const SHEN := 21
 const AURIC := 23
-const COSMIC_DRAGON := 31            # 24/16, cost 3; On Summon: 1 Pierce on itself
+const COSMIC_DRAGON := 31            # 26/16 (26 ATK since 10 Nov), cost 3; On Summon: 1 Pierce on itself
 const SOLOMON := 37                  # 20/14
 const MAGIC_CYLINDER := 45
 const DAMAGE_CONVERSION := 47
@@ -160,10 +160,10 @@ func test_c077_radablast_tributed_gives_the_ritual_unit_one_infiltrate() -> void
 func test_c021_shen_makes_each_unit_the_opponent_summons_lose_10_atk_for_good() -> void:
 	var m := CF.p1_main()
 	TB.unit(m, 0, SHEN, 1)
-	var cosmic := TB.summon(m, 1, COSMIC_DRAGON, 0)           # 24 ATK
-	assert_int(m.atk_of(cosmic)).is_equal(14)
+	var cosmic := TB.summon(m, 1, COSMIC_DRAGON, 0)           # 26 ATK
+	assert_int(m.atk_of(cosmic)).is_equal(16)
 	CF.end_turn(m)                                            # "Permanently": not until end of turn
-	assert_int(m.atk_of(cosmic)).is_equal(14)
+	assert_int(m.atk_of(cosmic)).is_equal(16)
 
 
 func test_c021_shen_also_weakens_an_opponents_fusion_summon() -> void:
@@ -181,7 +181,7 @@ func test_c021_shen_spares_its_own_controllers_summons() -> void:
 	var m := TB.make()
 	TB.unit(m, 0, SHEN, 1)
 	var cosmic := TB.summon(m, 0, COSMIC_DRAGON, 0)
-	assert_int(m.atk_of(cosmic)).is_equal(24)
+	assert_int(m.atk_of(cosmic)).is_equal(26)
 
 
 func test_c021_debilitated_shen_does_not_weaken_summons() -> void:
@@ -189,7 +189,7 @@ func test_c021_debilitated_shen_does_not_weaken_summons() -> void:
 	var shen := TB.unit(m, 0, SHEN, 1)
 	m.apply_status(shen, "debilitate", 1)
 	var cosmic := TB.summon(m, 1, COSMIC_DRAGON, 0)
-	assert_int(m.atk_of(cosmic)).is_equal(24)
+	assert_int(m.atk_of(cosmic)).is_equal(26)
 
 
 # ---------------------------------------------------------------- 23 Auric
@@ -293,10 +293,10 @@ func test_c045_magic_cylinder_on_a_direct_attack_deals_the_attackers_atk() -> vo
 	var m: MatchEngine = mt[0]
 	var a := TB.unit(m, 1, MAGE_WATER, 2, "atk", 12)
 	TB.attack(m, a, -1)
-	TB.choose(m, ["Activate Magic Cylinder"])
+	TB.choose(m, ["Activate Dimensional Redirect"])
 	assert_int(CF.hp(m, 1)).is_equal(GameCore.START_HP - 12)
 	assert_int(CF.hp(m, 0)).is_equal(GameCore.START_HP - 12)  # the attack still goes through
-	assert_int(m.current_cost(mt[1])).is_equal(2)
+	assert_int(m.current_cost(mt[1])).is_equal(2 + 1)          # Dimensional Redirect costs 2 since 10 Nov
 
 
 func test_c047_damage_conversion_costs_one_and_heals_by_the_attackers_atk() -> void:
@@ -306,7 +306,7 @@ func test_c047_damage_conversion_costs_one_and_heals_by_the_attackers_atk() -> v
 	var a := TB.unit(m, 1, MAGE_WATER, 0, "atk", 12)
 	var far := TB.unit(m, 0, MAGE_WATER, 2, "def", 0, 40)
 	TB.attack(m, a, far)
-	TB.choose(m, ["Activate Damage Conversion"])
+	TB.choose(m, ["Activate Dimensional Conversion"])
 	assert_int(CF.hp(m, 0)).is_equal(GameCore.START_HP + 12)
 	assert_int(m.current_cost(mt[1])).is_equal(2)             # 1, then +1 once activated
 
@@ -365,7 +365,7 @@ func test_c068_seppuku_can_be_its_own_material_and_then_is_not_destroyed() -> vo
 	TB.choose(m, ["Attack"])
 	assert_str(CF.zone(m, mf)).is_equal("unit")
 	assert_str(CF.zone(m, sp)).is_equal("spent")
-	assert_int(TB.log_index(m, "Seppuku is destroyed")).is_equal(-1)
+	assert_int(TB.log_index(m, "Zeph, Monk of Ancient Wisdom is destroyed")).is_equal(-1)
 
 
 func test_c067_void_basilisk_on_a_full_board_needs_a_field_material() -> void:
@@ -396,7 +396,7 @@ func test_c068_seppuku_fuses_first_then_destroys_itself() -> void:
 	assert_str(CF.zone(m, lord)).is_equal("unit")
 	assert_str(CF.zone(m, sp)).is_equal("spent")
 	var i_sum := TB.log_index(m, "summons Abysslord")
-	var i_des := TB.log_index(m, "Seppuku is destroyed")
+	var i_des := TB.log_index(m, "Zeph, Monk of Ancient Wisdom is destroyed")
 	assert_bool(i_sum >= 0 and i_sum < i_des).override_failure_message("summon %d destroy %d" % [i_sum, i_des]).is_true()
 
 
@@ -430,7 +430,7 @@ func test_c070_krakeshin_gains_6_atk_when_it_moves_zone() -> void:
 	m.apply_status(k, "nimble", 1)
 	assert_str(m.submit(0, {"t": "move", "uid": k})).is_empty()
 	TB.choose(m, [TB.slot_label(1)])
-	assert_int(m.atk_of(k)).is_equal(12 + 6)
+	assert_int(m.atk_of(k)).is_equal(16 + 6)                  # 16 ATK since 10 Nov
 
 
 func test_c072_myth_wukong_gains_16_def_in_front_and_16_atk_behind() -> void:
@@ -497,7 +497,7 @@ func test_c135_dragon_rider_summoned_behind_a_dragon_is_put_in_defense() -> void
 	var dragon := TB.unit(m, 0, DRAGON_WATER, 0)
 	var rider := TB.summon(m, 0, DRAGON_RIDER, 3)
 	assert_str(String(m.cards[rider]["stance"])).is_equal("def")
-	assert_int(m.atk_of(dragon)).is_equal(8 + 14)
+	assert_int(m.atk_of(dragon)).is_equal(8 + 10)             # +10 since 10 Nov (was +14)
 	assert_str(m.validate(0, {"t": "stance", "uid": rider})).contains("cannot be in Attack stance")
 
 
@@ -516,7 +516,7 @@ func test_c135_rider_summoned_behind_a_dragon_is_not_asked_for_a_stance() -> voi
 	assert_str(String(m.cards[rider]["zone"])).is_equal("unit")
 	assert_str(String(m.cards[rider]["stance"])).is_equal("def")
 	assert_str(TB.log_text(m)).not_contains("changes to Defense stance")
-	assert_int(m.atk_of(dragon)).is_equal(8 + 14)
+	assert_int(m.atk_of(dragon)).is_equal(8 + 10)             # +10 since 10 Nov (was +14)
 
 
 ## Behind a non-Dragon the same summon still asks Attack or Defense.
@@ -625,13 +625,19 @@ func test_c178_reinforcements_lowers_unit_costs_by_one() -> void:
 	assert_int(m.current_cost(cosmic)).is_equal(3)
 
 
-func test_c179_tyrants_lantern_gives_your_fire_units_8_atk() -> void:
+## 10 Nov: Tyrant's Lantern is a Spell (was a Power giving Fire units +8): 1 Burn on a unit, which gains
+## +4 ATK and is Fire Type until the end of the turn. The Burn stays; the ATK and the Type do not.
+func test_c179_tyrants_lantern_atk_and_fire_type_end_with_the_turn_but_the_burn_stays() -> void:
 	var m := TB.make()
-	TB.power(m, 0, TYRANTS_LANTERN, 0)
-	var fire := TB.unit(m, 0, MAGE_FIRE, 0)
-	var water := TB.unit(m, 0, MAGE_WATER, 1)
-	assert_int(m.atk_of(fire)).is_equal(8 + 8)
+	var water := TB.unit(m, 0, MAGE_WATER, 0)
+	TB.cast(m, 0, TYRANTS_LANTERN)
+	TB.choose_uids(m, [water])
+	assert_int(m.atk_of(water)).is_equal(8 + 4)
+	assert_str(m.unit_type(water)).is_equal("Fire")
+	CF.end_turn(m)
 	assert_int(m.atk_of(water)).is_equal(8)
+	assert_str(m.unit_type(water)).is_equal("Water")
+	assert_int(m.status_count(water, "burn")).is_equal(1)
 
 
 # ---------------------------------------------------------------- 180 / 182 Spells
@@ -751,13 +757,14 @@ func test_c191_do_not_open_box_destroyed_by_an_opponents_card_effect_in_play() -
 
 ## Regression: the 3 Nov cards have no sheet index (null); CardDB.all() compared null with a number
 ## (a script error on every call, e.g. the game log's name tinting) and left the order undefined.
+## Since 10 Nov the cards 192-197 have no sheet index either: 189-197 sort last, in id order.
 func test_c191_cards_without_a_sheet_index_sort_last_in_id_order() -> void:
 	var all := CardDB.all()
 	var ids := all.map(func(d): return int(d["id"]))
 	assert_int(ids.size()).is_equal(CardDB._defs.size())
-	var tail := ids.slice(ids.size() - 3)
-	assert_array(tail).contains_exactly([189, 190, 191])
-	for d in all.slice(0, all.size() - 3):
+	var tail := ids.slice(ids.size() - 9)
+	assert_array(tail).contains_exactly([189, 190, 191, 192, 193, 194, 195, 196, 197])
+	for d in all.slice(0, all.size() - 9):
 		assert_bool(d["source"].get("index") != null).is_true()
 
 

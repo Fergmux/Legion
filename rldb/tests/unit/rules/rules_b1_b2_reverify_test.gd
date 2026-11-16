@@ -20,8 +20,8 @@ const DEFCON_1 := 165
 const SUMMON_TRAPS := [TRAP_HOLE, OVEREXTEND, ALEXANDERS_ARROW, DEFCON_2, DEFCON_1]
 
 # Values as of the 3 Nov 2026 card sheet.
-const COSMIC_DRAGON := 31          # unit 3 AP 24/16, On Summon: 1 Pierce to itself
-const CHIDORI_MONK := 24           # unit 1 AP 16/14, On Summon: 1 Infiltrate to itself
+const COSMIC_DRAGON := 31          # unit 3 AP 26/16 (2026-11-10), On Summon: 1 Pierce to itself
+const CHIDORI_MONK := 24           # unit 1 AP 14 ATK (2026-11-10), On Summon: 1 Infiltrate to itself
 const CREEPING_NULL := 65          # Ritual 3R 36/12, On Summon: you can apply 1 Rune to a unit
 const BOOM := 175                  # Arcane 4, On Summon: change the opponent's units' stance
 const BASTION_WYRM := 93           # Fusion 20+ ATK-or-DEF unit + Physical unit, On Summon: 1 Eternal to itself
@@ -220,7 +220,7 @@ func test_b2_ambush_offers_trap_hole_after_each_unit_lands() -> void:
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")    # Trap Hole answers it before the next
 	assert_str(m.cards[b]["zone"]).is_equal("hand")
 	TB.choose(m, ["Activate Trap Hole"])
-	assert_int(m.status_count(a, "paralyse")).is_equal(3)
+	assert_int(m.status_count(a, "paralyse")).is_equal(2)      # 2 since 2026-11-10 (a summon in its column)
 	assert_str(TB.pend_kind(m)).is_equal("slot")             # then the second unit's zone
 	TB.choose(m, [TB.slot_label(1)])
 	assert_str(m.cards[b]["zone"]).is_equal("unit")

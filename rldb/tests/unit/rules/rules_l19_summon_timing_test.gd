@@ -112,7 +112,7 @@ func test_seppuku_is_destroyed_before_the_fusion_units_on_summon() -> void:
 	assert_str(TB.ability(m, sepp)).is_empty()
 	assert_str(_drive_fusion(m, s["fu"], [s["a"], s["b"]])).is_equal(DESTROY_PROMPT)
 	assert_str(CF.zone(m, sepp)).is_equal("spent")
-	assert_bool(TB.log_index(m, "Seppuku is destroyed") < TB.log_index(m, "Trigger: Abysslord")).is_true()
+	assert_bool(TB.log_index(m, "Zeph, Monk of Ancient Wisdom is destroyed") < TB.log_index(m, "Trigger: Abysslord")).is_true()
 
 
 func test_a_tributed_materials_own_effect_resolves_after_the_fusion_unit_lands() -> void:

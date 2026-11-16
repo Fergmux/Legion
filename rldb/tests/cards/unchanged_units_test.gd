@@ -5,40 +5,49 @@ extends GdUnitTestSuite
 
 # ---------------------------------------------------------------- 14 Avatar of the Flame Spirit
 
-func test_c014_avatar_on_summon_rune_is_optional() -> void:
+## 2026-11-10: Avatar (now evolution-only, from Edwin) has no On Summon any more (it was an optional
+## Rune on a unit).
+func test_c014_avatar_on_summon_asks_nothing_any_more() -> void:
 	var m := CF.make()
 	var foe := TB.unit(m, 1, TB.WATER, 0)
-	var av := TB.summon(m, 0, 14, 0)
-	assert_str(TB.pend_kind(m)).is_equal("select")
-	assert_str(CF.decline(m)).is_empty()
+	var av := TB.special(m, 0, 14, 0)
+	assert_str(TB.pend_kind(m)).is_empty()
 	assert_int(m.status_count(av, "rune")).is_equal(0)
 	assert_int(m.status_count(foe, "rune")).is_equal(0)
 
 
-func test_c014_avatar_on_summon_rune_can_target_an_opponent_unit() -> void:
-	var m := CF.make()
-	var foe := TB.unit(m, 1, TB.WATER, 0)
-	TB.summon(m, 0, 14, 0)
-	TB.choose_uids(m, [foe])
-	assert_int(m.status_count(foe, "rune")).is_equal(1)
+## 2026-11-10: "If you Destroy an opponent's Unit: apply 1 Rune to a Unit": any unit, an opponent's too.
+func test_c014_avatar_destroying_an_opponents_unit_applies_a_rune_to_any_unit() -> void:
+	var m := CF.p1_battle()
+	var av := TB.unit(m, 1, 14, 0)                            # 18 ATK
+	var victim := TB.unit(m, 0, TB.WATER, 0)
+	var other_foe := TB.unit(m, 0, TB.WATER, 1)
+	assert_str(TB.attack(m, av, victim)).is_empty()
+	assert_str(CF.zone(m, victim)).is_equal("spent")
+	assert_bool(other_foe in CF.offered(m)).is_true()
+	assert_bool(av in CF.offered(m)).is_true()
+	TB.choose_uids(m, [other_foe])
+	assert_int(m.status_count(other_foe, "rune")).is_equal(1)
 
 
-func test_c014_avatar_burn_is_once_per_turn() -> void:
+## 2026-11-10: the old "Apply 6 Burn to a unit" ability is gone.
+func test_c014_avatar_has_no_burn_ability_any_more() -> void:
 	var m := CF.make()
 	var av := TB.unit(m, 0, 14, 0)
 	var foe := TB.unit(m, 1, TB.WATER, 0)
-	assert_str(TB.ability(m, av)).is_empty()
-	TB.choose_uids(m, [foe])
-	assert_str(TB.ability(m, av)).is_equal("Already used this turn.")
-	assert_int(m.status_count(foe, "burn")).is_equal(6)
+	assert_str(TB.ability(m, av)).is_equal("No such ability.")
+	assert_int(m.status_count(foe, "burn")).is_equal(0)
 
 
-func test_c014_avatar_destruction_costs_both_players_six_hp() -> void:
+## 2026-11-10: the On Destruction -6 HP for both players is gone (it now burns the unit that destroyed
+## it, which an effect is not).
+func test_c014_avatar_destroyed_by_an_effect_costs_no_hp() -> void:
 	var m := CF.make()
 	var av := TB.unit(m, 0, 14, 0)
 	TB.kill(m, av)
-	assert_int(CF.hp(m, 0)).is_equal(GameCore.START_HP - 6)
-	assert_int(CF.hp(m, 1)).is_equal(GameCore.START_HP - 6)
+	assert_str(CF.zone(m, av)).is_equal("spent")
+	assert_int(CF.hp(m, 0)).is_equal(GameCore.START_HP)
+	assert_int(CF.hp(m, 1)).is_equal(GameCore.START_HP)
 
 
 # ---------------------------------------------------------------- 24 Chidori Monk
@@ -155,7 +164,7 @@ func test_c070_krakeshin_summons_with_three_nimble() -> void:
 	var m := CF.make()
 	var k := TB.summon(m, 0, 70, 0)
 	assert_int(m.status_count(k, "nimble")).is_equal(3)
-	assert_int(m.atk_of(k)).is_equal(12)                     # 12/26 since 2026-11-03; no move, no gain
+	assert_int(m.atk_of(k)).is_equal(16)                     # 16/22 since 2026-11-10; no move, no gain
 
 
 # ---------------------------------------------------------------- 73 Man's Best Friend

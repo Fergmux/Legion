@@ -66,7 +66,7 @@ func _view(m: MatchEngine, id: int, zone: String = "hand") -> Dictionary:
 
 func _page_big(p: Control) -> void:
 	var m := TB.make()
-	_caption(p, "3 Nov 2026: Do Not Open Box (new), Tag Team - X, Shen, Dragon Rider, Magic Cylinder, Void Basilisk", Vector2(16, 8))
+	_caption(p, "3 Nov 2026: Do Not Open Box (new), Tag Team - X, Shen, Dragon Rider, Dimensional Redirect, Void Basilisk", Vector2(16, 8))
 	for i in IDS.size():
 		_card(p, _view(m, IDS[i]), "big", Vector2(16 + i * 244, 36))
 

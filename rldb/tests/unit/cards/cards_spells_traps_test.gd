@@ -146,30 +146,38 @@ func test_c136_equaliser_destroys_units_with_20_atk_and_exhausts_itself() -> voi
 	assert_str(m.cards[spell]["zone"]).is_equal("exhaust")
 
 
-func test_c138_no_hubris_destroys_a_buffed_unit() -> void:
+## 2026-11-10: No Hubris applies 1 Cleanse to a unit, then 1 Curse to a unit (it used to destroy a
+## Buffed unit).
+func test_c138_no_hubris_cleanses_one_unit_then_curses_another() -> void:
 	var m := TB.make()
-	var buffed := TB.unit(m, 1, TB.WATER, 0)
-	m.apply_status(buffed, "pierce", 1)
-	TB.unit(m, 1, TB.WATER, 1)
+	var own := TB.unit(m, 0, TB.WATER, 0)
+	var foe := TB.unit(m, 1, TB.WATER, 1)
 	TB.cast(m, 0, 138)
-	TB.choose_uids(m, [buffed])
-	assert_str(m.cards[buffed]["zone"]).is_equal("spent")
+	TB.choose_uids(m, [own])
+	TB.choose_uids(m, [foe])
+	assert_int(m.status_count(own, "cleanse")).is_equal(1)
+	assert_int(m.status_count(foe, "curse")).is_equal(1)
+	assert_str(m.cards[foe]["zone"]).is_equal("unit")
 
 
-func test_c138_no_hubris_cannot_be_cast_without_buffed_target() -> void:
+## Any unit is a target now (no Buff needed); with no unit on the Field it cannot be cast.
+func test_c138_no_hubris_needs_a_unit_but_no_longer_a_buffed_one() -> void:
 	var m := TB.make()
-	TB.unit(m, 1, TB.WATER, 0)
 	var spell := TB.card(m, 0, 138)
 	assert_str(m.validate(0, {"t": "cast", "uid": spell})).is_equal("No legal target.")
+	TB.unit(m, 1, TB.WATER, 0)                              # no Buff
+	assert_str(m.validate(0, {"t": "cast", "uid": spell})).is_empty()
 
 
-func test_c182_shimmer_serum_raises_its_targets_cost_not_its_own() -> void:
+## 2026-11-10 (Street Venom): the Spell itself permanently costs 1 AP more each time it is activated;
+## the target's cost no longer changes.
+func test_c182_street_venom_raises_its_own_cost_not_its_targets() -> void:
 	var m := TB.make()
 	var own := TB.unit(m, 0, TB.WATER, 0)
 	var s := TB.cast(m, 0, 182)
 	TB.choose_uids(m, [own])
-	assert_int(m.current_cost(s)).is_equal(0)
-	assert_int(m.current_cost(own)).is_equal(2)
+	assert_int(m.current_cost(s)).is_equal(0 + 1)
+	assert_int(m.current_cost(own)).is_equal(1)
 
 
 func test_c152_ruler_no_more_destroys_a_power() -> void:
@@ -210,7 +218,7 @@ func test_c086_get_well_soon_heals_after_opponent_destroys_your_unit() -> void:
 	TB.attack(m, a, victim)
 	TB.choose(m, ["Activate Get Well Soon"])
 	TB.choose_uids(m, [survivor])
-	assert_int(m.status_count(survivor, "medic")).is_equal(4)
+	assert_int(m.status_count(survivor, "medic")).is_equal(6)  # 6 since 2026-11-10 (was 4)
 
 
 func test_c087_shared_fate_retaliates_when_unit_destroyed_by_effect() -> void:
@@ -232,28 +240,39 @@ func test_c047_damage_conversion_heals_by_attacker_atk() -> void:
 	var a := TB.unit(m, 1, TB.WATER, 1, "atk", 12)          # 2026-11-03: the attacker's column counts
 	var d := TB.unit(m, 0, TB.WATER, 1, "def", 0, 40)
 	TB.attack(m, a, d)
-	TB.choose(m, ["Activate Damage Conversion"])
+	TB.choose(m, ["Activate Dimensional Conversion"])
 	assert_int(m.players[0]["hp"]).is_equal(72)
 	assert_int(m.current_cost(dc)).is_equal(2)              # costs 1 since 2026-11-03, +1 once used
 
 
-func test_c048_overextend_weakens_the_chosen_unit_after_third_unit() -> void:
+## 2026-11-10: every unit of the opponent permanently loses 10 ATK (it used to be one chosen unit, -20).
+func test_c048_overextend_weakens_every_opposing_unit_by_ten_after_third_unit() -> void:
 	var m := _p1_turn()
 	TB.set_card(m, 0, 48, 0)
 	var big := TB.unit(m, 1, TB.WATER, 0, "atk", 30)
-	TB.unit(m, 1, TB.WATER, 1, "atk", 10)
-	TB.summon(m, 1, TB.FIRE, 2)
+	var mid := TB.unit(m, 1, TB.WATER, 1, "atk", 14)
+	var third := TB.summon(m, 1, TB.FIRE, 2)                # 8 ATK
+	var own := TB.unit(m, 0, TB.WATER, 3)
 	TB.choose(m, ["Activate Overextend"])
-	TB.choose_uids(m, [big])                                # sole highest-ATK unit: still chosen by the player
-	assert_int(m.atk_of(big)).is_equal(10)
+	assert_bool(m.pending.is_empty()).is_true()            # no choice any more
+	assert_int(m.atk_of(big)).is_equal(30 - 10)
+	assert_int(m.atk_of(mid)).is_equal(14 - 10)
+	assert_int(m.atk_of(third)).is_equal(0)
+	assert_int(m.atk_of(own)).is_equal(8)
 
 
-func test_c049_trap_hole_paralyses_two_cost_summon() -> void:
+## 2026-11-10 (Trap Hole of Ensnarement): 2 Paralyse to all the opponent's units in this card's column
+## (it used to be 3 on the summoned unit only).
+func test_c049_trap_hole_paralyses_their_units_in_its_column_for_two() -> void:
 	var m := _p1_turn()
 	TB.set_card(m, 0, 49, 0)
-	var u := TB.summon(m, 1, 28, 0)                         # Guardian of the Forest, cost 2
+	var behind := TB.unit(m, 1, TB.WATER, 3)                # already in column 1
+	var other := TB.unit(m, 1, TB.WATER, 1)                 # column 2
+	var u := TB.summon(m, 1, 28, 0)                         # Guardian of the Forest, cost 2, column 1
 	TB.choose(m, ["Activate Trap Hole"])
-	assert_int(m.status_count(u, "paralyse")).is_equal(3)
+	assert_int(m.status_count(u, "paralyse")).is_equal(2)
+	assert_int(m.status_count(behind, "paralyse")).is_equal(2)
+	assert_int(m.status_count(other, "paralyse")).is_equal(0)
 
 
 func test_c049_trap_hole_answers_a_one_cost_summon_too() -> void:
@@ -270,7 +289,7 @@ func test_c050_wabuku_gives_eternal_to_unit_in_its_column() -> void:
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 30)
 	var d := TB.unit(m, 0, TB.WATER, 1)
 	TB.attack(m, a, d)
-	TB.choose(m, ["Activate Wabuku"])
+	TB.choose(m, ["Activate Perfect Dodge"])
 	assert_str(m.cards[d]["zone"]).is_equal("unit")
 
 

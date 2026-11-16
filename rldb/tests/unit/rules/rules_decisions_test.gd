@@ -29,7 +29,7 @@ func test_p13_burn_not_applied_when_attack_is_cancelled() -> void:
 	for s in [1, 2, 3]:
 		TB.unit(m, 1, TB.WATER, s, "def")
 	TB.attack(m, a, TB.unit(m, 0, TB.WATER, 0))
-	TB.choose(m, ["Activate Mirror Force"])
+	TB.choose(m, ["Activate Sorcerer's Forcefield"])
 	assert_int(m.players[1]["hp"]).is_equal(60)
 
 
@@ -82,7 +82,7 @@ func test_c03_damage_conversion_answers_a_direct_attack_from_its_column() -> voi
 	TB.set_card(m, 0, 47, 0)
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 10)
 	TB.attack(m, a, -1)
-	TB.choose(m, ["Activate Damage Conversion"])
+	TB.choose(m, ["Activate Dimensional Conversion"])
 	assert_int(m.players[0]["hp"]).is_equal(60 + 10 - 10)  # healed 10, then took the direct 10
 
 
@@ -124,18 +124,19 @@ func test_s01_two_snundays_cancel() -> void:
 	assert_int(m.atk_of(u)).is_equal(20)
 
 
-# 2026-10-18: Shimmer Serum's cost change is on its target unit. L15 (2026-11-05): Sneaky Snunday
-# no longer reverses it.
-func test_s04_shimmer_cost_change_is_not_reversed_by_snunday() -> void:
+# 2026-10-18: Shimmer Serum's cost change was on its target unit. 2026-11-10 (Street Venom): it is on the
+# Spell itself again. L15 (2026-11-05): Sneaky Snunday does not reverse it.
+func test_s04_street_venom_cost_change_is_not_reversed_by_snunday() -> void:
 	var m := TB.make()
 	var own := TB.unit(m, 0, TB.WATER, 0, "atk", 10)
 	var printed := m.current_cost(own)
 	TB.cast(m, 0, 154)
 	var s := TB.cast(m, 0, 182)
 	TB.choose_uids(m, [own])
-	assert_int(m.current_cost(own)).is_equal(printed + 1)
-	assert_int(m.cards[own]["cost_p"]).is_equal(1)
-	assert_int(m.cards[s]["cost_p"]).is_equal(0)
+	assert_int(m.current_cost(own)).is_equal(printed)
+	assert_int(m.cards[own]["cost_p"]).is_equal(0)
+	assert_int(m.cards[s]["cost_p"]).is_equal(1)
+	assert_int(m.current_cost(s)).is_equal(int(CardDB.get_def(182)["cost"]) + 1)
 
 
 func test_s04_magic_cylinder_cost_change_is_not_reversed_by_snunday() -> void:
@@ -146,8 +147,8 @@ func test_s04_magic_cylinder_cost_change_is_not_reversed_by_snunday() -> void:
 	m.phase = MatchEngine.PHASE_BATTLE
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 10)
 	TB.attack(m, a, TB.unit(m, 0, TB.WATER, 0))
-	TB.choose(m, ["Activate Magic Cylinder"])
-	assert_int(m.current_cost(mc)).is_equal(2)            # 1 + 1: L15, costs are not reversed
+	TB.choose(m, ["Activate Dimensional Redirect"])
+	assert_int(m.current_cost(mc)).is_equal(2 + 1)        # 2 (since 2026-11-10) + 1: L15, costs are not reversed
 
 
 # P-20: Plan B destroys in selected order, each chain fully resolved, healing last.

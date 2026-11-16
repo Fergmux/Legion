@@ -5,6 +5,7 @@ The in-game list (main menu, Options > Credits) is read from `rldb/data/credits.
 | Asset | Where | Source | Licence |
 |---|---|---|---|
 | Card art (188 cards) | `assets/art/cards/<id>.webp` | RLDB team, accepted through the card art review tool; imported by `tools/godot/import_card_art.gd` | Project-owned |
+| Card art for ids 192-197 (10 Nov 2026) | `assets/art/cards/<id>.webp` | Generated with GPT Image 2.5 (OpenAI Images API, edits with existing RLDB card art as style references); one of three takes picked by the owner per card, resized to 768x768 WebP | AI-generated output made for RLDB; no third-party artwork |
 | Table / menu backgrounds, soundtrack | `assets/art/tables/`, `assets/art/menu_background.jpg`, `assets/audio/music/` | RLDB team | Project-owned |
 | Sound effects | `assets/audio/sfx/` | Generated with ElevenLabs Sound Effects (`eleven_text_to_sound_v2`), Nov 2026; mastered by `tools/sfx_master.py` | ElevenLabs output; commercial use needs a paid ElevenLabs plan at generation time (see `assets/audio/sfx/README.md`) |
 | Painted card backs (6) | `assets/art/card_backs/back_<id>.webp` | Generated with GPT Image 2 (`gpt-image-2`, via ElevenLabs), Nov 2026; one take picked per back, resized to 512x768 WebP; the frame and the Violet Sigil are drawn in code (`src/ui/card/card_back.gd`) | AI-generated output made for RLDB; no third-party artwork |

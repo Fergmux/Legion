@@ -10,7 +10,7 @@ const WARRIOR_WATER := 3
 const BEAST_WATER := 4
 const BEAST_FIRE := 113
 const MAGE_FIRE := 110
-const MAGIC_CYLINDER := 45           # Trap, cost 1
+const MAGIC_CYLINDER := 45           # Trap (Dimensional Redirect), cost 2 since 2026-11-10
 const SACRED_OFFERINGS := 83         # Spell, cost 1
 const ASSASSINATE := 84              # Spell, cost 2
 const MAGENTRIC := 69                # Unit, cost 2
@@ -37,7 +37,7 @@ func test_c006_tag_team_l_optionally_adds_a_trap_that_costs_one_less() -> void:
 	TB.choose_uids(m, [trap])
 	assert_str(m.cards[trap]["zone"]).is_equal("hand")
 	assert_str(m.cards[unit]["zone"]).is_equal("draw")
-	assert_int(m.current_cost(trap)).is_equal(0)
+	assert_int(m.current_cost(trap)).is_equal(2 - 1)
 
 
 func test_c006_tag_team_l_skip_leaves_the_trap_in_draw() -> void:
@@ -47,7 +47,7 @@ func test_c006_tag_team_l_skip_leaves_the_trap_in_draw() -> void:
 	TB.summon(m, 0, 6, 0)
 	TB.choose(m, ["Skip"])
 	assert_str(m.cards[trap]["zone"]).is_equal("draw")
-	assert_int(m.current_cost(trap)).is_equal(1)
+	assert_int(m.current_cost(trap)).is_equal(2)
 
 
 func test_c007_tag_team_b_adds_a_spell_and_no_longer_cleanses() -> void:
@@ -68,7 +68,7 @@ func test_c007_tag_team_b_adds_a_spell_and_no_longer_cleanses() -> void:
 func test_c009_tag_team_f_adds_same_cost_unit_with_discount_and_new_stats() -> void:
 	var df := CardDB.get_def(9)
 	assert_int(df["cost"]).is_equal(2)
-	assert_int(df["def"]).is_equal(16)                           # 22 -> 16 on 2026-11-03
+	assert_int(df["def"]).is_equal(18)                           # 22 -> 16 on 2026-11-03, 18 on 2026-11-10
 	var m := TB.make(7, 0)
 	TB.unit(m, 0, MAGE_WATER, 3)                                 # cost-1 partner
 	var same := TB.card(m, 0, BEAST_WATER, "draw")
@@ -232,25 +232,27 @@ func test_c030_accio_skip_sends_nothing_and_retains_nothing() -> void:
 	assert_int(m.status_count(hu, "retain")).is_equal(0)
 
 
-func test_c036_dante_burns_every_unit_and_gains_atk_from_its_own_burn() -> void:
+# 2026-11-10: Dante is a Fusion (28 ATK) and gains +2 ATK per Burn on itself (was +1).
+func test_c036_dante_burns_every_unit_and_gains_two_atk_per_own_burn() -> void:
 	var m := TB.make()
 	var ally := TB.unit(m, 0, MAGE_WATER, 1)
 	var foe := TB.unit(m, 1, BEAST_WATER, 0)
 	var foe_back := TB.unit(m, 1, MAGE_FIRE, 3)                  # protected units burn too
-	var dante := TB.summon(m, 0, 36, 0)
+	var dante := TB.special(m, 0, 36, 0)
 	for u in [ally, foe, foe_back, dante]:
 		assert_int(m.status_count(u, "burn")).is_equal(6)
-	assert_int(m.atk_of(dante)).is_equal(24 + 6)                 # 24 ATK since 2026-11-03
+	assert_int(m.atk_of(dante)).is_equal(28 + 6 * 2)
 
 
-func test_c036_dante_manual_ten_burn_on_any_unit_once_per_turn() -> void:
+# 2026-11-10: the ability's Burn is 5 (was 10).
+func test_c036_dante_manual_five_burn_on_any_unit_once_per_turn() -> void:
 	var m := TB.make()
 	var dante := TB.unit(m, 0, 36, 0)
 	var foe := TB.unit(m, 1, BEAST_WATER, 2)                     # not adjacent: any unit qualifies
 	assert_str(TB.ability(m, dante)).is_empty()
 	TB.choose_uids(m, [foe])
-	TB.choose(m, ["10 Burn"])
-	assert_int(m.status_count(foe, "burn")).is_equal(10)
+	assert_str(TB.choose(m, ["5 Burn"])).is_empty()
+	assert_int(m.status_count(foe, "burn")).is_equal(5)
 	assert_str(TB.ability(m, dante)).is_not_empty()               # once per turn
 
 
@@ -259,14 +261,14 @@ func test_c036_dante_burning_itself_raises_its_atk_and_cleanse_lowers_it() -> vo
 	var dante := TB.unit(m, 0, 36, 0)
 	TB.ability(m, dante)
 	TB.choose_uids(m, [dante])
-	TB.choose(m, ["10 Burn"])
-	assert_int(m.atk_of(dante)).is_equal(24 + 10)                # 24 ATK since 2026-11-03
+	assert_str(TB.choose(m, ["5 Burn"])).is_empty()
+	assert_int(m.atk_of(dante)).is_equal(28 + 5 * 2)             # 28 ATK, +2 per Burn since 2026-11-10
 	m.turn += 2
 	TB.ability(m, dante)
 	TB.choose_uids(m, [dante])
 	TB.choose(m, ["1 Cleanse"])
 	assert_int(m.status_count(dante, "burn")).is_equal(0)
-	assert_int(m.atk_of(dante)).is_equal(24)
+	assert_int(m.atk_of(dante)).is_equal(28)
 
 
 # 2026-11-03 (rule changed on purpose): +8 ATK while it is Protecting a unit; it used to be +10
@@ -349,7 +351,7 @@ func test_c069_magentric_exhausted_for_an_arcane_summon_gives_nothing() -> void:
 	assert_int(m.status_count(cliff, "pierce")).is_equal(0)
 	assert_int(m.status_count(cliff, "cleanse")).is_equal(0)    # the 2026-11-03 bonus is Cleanse
 	var df := CardDB.get_def(MAGENTRIC)
-	assert_int(df["atk"]).is_equal(16)                           # 20/20 -> 16/16 on 2026-11-03
+	assert_int(df["atk"]).is_equal(20)                           # 20/20 -> 16/16 on 2026-11-03, 20/16 on 2026-11-10
 	assert_int(df["def"]).is_equal(16)
 
 
@@ -526,32 +528,36 @@ func test_c172_tyde_sacrificed_no_longer_destroys_anything() -> void:
 
 # ---------------------------------------------------------------- Solomon the Tyrannical
 
-func test_c181_solomon_tyrannical_exhausts_the_unit_it_protects() -> void:
+# 2026-11-10: Solomon, the Tyrannical destroys the unit it is Protected by (the one in front of it); it
+# used to exhaust the unit it was Protecting.
+func test_c181_solomon_tyrannical_destroys_the_unit_protecting_it() -> void:
 	var m := TB.make()
-	var sol := TB.unit(m, 0, 181, 0)
-	var ward := TB.unit(m, 0, MAGE_WATER, 3)
-	TB.unit(m, 0, MAGE_FIRE, 4)                                  # not protected by Solomon
+	var sol := TB.unit(m, 0, 181, 3)
+	var guard := TB.unit(m, 0, MAGE_WATER, 0)
+	TB.unit(m, 0, MAGE_FIRE, 1)                                  # not protecting Solomon
 	var warrior := TB.card(m, 0, WARRIOR_WATER, "spent")         # the old Spent cost is gone
 	var ap: int = 5
 	m.players[0]["ap"] = ap
 	assert_str(TB.ability(m, sol)).is_empty()
-	assert_array(_opts(m)).contains_exactly([ward])
-	TB.choose_uids(m, [ward])
-	assert_str(m.cards[ward]["zone"]).is_equal("exhaust")
+	assert_array(_opts(m)).contains_exactly([guard])
+	TB.choose_uids(m, [guard])
+	assert_str(m.cards[guard]["zone"]).is_equal("spent")
 	assert_str(m.cards[warrior]["zone"]).is_equal("spent")
 	assert_int(m.status_count(sol, "eternal")).is_equal(1)
 	assert_int(m.players[0]["ap"]).is_equal(ap + 1)
 	assert_str(TB.ability(m, sol)).is_not_empty()                 # once per turn
 
 
-func test_c181_solomon_tyrannical_needs_to_be_protecting() -> void:
+# 2026-11-10: the ability needs a unit in front of Solomon (Protected by); Protecting one is not enough.
+func test_c181_solomon_tyrannical_needs_to_be_protected() -> void:
 	var m := TB.make()
-	var sol := TB.unit(m, 0, 181, 0)
+	var sol := TB.unit(m, 0, 181, 0)                             # front row: protecting the unit behind
+	TB.unit(m, 0, MAGE_WATER, 3)
 	TB.card(m, 0, WARRIOR_WATER, "spent")
 	assert_str(TB.ability(m, sol)).is_not_empty()
 	var m2 := TB.make()
-	var sol2 := TB.unit(m2, 0, 181, 3)                           # back row: protects nobody
-	TB.unit(m2, 0, MAGE_WATER, 0)
+	var sol2 := TB.unit(m2, 0, 181, 3)                           # back row, nobody in front of it
+	TB.unit(m2, 0, MAGE_WATER, 1)
 	assert_str(TB.ability(m2, sol2)).is_not_empty()
 
 
@@ -599,8 +605,8 @@ func test_c095_c065_c183_ritual_costs_and_stats_follow_the_new_source() -> void:
 	assert_int(null_u["def"]).is_equal(12)
 	var yam := CardDB.get_def(183)
 	assert_int(yam["cost"]).is_equal(3)
-	assert_int(yam["atk"]).is_equal(10)
-	assert_int(yam["def"]).is_equal(18)
+	assert_int(yam["atk"]).is_equal(8)                           # 8/0 since 2026-11-10
+	assert_int(yam["def"]).is_equal(0)
 	assert_that(CardDB.get_def(96)["cost"]).is_null()
 
 
@@ -632,13 +638,14 @@ func test_c183_yamata_three_runes_and_start_of_turn_damage_kept() -> void:
 	assert_int(m.players[0]["hp"]).is_equal(hp0)
 
 
-func test_c181_solomon_tyrannical_keeps_summon_pierce_and_death_hp_loss() -> void:
+# 2026-11-10: On Destruction its controller takes 10 (was 12).
+func test_c181_solomon_tyrannical_keeps_summon_pierce_and_takes_ten_on_destruction() -> void:
 	var m := TB.make()
 	var sol := TB.special(m, 0, 181, 0)
 	assert_int(m.status_count(sol, "pierce")).is_equal(2)
 	var hp0: int = m.players[0]["hp"]
 	TB.kill(m, sol)
-	assert_int(m.players[0]["hp"]).is_equal(hp0 - 12)
+	assert_int(m.players[0]["hp"]).is_equal(hp0 - 10)
 
 
 ## Review 2026-10-17: "Exhaust this unit: ..." is a cost of the unit on the Field. If Neva leaves

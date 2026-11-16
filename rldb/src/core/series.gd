@@ -548,9 +548,10 @@ func _draft_pool(cat: String) -> Array:
 
 
 ## L3: the one place that decides whether card `id` may be offered in a draft or as a reward: it is
-## implemented and collectible (L23: evolution-only cards such as Symbiote Larva are not).
+## implemented and collectible (L23: evolution-only cards such as Symbiote Larva are not) and not
+## disabled (CardDB.DISABLED, 2026-11-10).
 static func is_offerable(id: int) -> bool:
-	return CardScripts.is_implemented(id) and CardDB.is_collectible(id)
+	return CardScripts.is_implemented(id) and CardDB.is_collectible(id) and not CardDB.is_disabled(id)
 
 
 ## L3 (owner, 5 Nov): an Extra Deck offer is always one Fusion, one Ritual and one Arcane, shown in

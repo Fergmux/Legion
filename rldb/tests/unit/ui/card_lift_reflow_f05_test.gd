@@ -6,7 +6,7 @@ const _LONG := "Apply 1 Eternal and 3 Cleanse to this Unit. At the start of your
 const _UNIT := {"uid": 7, "id": 7, "name": "Neva the Divine Mother", "category": "unit", "cost_kind": "ap", "cost": 4,
 	"printed_cost": 4, "zone": "hand", "face_up": true, "statuses": {}, "runes": 0, "text": _LONG,
 	"race": "God", "type": "", "atk": 16, "def": 30, "printed_atk": 16, "printed_def": 30}
-const _SPELL := {"uid": 8, "id": 8, "name": "Shimmer Serum", "category": "spell", "cost_kind": "ap", "cost": 0,
+const _SPELL := {"uid": 8, "id": 8, "name": "Street Venom", "category": "spell", "cost_kind": "ap", "cost": 0,
 	"printed_cost": 0, "zone": "hand", "face_up": true, "statuses": {}, "runes": 0, "text": _LONG}
 ## Steps of a hover lift, including the TRANS_BACK overshoot, the 1.05 draft / reward lift and the
 ## 1.75 hand lift (2026-10-18) with its overshoot.

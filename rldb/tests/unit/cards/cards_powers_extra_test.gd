@@ -171,16 +171,6 @@ func test_c178_reinforcements_discounts_units_when_only_opponent_has_units() -> 
 	assert_int(m.current_cost(u)).is_equal(1)                  # -1 AP since 2026-11-03 (was -2)
 
 
-func test_c179_tyrants_lantern_boosts_fire_and_punishes_both_on_fire_death() -> void:
-	var m := TB.make()
-	TB.power(m, 0, 179)
-	var fire := TB.unit(m, 0, TB.FIRE, 0)
-	assert_int(m.atk_of(fire)).is_equal(8 + 8)                 # +8 since 2026-11-03 (was +12)
-	TB.kill(m, fire)
-	assert_int(m.players[0]["hp"]).is_equal(54)
-	assert_int(m.players[1]["hp"]).is_equal(54)
-
-
 func test_c044_draw_virus_stops_opponent_setting() -> void:
 	var m := TB.make()
 	TB.power(m, 1, 44)

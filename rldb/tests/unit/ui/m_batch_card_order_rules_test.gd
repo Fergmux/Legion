@@ -4,11 +4,20 @@ extends GdUnitTestSuite
 ##     MatchView.summary_view (draft, rewards, deck builder, card list) carries the same text_parts
 ##     and abilities as MatchView.def_view (game log, draft list, evolve preview).
 ## M8: card lists order by kind first (CardDB.KIND_ORDER), so the 3 Nov cards with no sheet index
-##     (Owlbear Druid, Snow Tiger Paladin: Fusions; Do Not Open Box: a Trap) sit with their kind.
+##     (Owlbear Druid, Snow Tiger Paladin: Fusions; Do Not Open Box: a Trap) sit with their kind. The
+##     10 Nov cards have no sheet index either (Mithral Dome: a Power; A Great Heist: a Spell; Trap Hole
+##     of Suppression / of Spikes: Traps; Divine Serpent - Tail: a Unit; The Great Leviathan: a Unit,
+##     evolution-only, so not collectible).
 
 const OWLBEAR := 189
 const SNOW_TIGER := 190
 const BOX := 191
+const MITHRAL_DOME := 192
+const GREAT_HEIST := 193
+const TH_SUPPRESSION := 194
+const TH_SPIKES := 195
+const SERPENT_TAIL := 196
+const LEVIATHAN := 197
 
 
 # ---------------------------------------------------------------- M6
@@ -23,7 +32,7 @@ func test_summary_view_and_def_view_give_identical_rule_sections_for_every_card(
 		assert_array(sv.get("abilities", [])).override_failure_message("abilities differ for card %d" % id).is_equal(dv.get("abilities", []))
 		assert_str(String(sv["text"])).is_equal(String(dv["text"]))
 		n += 1
-	assert_int(n).is_equal(191)
+	assert_int(n).is_equal(197)                           # 191 + the six cards of 2026-11-10
 
 
 func test_spawn_and_larva_both_have_separate_sections() -> void:
@@ -52,12 +61,19 @@ func test_new_cards_sit_among_their_kind() -> void:
 	var ids := _ids(CardDB.collectible())
 	var fusions := _ids(CardDB.collectible().filter(func(d): return d["category"] == "fusion"))
 	var traps := _ids(CardDB.collectible().filter(func(d): return d["category"] == "trap"))
+	var units := _ids(CardDB.collectible().filter(func(d): return d["category"] == "unit"))
+	var spells := _ids(CardDB.collectible().filter(func(d): return d["category"] == "spell"))
+	var powers := _ids(CardDB.collectible().filter(func(d): return d["category"] == "power"))
 	# Unindexed cards come last within their kind, by id.
 	assert_array(fusions.slice(fusions.size() - 2)).is_equal([OWLBEAR, SNOW_TIGER])
-	assert_int(traps[-1]).is_equal(BOX)
-	# The Box comes right after the last indexed Trap, before the first Power.
-	var first_power: int = _ids(CardDB.collectible().filter(func(d): return d["category"] == "power"))[0]
-	assert_int(ids.find(BOX) + 1).is_equal(ids.find(first_power))
+	assert_array(traps.slice(traps.size() - 3)).is_equal([BOX, TH_SUPPRESSION, TH_SPIKES])
+	assert_int(units[-1]).is_equal(SERPENT_TAIL)
+	assert_int(spells[-1]).is_equal(GREAT_HEIST)
+	assert_int(powers[-1]).is_equal(MITHRAL_DOME)
+	assert_bool(ids.has(LEVIATHAN)).is_false()            # evolution-only
+	# The unindexed Traps come right after the last indexed Trap, before the first Power.
+	var first_power: int = powers[0]
+	assert_int(ids.find(TH_SPIKES) + 1).is_equal(ids.find(first_power))
 	# The two Fusions come before the first Ritual.
 	var first_ritual: int = _ids(CardDB.collectible().filter(func(d): return d["category"] == "ritual"))[0]
 	assert_int(ids.find(SNOW_TIGER) + 1).is_equal(ids.find(first_ritual))
@@ -75,7 +91,8 @@ func test_within_a_kind_the_source_order_is_kept() -> void:
 
 func test_all_keeps_plain_source_order_for_rules_code() -> void:
 	var ids := _ids(CardDB.all())
-	assert_array(ids.slice(ids.size() - 3)).is_equal([OWLBEAR, SNOW_TIGER, BOX])
+	assert_array(ids.slice(ids.size() - 9)).is_equal([OWLBEAR, SNOW_TIGER, BOX, MITHRAL_DOME, GREAT_HEIST,
+		TH_SUPPRESSION, TH_SPIKES, SERPENT_TAIL, LEVIATHAN])
 
 
 func test_browser_catalogue_index_and_deck_list_follow_catalogue_order() -> void:

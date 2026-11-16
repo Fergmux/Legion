@@ -55,8 +55,9 @@ func test_l2_every_non_basic_card_is_in_its_draft_pool() -> void:
 		if d["category"] == "basic_unit":
 			continue
 		var offered := int(d["id"]) in s._draft_pool(_cat(int(d["id"])))
-		# L23: evolution-only cards (Symbiote Larva, Siphonophore) are never offered; every other card is.
-		if offered != CardDB.is_collectible(int(d["id"])):
+		# L23: evolution-only cards (Symbiote Larva, Siphonophore) are never offered, nor (2026-11-10) a
+		# disabled card (CardDB.DISABLED); every other card is.
+		if offered != (CardDB.is_collectible(int(d["id"])) and not CardDB.is_disabled(int(d["id"]))):
 			missing.append("%d %s" % [int(d["id"]), d["name"]])
 	assert_array(missing).is_empty()
 
@@ -66,15 +67,15 @@ func test_l2_every_non_basic_card_drafts_into_the_right_deck() -> void:
 	var n := 0
 	for d in CardDB.all():
 		var id := int(d["id"])
-		if d["category"] == "basic_unit" or not CardDB.is_collectible(id):
-			continue   # L23: evolution-only cards are not draftable
+		if d["category"] == "basic_unit" or not Series.is_offerable(id):
+			continue   # L23: evolution-only cards are not draftable; 2026-11-10: nor disabled ones
 		var s := _draft_one(id)
 		var want := "extra" if CardDB.is_extra_category(String(d["category"])) else "main"
 		if not (id in s.decks[0]) or s.stage != Series.STAGE_GAME or _zone_of(s.game, 0, id) != want:
 			wrong.append("%d %s: in deck %s, zone '%s' (want %s)" % [id, d["name"], id in s.decks[0], _zone_of(s.game, 0, id) if s.game != null else "-", want])
 		n += 1
 	assert_array(wrong).is_empty()
-	assert_int(n).is_equal(CardDB.all().filter(func(d): return d["category"] != "basic_unit" and CardDB.is_collectible(int(d["id"]))).size())
+	assert_int(n).is_equal(CardDB.all().filter(func(d): return d["category"] != "basic_unit" and Series.is_offerable(int(d["id"]))).size())
 
 
 func test_l2_the_three_new_cards_draft_into_the_right_deck() -> void:
@@ -100,4 +101,4 @@ func test_l2_every_basic_unit_can_be_chosen_and_is_dealt_into_the_main_deck() ->
 		if err != "" or s.game == null or _zone_of(s.game, 0, int(d["id"])) != "main":
 			wrong.append("%d %s (%s %s): %s" % [int(d["id"]), d["name"], d["type"], d["race"], err])
 	assert_array(wrong).is_empty()
-	assert_int(CardDB.all().size()).is_equal(191)
+	assert_int(CardDB.all().size()).is_equal(197)            # 191 + the six cards of 2026-11-10

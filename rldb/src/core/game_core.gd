@@ -391,6 +391,10 @@ func count_flag(p: int, flag: String) -> int:
 ## Current type of unit uid.
 func unit_type(uid: int) -> String:
 	var inst: Dictionary = cards[uid]
+	# Tyrant's Lantern (179, 2026-11-10): "until the end of this turn: that Unit ... is Fire Type".
+	var tt: Dictionary = inst.get("type_t", {})
+	if not tt.is_empty() and int(tt["turn"]) == turn and inst["zone"] == "unit":
+		return String(tt["type"])
 	if inst["type_o"] != null:
 		return inst["type_o"]
 	return d(uid)["type"]
@@ -459,8 +463,9 @@ func can_evolve(uid: int) -> bool:
 
 ## L23: replaces unit `uid`'s card with the card it evolves into, for the rest of THIS game (the
 ## instance keeps the new card wherever it goes: Spent, Hand, Draw, Exhaust...; the next game of a
-## series starts from the series deck, which keeps the base card). Not a Summon: no On Summon and no
-## summon-triggered Trap. State carries over (confirmed rule): zone, slot and stance; statuses,
+## series starts from the series deck, which keeps the base card). 2026-11-10 (owner): an evolution is
+## a Summon; the caller follows this with SpecialOps.summon_tail (On Summon, then the summon-response
+## window). State carries over (confirmed rule, re-confirmed 2026-11-10): zone, slot and stance; statuses,
 ## Runes, counters and every temporary or permanent stat and cost change. Base ATK/DEF and the
 ## printed cost become the new card's, so a copied base (base_atk/base_def) and a copied art go;
 ## once-per-turn uses belong to the old card's abilities and are cleared.
@@ -584,6 +589,19 @@ const TFX_TRAPS_COST_LESS := "traps_cost_less"
 const TFX_TRAPS_INDESTRUCTIBLE := "traps_indestructible"
 
 
+## Snow Tiger Paladin (190, continuous since 2026-11-10): true while one of player p's undebilitated
+## Snow Tiger Paladins is "protecting" (a unit behind it: Traps cost 1 AP less) or "protected"
+## (a unit in front of it: Traps cannot be Destroyed).
+func snow_tiger_active(p: int, how: String) -> bool:
+	for u in field_units(p):
+		if has_flag(u, "snow_tiger"):
+			if how == "protecting" and protected_by(u) != -1:
+				return true
+			if how == "protected" and is_protected(u):
+				return true
+	return false
+
+
 ## Starts player p's effect `effect` now; it lasts until the start of p's next turn.
 func start_turn_effect(p: int, effect: String) -> void:
 	if not players[p].has("turn_fx"):
@@ -614,7 +632,7 @@ func current_cost(uid: int) -> int:
 		v -= 1
 	if cat == "trap" and player_has_flag(p, "traps_cost_less"):
 		v -= 1
-	if cat == "trap" and turn_effect_active(p, TFX_TRAPS_COST_LESS):
+	if cat == "trap" and snow_tiger_active(p, "protecting"):
 		v -= 1                            # Snow Tiger Paladin, Protecting a Unit (stacks with the Guild)
 	# Reinforcements: -1 AP (2026-11-03; it was -2) while only the opponent controls a unit.
 	if CardDB.is_unit_category(cat) and player_has_flag(p, "units_cost_less_if_behind") \

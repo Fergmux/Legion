@@ -30,7 +30,7 @@ func test_window_offers_skip_pass_for_the_turn_and_activate() -> void:
 	var m: MatchEngine = b["m"]
 	assert_str(TB.attack(m, b["a1"], b["wall"])).is_empty()
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")
-	assert_array(_labels(m)).is_equal(["Skip", "Skip for the rest of this turn", "Activate Damage Conversion"])
+	assert_array(_labels(m)).is_equal(["Skip", "Skip for the rest of this turn", "Activate Dimensional Conversion"])
 	assert_int(int(m.pending["options"][0]["v"])).is_equal(EffectEngine.TRAP_V_SKIP)
 
 

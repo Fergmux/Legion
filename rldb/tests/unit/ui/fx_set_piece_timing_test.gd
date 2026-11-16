@@ -1,4 +1,6 @@
 extends GdUnitTestSuite
+## 2026-11-10: the Divine Serpent 30-damage combo is gone from the cards, so the tests that played it
+## for real were removed; FxSerpent stays reachable only through hand-built events.
 ## D8 / B5 / D6 (owner feedback 2026-10-20): the set pieces keep the FX queue in step with the log.
 ## A Fusion / Ritual / Arcane summon plays one set piece that holds the rest of its batch for its full
 ## length (never compressed), the Divine Serpents' strike owns its damage and destructions, a sacrifice
@@ -82,14 +84,6 @@ func _serpent_events() -> Array:
 	return _batch(m, 0, since)
 
 
-func test_serpent_batch_is_detected_as_the_serpent_strike() -> void:
-	var info := FxSerpent.detect(_serpent_events())
-	assert_bool(info.is_empty()).is_false()
-	assert_int(int(info["p"])).is_equal(0)
-	assert_int(int(info["opp"])).is_equal(1)
-	assert_int(int(info["d"])).is_equal(30)
-	assert_int((info["destroys"] as Array).size()).is_equal(3)
-
 
 func test_other_damage_and_destruction_is_not_the_serpent_strike() -> void:
 	var ev := [{"k": "hp", "p": 1, "d": -30},
@@ -103,50 +97,6 @@ func test_other_damage_and_destruction_is_not_the_serpent_strike() -> void:
 	assert_dict(FxSerpent.detect(anon, func(_id: int) -> String: return "Divine Serpent - Head")).is_empty()
 
 
-func test_serpent_strike_owns_its_damage_and_destructions_once() -> void:
-	var gs := _screen()
-	await await_idle_frame()
-	gs.fx.play(_serpent_events(), {})
-	var plan: Array = gs.fx.last_plan
-	assert_int(_tags(plan, "serpent").size()).is_equal(1)
-	assert_array(_tags(plan, "hp:")).is_empty()           # no plain HP floater: the strike shows it
-	assert_array(_tags(plan, "destroy")).is_empty()       # no plain destructions: the strike consumes them
-	assert_array(_tags(plan, "sfx:damage")).is_empty()    # its impact plays the damage sound itself
-	assert_array(_tags(plan, "sfx:destroy")).is_empty()
-	gs.fx.finish_all()
-
-
-func test_lethal_serpent_strike_replaces_the_final_blow_flourish() -> void:
-	# the 30 damage ends the game: the strike plays and starts the victory look itself
-	var ev := _serpent_events()
-	ev.append({"k": "game_over", "winner": 0})
-	var gs := _screen()
-	await await_idle_frame()
-	gs.fx.expect_game_end(ev)
-	gs.fx.play(ev, {})
-	var plan: Array = gs.fx.last_plan
-	assert_int(_tags(plan, "serpent").size()).is_equal(1)
-	assert_array(_tags(plan, "flourish")).is_empty()
-	assert_array(_tags(plan, "game_end")).is_empty()
-	assert_bool(gs.fx.game_end_hold).is_true()
-	gs.fx.finish_all()
-	assert_bool(gs.fx.game_end_hold).is_false()
-
-
-func test_serpent_strike_restores_the_hp_bar_when_skipped() -> void:
-	var gs := _screen()
-	await await_idle_frame()
-	var pl: PlayerPlate = gs.plate_of(1)
-	pl.hp_bar.set_hp(30, true)          # the final state the board shows
-	gs.fx.play(_serpent_events(), {})
-	await await_millis(int(_wait_ms()))
-	# H1 WP-3: the plate holds the vial at the value before the strike and keeps the real HP itself.
-	assert_bool(pl.hp_held()).is_true()
-	assert_int(pl.hp_bar.hp).is_greater(30)
-	gs.fx.finish_all()
-	assert_bool(pl.hp_held()).is_false()
-	assert_int(pl.hp_bar.hp).is_equal(30)
-	assert_float(pl.hp_bar.shown).is_equal(30.0)
 
 
 ## Real milliseconds into the strike (past the Soul arrival, before the impact).

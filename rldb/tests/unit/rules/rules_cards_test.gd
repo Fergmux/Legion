@@ -29,12 +29,12 @@ func test_magic_cylinder_resolves_hp_loss_first_then_battle_continues() -> void:
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 10)
 	var d := TB.unit(m, 0, TB.WATER, 0, "atk", 8)
 	TB.attack(m, a, d)
-	assert_str(TB.choose(m, ["Activate Magic Cylinder"])).is_empty()
+	assert_str(TB.choose(m, ["Activate Dimensional Redirect"])).is_empty()
 	assert_int(m.players[1]["hp"]).is_equal(50)
 	assert_str(m.cards[d]["zone"]).is_equal("spent")
 	assert_int(m.players[0]["hp"]).is_equal(58)
 	assert_str(m.cards[a]["zone"]).is_equal("unit")
-	assert_int(m.current_cost(mc)).is_equal(2)
+	assert_int(m.current_cost(mc)).is_equal(2 + 1)             # Dimensional Redirect costs 2 since 2026-11-10
 	assert_bool(TB.log_index(m, "loses 10 HP") < TB.log_index(m, "Battle:")).is_true()
 
 
@@ -70,7 +70,7 @@ func test_mirror_force_destroys_attacker_so_battle_does_not_resolve() -> void:
 		TB.unit(m, 1, TB.WATER, s, "atk")
 	var d := TB.unit(m, 0, TB.WATER, 0, "atk", 8)
 	TB.attack(m, a, d)
-	TB.choose(m, ["Activate Mirror Force"])
+	TB.choose(m, ["Activate Sorcerer's Forcefield"])
 	assert_str(m.cards[a]["zone"]).is_equal("spent")
 	assert_str(m.cards[d]["zone"]).is_equal("unit")
 	assert_int(m.field_units(1).size()).is_equal(0)
@@ -87,20 +87,22 @@ func test_mirror_force_needs_attacker_with_four_field_cards() -> void:
 	assert_str(m.cards[d]["zone"]).is_equal("spent")
 
 
+## 2026-11-10: Defensive Rally answers only an attack on a unit in its column, so the attacked unit
+## stands in column 3 with it; Dimensional Redirect answers the attacker's column (column 1).
 func test_trap_owner_orders_multiple_eligible_traps() -> void:
 	var m := _battle_match()
-	TB.set_card(m, 0, 45, 0)                    # Magic Cylinder
-	TB.set_card(m, 0, 47, 0 + 1)                # Damage Conversion, column 2 (not attacked column)
-	TB.set_card(m, 0, 51, 2)                    # Rushed Recklessly (any attack)
+	TB.set_card(m, 0, 45, 0)                    # Dimensional Redirect, column 1: the attacker's column
+	TB.set_card(m, 0, 47, 0 + 1)                # Dimensional Conversion, column 2 (neither column)
+	TB.set_card(m, 0, 51, 2)                    # Defensive Rally, column 3: the attacked unit's column
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 10)
-	var d := TB.unit(m, 0, TB.WATER, 0, "atk", 8)
+	var d := TB.unit(m, 0, TB.WATER, 2, "atk", 8)
 	TB.attack(m, a, d)
 	var labels: Array = m.pending["options"].map(func(o): return o["label"])
-	assert_array(labels).contains(["Skip", "Skip for the rest of this turn", "Activate Magic Cylinder", "Activate Rushed Recklessly"])
-	assert_array(labels).not_contains(["Activate Damage Conversion"])
-	TB.choose(m, ["Activate Rushed Recklessly"])
+	assert_array(labels).contains(["Skip", "Skip for the rest of this turn", "Activate Dimensional Redirect", "Activate Defensive Rally"])
+	assert_array(labels).not_contains(["Activate Dimensional Conversion"])
+	TB.choose(m, ["Activate Defensive Rally"])
 	assert_str(m.pending["kind"]).is_equal("trap_response")
-	TB.choose(m, ["Activate Magic Cylinder"])
+	TB.choose(m, ["Activate Dimensional Redirect"])
 	assert_int(m.players[1]["hp"]).is_equal(50)
 
 
@@ -115,20 +117,26 @@ func test_traps_cannot_activate_on_own_turn() -> void:
 	assert_bool(m.pending.is_empty() or m.pending["kind"] != "trap_response").is_true()
 
 
+## 2026-11-10: Avatar (the old fixture: lose 6, then the opponent loses 6) no longer loses HP; Grandmother
+## Kaya's On Destruction (take 10 Damage, then add a card from Spent to Hand) is the ordered effect now.
 func test_own_hp_reaching_zero_in_ordered_loss_ends_before_second_step() -> void:
 	var m := TB.make()
-	var avatar := TB.unit(m, 0, 14, 0)          # Avatar: lose 6 then opponent loses 6
-	m.players[0]["hp"] = 6
-	m.destroy(avatar, "effect", -1, 1)
+	var kaya := TB.unit(m, 0, 170, 0)           # Grandmother Kaya: take 10, then add a Spent card to Hand
+	var spent := TB.card(m, 0, TB.WATER, "spent")
+	m.players[0]["hp"] = 10
+	m.destroy(kaya, "effect", -1, 1)
 	m.run()
+	assert_str(TB.choose(m, ["Yes"])).is_empty()
 	assert_int(m.winner).is_equal(1)
-	assert_int(m.players[1]["hp"]).is_equal(60)
+	assert_bool(m.pending.is_empty()).is_true()
+	assert_str(String(m.cards[spent]["zone"])).is_equal("spent")
 
 
 func test_narzyl_destroying_crevasse_resolves_narzyl_rune_before_crevasse_paralyse() -> void:
 	var m := _battle_match()
-	var narzyl := TB.unit(m, 1, 18, 0)          # Corrupted Narzyl 10/0 (active player)
-	var crevasse := TB.unit(m, 0, 100, 0)       # Gaping Crevasse 0/10
+	var narzyl := TB.unit(m, 1, 18, 0)          # Corrupted Narzyl 14/2 (active player)
+	var crevasse := TB.unit(m, 0, 100, 0)       # Gaping Crevasse 0/10, cost 0
+	m.cards[crevasse]["cost_p"] = 1             # Narzyl's Runes equal the victim's Cost (2026-11-10): 1
 	TB.attack(m, narzyl, crevasse)
 	var rune_i := TB.log_index(m, "gains 1 Rune")
 	var para_i := TB.log_index(m, "gains 2 Paralyse")
@@ -256,29 +264,15 @@ func test_snunday_reverses_shimmer_serum_atk_but_not_blind() -> void:
 	assert_int(m.status_count(u, "blind")).is_equal(1)
 
 
-# 2026-10-18: Damage is not a "loss", so Sneaky Snunday no longer turns it into healing.
-func test_snunday_no_longer_turns_divine_serpent_damage_into_healing() -> void:
+# 2026-10-18: Damage is not a "loss", so Sneaky Snunday no longer turns it into healing. 2026-11-10: the
+# Divine Serpent 30-damage combo (the old fixture) is gone; Shaman's Snunday Brew deals the Damage now.
+func test_snunday_no_longer_turns_damage_into_healing() -> void:
 	var m := TB.make()
-	TB.unit(m, 0, 159, 1)
-	TB.unit(m, 0, 160, 3)
 	_cast(m, 0, 154)
-	var head := TB.card(m, 0, 158)
-	m.submit(0, {"t": "summon", "uid": head})
-	TB.choose(m, ["Front row, column 1"])
-	TB.choose(m, ["Attack"])
-	assert_int(m.players[1]["hp"]).is_equal(30)
-
-
-func test_divine_serpent_damages_opponent_without_reversal() -> void:
-	var m := TB.make()
-	TB.unit(m, 0, 159, 1)
-	TB.unit(m, 0, 160, 3)
-	var head := TB.card(m, 0, 158)
-	m.players[0]["ap"] = 5
-	m.submit(0, {"t": "summon", "uid": head})
-	TB.choose(m, ["Front row, column 1"])
-	TB.choose(m, ["Attack"])
-	assert_int(m.players[1]["hp"]).is_equal(30)
+	var brew := TB.power(m, 0, 167)
+	assert_str(TB.ability(m, brew)).is_empty()
+	assert_str(TB.choose(m, ["Opponent takes 4 Damage"])).is_empty()
+	assert_int(m.players[1]["hp"]).is_equal(GameCore.START_HP - 4)
 
 
 # L15 (2026-11-05): Sneaky Snunday reverses ATK/DEF only, so the AP next turn is not reversed.
@@ -297,13 +291,13 @@ func test_delayed_gratification_under_snunday_still_gives_plus_one_ap() -> void:
 
 func test_snunday_flips_continuous_aura_while_active_and_restores_after() -> void:
 	var m := TB.make()
-	TB.unit(m, 0, 159, 0)                       # Divine Serpent - Body: adjacent +10 DEF
+	TB.unit(m, 0, 159, 0)                       # Divine Serpent - Body: adjacent +8 DEF (2026-11-10)
 	var friend := TB.unit(m, 0, TB.WATER, 1, "atk", 8, 20)
-	assert_int(m.def_of(friend)).is_equal(30)
+	assert_int(m.def_of(friend)).is_equal(20 + 8)
 	_cast(m, 0, 154)
-	assert_int(m.def_of(friend)).is_equal(10)
+	assert_int(m.def_of(friend)).is_equal(20 - 8)
 	TB.to_turn2(m)
-	assert_int(m.def_of(friend)).is_equal(30)
+	assert_int(m.def_of(friend)).is_equal(20 + 8)
 
 
 # L15 (2026-11-05): "all new and ongoing" gains are reversed, so a gain from before Snunday is too.

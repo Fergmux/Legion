@@ -41,7 +41,7 @@ func test_spectator_without_permission_sees_no_hidden_card_of_either_player() ->
 	var v := MatchView.build_spectator(m, 0, -1)
 	var blob := JSON.stringify(v)
 	assert_str(blob).not_contains("Dragon of the Cave")
-	assert_str(blob).not_contains("Magic Cylinder")
+	assert_str(blob).not_contains("Dimensional Redirect")
 	assert_array(_leaks(blob, _hidden_uids(m, 0) + _hidden_uids(m, 1))).is_empty()
 	for p in 2:
 		var pv: Dictionary = v["players"][p]

@@ -25,7 +25,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 0
    }
@@ -55,7 +55,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 1
    }
@@ -85,7 +85,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 2
    }
@@ -115,7 +115,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 3
    }
@@ -145,7 +145,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 4
    }
@@ -175,7 +175,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 5
    }
@@ -205,7 +205,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 6
    }
@@ -235,7 +235,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 7
    }
@@ -265,7 +265,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 8
    }
@@ -295,7 +295,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 9
    }
@@ -325,7 +325,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 10
    }
@@ -355,7 +355,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 11
    }
@@ -385,7 +385,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 12
    }
@@ -415,7 +415,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 13
    }
@@ -445,7 +445,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 14
    }
@@ -475,7 +475,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 15
    }
@@ -505,7 +505,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 16
    }
@@ -535,7 +535,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 17
    }
@@ -565,7 +565,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 18
    }
@@ -595,7 +595,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 19
    }
@@ -625,7 +625,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 20
    }
@@ -655,7 +655,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 21
    }
@@ -685,7 +685,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 22
    }
@@ -715,7 +715,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 23
    }
@@ -745,7 +745,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 24
    }
@@ -775,7 +775,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 25
    }
@@ -805,7 +805,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 26
    }
@@ -835,7 +835,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 27
    }
@@ -865,7 +865,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 28
    }
@@ -895,7 +895,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 29
    }
@@ -925,7 +925,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 30
    }
@@ -955,7 +955,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 31
    }
@@ -985,7 +985,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 32
    }
@@ -1015,7 +1015,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 33
    }
@@ -1045,7 +1045,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 34
    }
@@ -1075,7 +1075,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 35
    }
@@ -1105,7 +1105,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 36
    }
@@ -1135,7 +1135,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 37
    }
@@ -1149,23 +1149,23 @@
    "cost_kind": "ap",
    "cost": 2,
    "atk": 10,
-   "def": 16,
+   "def": 18,
    "keywords": [],
    "condition": "",
    "on_summon": "If you Control another Unit in this Column: you can add a Unit with the same Cost as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP.",
    "on_field": "",
-   "on_destruction": "Destroy all 1 Cost or lower Units in this Column.",
+   "on_destruction": "You must Destroy all 1 Cost or lower Units in this Column.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: If you Control another Unit in this Column: you can add a Unit with the same Cost as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP. On Destroy: Destroy all 1 Cost or lower Units in this Column.",
+   "description": "On Summon: If you Control another Unit in this Column: you can add a Unit with the same Cost as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP. On Destroy: You must Destroy all 1 Cost or lower Units in this Column.",
    "art": {
     "image": "9.png",
     "card_img": "038.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 38
    }
@@ -1178,24 +1178,24 @@
    "type": "Dark",
    "cost_kind": "ap",
    "cost": 2,
-   "atk": 16,
+   "atk": 18,
    "def": 2,
    "keywords": [],
    "condition": "",
    "on_summon": "If you Control another Unit in this Column: you can add a Unit with the same Race as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP.",
    "on_field": "",
-   "on_destruction": "Destroy all Spells/Traps in this Column.",
+   "on_destruction": "You must Destroy all Spells/Traps in this Column.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: If you Control another Unit in this Column: you can add a Unit with the same Race as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP. On Destroy: Destroy all Spells/Traps in this Column.",
+   "description": "On Summon: If you Control another Unit in this Column: you can add a Unit with the same Race as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP. On Destroy: You must Destroy all Spells/Traps in this Column.",
    "art": {
     "image": "10.png",
     "card_img": "039.png",
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 39
    }
@@ -1208,24 +1208,24 @@
    "type": "Lightning",
    "cost_kind": "ap",
    "cost": 2,
-   "atk": 8,
-   "def": 14,
+   "atk": 14,
+   "def": 12,
    "keywords": [],
    "condition": "",
    "on_summon": "If you Control another Unit in this Column: you can add a Unit with the same Type as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP.",
    "on_field": "",
-   "on_destruction": "Destroy a Power.",
+   "on_destruction": "You must Destroy a Power.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: If you Control another Unit in this Column: you can add a Unit with the same Type as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP. On Destroy: Destroy a Power.",
+   "description": "On Summon: If you Control another Unit in this Column: you can add a Unit with the same Type as that Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP. On Destroy: You must Destroy a Power.",
    "art": {
     "image": "11.png",
     "card_img": "040.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 40
    }
@@ -1238,8 +1238,8 @@
    "type": "Light",
    "cost_kind": "ap",
    "cost": 3,
-   "atk": 16,
-   "def": 24,
+   "atk": 20,
+   "def": 18,
    "keywords": [],
    "condition": "",
    "on_summon": "If you Control another Unit in this Column: you can draw a card and gain +1 AP.",
@@ -1255,7 +1255,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 41
    }
@@ -1268,8 +1268,8 @@
    "type": "Dark",
    "cost_kind": "ap",
    "cost": 3,
-   "atk": 18,
-   "def": 22,
+   "atk": 16,
+   "def": 24,
    "keywords": [],
    "condition": "",
    "on_summon": "",
@@ -1285,7 +1285,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 42
    }
@@ -1298,29 +1298,26 @@
    "type": "Fire",
    "cost_kind": "ap",
    "cost": 2,
-   "atk": 16,
-   "def": 12,
+   "atk": 18,
+   "def": 14,
    "keywords": [],
    "condition": "",
-   "on_summon": "You can apply 1 Rune to a Unit.",
-   "on_field": "Once per turn: you can apply 6 Burn to a Unit.",
-   "on_destruction": "Take -6 HP Damage, then your opponent must take -6 HP Damage.",
+   "on_summon": "",
+   "on_field": "If you Destroy an opponent's Unit: apply 1 Rune to a Unit.",
+   "on_destruction": "Apply 10 Burn to the Unit that Destroyed this Unit.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: You can apply 1 Rune to a Unit. Once per turn: you can apply 6 Burn to a Unit. On Destroy: Take -6 HP Damage, then your opponent must take -6 HP Damage.",
+   "description": "If you Destroy an opponent's Unit: apply 1 Rune to a Unit. On Destroy: Apply 10 Burn to the Unit that Destroyed this Unit.",
    "art": {
     "image": "14.png",
     "card_img": "043.png",
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
-    "index": 43,
-    "raw": {
-     "On Destruction": "take -6 HP Damage, then your opponent must take -6 HP Damage."
-    }
+    "index": 43
    }
   },
   {
@@ -1331,7 +1328,7 @@
    "type": "Physical",
    "cost_kind": "ap",
    "cost": 2,
-   "atk": 16,
+   "atk": 18,
    "def": 10,
    "keywords": [],
    "condition": "",
@@ -1348,7 +1345,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 44
    }
@@ -1378,7 +1375,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 45,
     "raw": {
@@ -1388,30 +1385,30 @@
   },
   {
    "id": 20,
-   "name": "Spirit Bomb",
+   "name": "Spirit, the Virtuous",
    "category": "unit",
    "race": "Warrior",
    "type": "Light",
    "cost_kind": "ap",
    "cost": 3,
    "atk": 18,
-   "def": 24,
+   "def": 20,
    "keywords": [],
    "condition": "",
    "on_summon": "Apply all Buffs on all Units to this Unit.",
-   "on_field": "This Unit gains +4 ATK/DEF for each Unit your opponent Controls.",
-   "on_destruction": "You can apply 1 Pierce to a Unit.",
+   "on_field": "This Unit gains +6 ATK/DEF for each Unit your opponent Controls.",
+   "on_destruction": "You can apply 1 of any Buff to a Unit.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply all Buffs on all Units to this Unit. This Unit gains +4 ATK/DEF for each Unit your opponent Controls. On Destroy: You can apply 1 Pierce to a Unit.",
+   "description": "On Summon: Apply all Buffs on all Units to this Unit. This Unit gains +6 ATK/DEF for each Unit your opponent Controls. On Destroy: You can apply 1 of any Buff to a Unit.",
    "art": {
     "image": "20.png",
     "card_img": "046.png",
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 46,
     "raw": {
@@ -1444,7 +1441,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 47,
     "raw": {
@@ -1478,7 +1475,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 48,
     "raw": {
@@ -1511,7 +1508,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 49,
     "raw": {
@@ -1532,19 +1529,19 @@
    "keywords": [],
    "condition": "",
    "on_summon": "Apply 1 Eternal and 1 Cleanse to this Unit.",
-   "on_field": "At the start of your turn: apply 1 Eternal to this Unit. Once per turn: you can Exhaust this Unit, then your opponent must take -10 HP Damage for each Eternal on this Unit.",
+   "on_field": "At the start of your turn: apply 1 Eternal to this Unit. Once per turn: you can Exhaust this Unit, then your opponent takes -10 HP Damage for each Eternal on this Unit.",
    "on_destruction": "This Unit Permanently costs +1 AP.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 1 Eternal and 1 Cleanse to this Unit. At the start of your turn: apply 1 Eternal to this Unit. Once per turn: you can Exhaust this Unit, then your opponent must take -10 HP Damage for each Eternal on this Unit. On Destroy: This Unit Permanently costs +1 AP.",
+   "description": "On Summon: Apply 1 Eternal and 1 Cleanse to this Unit. At the start of your turn: apply 1 Eternal to this Unit. Once per turn: you can Exhaust this Unit, then your opponent takes -10 HP Damage for each Eternal on this Unit. On Destroy: This Unit Permanently costs +1 AP.",
    "art": {
     "image": "161.png",
     "card_img": "050.png",
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 50,
     "raw": {
@@ -1554,13 +1551,13 @@
   },
   {
    "id": 24,
-   "name": "Chidori Monk",
+   "name": "Chidori, Monk of Speed",
    "category": "unit",
    "race": "Warrior",
    "type": "Lightning",
    "cost_kind": "ap",
    "cost": 1,
-   "atk": 16,
+   "atk": 14,
    "def": 14,
    "keywords": [],
    "condition": "",
@@ -1577,7 +1574,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 51,
     "raw": {
@@ -1597,30 +1594,30 @@
    "def": 10,
    "keywords": [],
    "condition": "",
-   "on_summon": "Destroy all Unprotected Basic Units.",
+   "on_summon": "You must Destroy all Unprotected Basic Units.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Destroy all Unprotected Basic Units.",
+   "description": "On Summon: You must Destroy all Unprotected Basic Units.",
    "art": {
     "image": "25.png",
     "card_img": "052.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 52
    }
   },
   {
    "id": 26,
-   "name": "Brinekeeper Summoner",
+   "name": "Tag Team - C",
    "category": "unit",
    "race": "Monster",
-   "type": "Water",
+   "type": "Physical",
    "cost_kind": "ap",
    "cost": 1,
    "atk": 16,
@@ -1629,18 +1626,18 @@
    "condition": "",
    "on_summon": "If you Control another Unit in this Column: add a 0 Cost card from Draw to Hand.",
    "on_field": "",
-   "on_destruction": "Destroy your Spells/Traps.",
+   "on_destruction": "You must Destroy your Spells/Traps.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: If you Control another Unit in this Column: add a 0 Cost card from Draw to Hand. On Destroy: Destroy your Spells/Traps.",
+   "description": "On Summon: If you Control another Unit in this Column: add a 0 Cost card from Draw to Hand. On Destroy: You must Destroy your Spells/Traps.",
    "art": {
     "image": "26.png",
     "card_img": "053.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 53
    }
@@ -1670,7 +1667,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 54
    }
@@ -1700,7 +1697,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 55
    }
@@ -1730,7 +1727,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 56
    }
@@ -1760,7 +1757,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 57
    }
@@ -1773,7 +1770,7 @@
    "type": "Light",
    "cost_kind": "ap",
    "cost": 3,
-   "atk": 24,
+   "atk": 26,
    "def": 16,
    "keywords": [],
    "condition": "",
@@ -1790,7 +1787,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 58,
     "raw": {
@@ -1810,20 +1807,20 @@
    "def": 8,
    "keywords": [],
    "condition": "",
-   "on_summon": "Destroy a Power.",
+   "on_summon": "You must Destroy a Power.",
    "on_field": "Once per turn: you can apply 1 Paralyse and 4 Burn to a Unit in this Column.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Destroy a Power. Once per turn: you can apply 1 Paralyse and 4 Burn to a Unit in this Column.",
+   "description": "On Summon: You must Destroy a Power. Once per turn: you can apply 1 Paralyse and 4 Burn to a Unit in this Column.",
    "art": {
     "image": "32.png",
     "card_img": "059.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 59
    }
@@ -1853,7 +1850,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 60
    }
@@ -1883,7 +1880,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 61
    }
@@ -1913,7 +1910,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 62
    }
@@ -1921,34 +1918,31 @@
   {
    "id": 36,
    "name": "Dante",
-   "category": "unit",
+   "category": "fusion",
    "race": "Warrior",
    "type": "Fire",
-   "cost_kind": "ap",
-   "cost": 3,
-   "atk": 24,
-   "def": 10,
+   "cost_kind": "fusion",
+   "cost": null,
+   "atk": 28,
+   "def": 18,
    "keywords": [],
-   "condition": "",
-   "on_summon": "Apply 6 Burn to all Units.",
-   "on_field": "Once per turn: you can apply 1 Cleanse or 10 Burn to a Unit. This Unit gains +1 ATK for each Burn on this Unit.",
+   "condition": "Warrior Unit + Fire Unit",
+   "on_summon": "You must apply 6 Burn to all Units.",
+   "on_field": "Once per turn: you can apply 1 Cleanse or 5 Burn to a Unit. This Unit gains +2 ATK for each Burn on this Unit.",
    "on_destruction": "At the start of your next turn: you can lose -1 AP to Summon this Unit from Spent to the Zone this Unit was originally in.",
-   "material": "",
+   "material": "Warrior Unit + Fire Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 6 Burn to all Units. Once per turn: you can apply 1 Cleanse or 10 Burn to a Unit. This Unit gains +1 ATK for each Burn on this Unit. On Destroy: At the start of your next turn: you can lose -1 AP to Summon this Unit from Spent to the Zone this Unit was originally in.",
+   "description": "On Summon: You must apply 6 Burn to all Units. Once per turn: you can apply 1 Cleanse or 5 Burn to a Unit. This Unit gains +2 ATK for each Burn on this Unit. On Destroy: At the start of your next turn: you can lose -1 AP to Summon this Unit from Spent to the Zone this Unit was originally in.",
    "art": {
     "image": "36.png",
     "card_img": "063.png",
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
-    "sheet": "unit",
-    "index": 63,
-    "raw": {
-     "On Summon/Play": "apply 6 Burn to all Units."
-    }
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "fusion",
+    "index": 63
    }
   },
   {
@@ -1967,8 +1961,8 @@
    "on_field": "If this Unit is Protecting a Unit: this Unit gains +8 ATK.",
    "on_destruction": "You can add a Warrior Unit from Spent to Hand.",
    "material": "",
-   "evolve": "",
-   "evolves_into": null,
+   "evolve": "If this Unit has Burn applied and ATK is more than Base: you can Evolve this Unit.",
+   "evolves_into": 181,
    "description": "On Summon: Apply 2 Pierce to this Unit. If this Unit is Protecting a Unit: this Unit gains +8 ATK. On Destroy: You can add a Warrior Unit from Spent to Hand.",
    "art": {
     "image": "37.png",
@@ -1976,11 +1970,12 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 64,
     "raw": {
-     "On Summon/Play": "apply 2 Pierce to this Unit."
+     "On Summon/Play": "apply 2 Pierce to this Unit.",
+     "condition": "Evolution: If this Unit has Burn applied and ATK is more than Base: you can Evolve this Unit."
     }
    }
   },
@@ -1996,20 +1991,20 @@
    "def": 16,
    "keywords": [],
    "condition": "",
-   "on_summon": "You can Destroy a card with Reveal.",
-   "on_field": "This Unit loses -6 ATK/DEF for each of your Adjacent Units. This Unit cannot receive Buffs or gain ATK/DEF.",
+   "on_summon": "You can apply Reveal to a Spell/Trap.",
+   "on_field": "This Unit loses -4 ATK/DEF for each of your Adjacent Units. This Unit is Unaffected by Trap Effects. Once per turn: you can Destroy a card with Reveal.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: You can Destroy a card with Reveal. This Unit loses -6 ATK/DEF for each of your Adjacent Units. This Unit cannot receive Buffs or gain ATK/DEF.",
+   "description": "On Summon: You can apply Reveal to a Spell/Trap. This Unit loses -4 ATK/DEF for each of your Adjacent Units. This Unit is Unaffected by Trap Effects. Once per turn: you can Destroy a card with Reveal.",
    "art": {
     "image": "38.png",
     "card_img": "065.png",
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 65
    }
@@ -2039,7 +2034,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 66
    }
@@ -2069,14 +2064,14 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 67
    }
   },
   {
    "id": 68,
-   "name": "Seppuku",
+   "name": "Zeph, Monk of Ancient Wisdom",
    "category": "unit",
    "race": "Warrior",
    "type": "Dark",
@@ -2099,7 +2094,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 68
    }
@@ -2112,7 +2107,7 @@
    "type": "Lightning",
    "cost_kind": "ap",
    "cost": 2,
-   "atk": 16,
+   "atk": 20,
    "def": 16,
    "keywords": [],
    "condition": "",
@@ -2129,14 +2124,14 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 69
    }
   },
   {
    "id": 40,
-   "name": "Aleister the Invoker",
+   "name": "Aleister the Inventor",
    "category": "unit",
    "race": "Mage",
    "type": "Physical",
@@ -2159,7 +2154,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 70
    }
@@ -2172,24 +2167,24 @@
    "type": "Water",
    "cost_kind": "ap",
    "cost": 3,
-   "atk": 12,
-   "def": 26,
+   "atk": 16,
+   "def": 22,
    "keywords": [],
    "condition": "",
    "on_summon": "Apply 3 Nimble to this Unit.",
-   "on_field": "If this Unit moves Zone: this Unit Permanently gains +6 ATK.",
+   "on_field": "If this Unit moves Zone: this Unit Permanently gains +6 ATK. Once per turn: you can apply 1 Debilitate to a Unit in this Column.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 3 Nimble to this Unit. If this Unit moves Zone: this Unit Permanently gains +6 ATK.",
+   "description": "On Summon: Apply 3 Nimble to this Unit. If this Unit moves Zone: this Unit Permanently gains +6 ATK. Once per turn: you can apply 1 Debilitate to a Unit in this Column.",
    "art": {
     "image": "70.png",
     "card_img": "071.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 71,
     "raw": {
@@ -2222,7 +2217,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 72
    }
@@ -2252,7 +2247,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 73,
     "raw": {
@@ -2272,25 +2267,22 @@
    "def": 0,
    "keywords": [],
    "condition": "",
-   "on_summon": "Add a Warrior Unit from Draw to Hand.",
-   "on_field": "If your Warrior Unit in this Column would be Destroyed: apply 1 Eternal to that Unit, then Destroy this Unit.",
+   "on_summon": "You must add a Warrior Unit from Draw to Hand.",
+   "on_field": "If your Warrior Unit in this Column would be Destroyed: you must apply 1 Eternal to that Unit, then Destroy this Unit.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Add a Warrior Unit from Draw to Hand. If your Warrior Unit in this Column would be Destroyed: apply 1 Eternal to that Unit, then Destroy this Unit.",
+   "description": "On Summon: You must add a Warrior Unit from Draw to Hand. If your Warrior Unit in this Column would be Destroyed: you must apply 1 Eternal to that Unit, then Destroy this Unit.",
    "art": {
     "image": "73.png",
     "card_img": "074.png",
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
-    "index": 74,
-    "raw": {
-     "On Summon/Play": "add a Warrior Unit from Draw to Hand."
-    }
+    "index": 74
    }
   },
   {
@@ -2318,7 +2310,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 75
    }
@@ -2339,8 +2331,8 @@
    "on_field": "If you Destroy an opponent's Unit: apply 1 Rune to this Unit.",
    "on_destruction": "",
    "material": "",
-   "evolve": "",
-   "evolves_into": null,
+   "evolve": "If this Unit has Burn applied and ATK is more than Base: you can Evolve this Unit.",
+   "evolves_into": 14,
    "description": "If you Destroy an opponent's Unit: apply 1 Rune to this Unit.",
    "art": {
     "image": "16.png",
@@ -2348,9 +2340,12 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
-    "index": 76
+    "index": 76,
+    "raw": {
+     "condition": "Evolution: If this Unit has Burn applied and ATK is more than Base: you can Evolve this Unit."
+    }
    }
   },
   {
@@ -2378,7 +2373,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 77
    }
@@ -2391,24 +2386,24 @@
    "type": "Dark",
    "cost_kind": "ap",
    "cost": 1,
-   "atk": 16,
+   "atk": 14,
    "def": 2,
    "keywords": [],
    "condition": "",
    "on_summon": "You can apply 1 Paralyse to a Unit in this Column.",
-   "on_field": "If this Unit Destroys an opponent's Unit: apply 1 Rune to this Unit.",
+   "on_field": "If this Unit Destroys an opponent's Unit: apply Rune(s) equal to the Cost of the Destroyed Unit.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: You can apply 1 Paralyse to a Unit in this Column. If this Unit Destroys an opponent's Unit: apply 1 Rune to this Unit.",
+   "description": "On Summon: You can apply 1 Paralyse to a Unit in this Column. If this Unit Destroys an opponent's Unit: apply Rune(s) equal to the Cost of the Destroyed Unit.",
    "art": {
     "image": "18.png",
     "card_img": "078.png",
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 78
    }
@@ -2438,7 +2433,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 79
    }
@@ -2468,7 +2463,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 80
    }
@@ -2482,7 +2477,7 @@
    "cost_kind": "ap",
    "cost": 2,
    "atk": 12,
-   "def": 18,
+   "def": 20,
    "keywords": [],
    "condition": "",
    "on_summon": "",
@@ -2498,7 +2493,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 81
    }
@@ -2528,7 +2523,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 82,
     "raw": {
@@ -2548,20 +2543,20 @@
    "def": 4,
    "keywords": [],
    "condition": "",
-   "on_summon": "Destroy a Water Unit.",
+   "on_summon": "You must Destroy a Water Unit.",
    "on_field": "Once per turn: you can apply 1 Infiltrate to a Unit.",
    "on_destruction": "You can apply Reveal to a Spell/Trap.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Destroy a Water Unit. Once per turn: you can apply 1 Infiltrate to a Unit. On Destroy: You can apply Reveal to a Spell/Trap.",
+   "description": "On Summon: You must Destroy a Water Unit. Once per turn: you can apply 1 Infiltrate to a Unit. On Destroy: You can apply Reveal to a Spell/Trap.",
    "art": {
     "image": "79.png",
     "card_img": "083.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 83
    }
@@ -2578,25 +2573,22 @@
    "def": 8,
    "keywords": [],
    "condition": "",
-   "on_summon": "Move a Unit from Spent to Draw.",
+   "on_summon": "You must move a Unit from Spent to Draw.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Move a Unit from Spent to Draw.",
+   "description": "On Summon: You must move a Unit from Spent to Draw.",
    "art": {
     "image": "99.png",
     "card_img": "084.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
-    "index": 84,
-    "raw": {
-     "On Summon/Play": "move a Unit from Spent to Draw."
-    }
+    "index": 84
    }
   },
   {
@@ -2624,7 +2616,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 85,
     "raw": {
@@ -2640,7 +2632,7 @@
    "type": "Water",
    "cost_kind": "ap",
    "cost": 2,
-   "atk": 14,
+   "atk": 16,
    "def": 16,
    "keywords": [],
    "condition": "",
@@ -2657,7 +2649,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 86
    }
@@ -2670,28 +2662,28 @@
    "type": "Physical",
    "cost_kind": "ap",
    "cost": 2,
-   "atk": 14,
+   "atk": 10,
    "def": 4,
    "keywords": [],
    "condition": "",
    "on_summon": "",
-   "on_field": "If this Unit is Protected by a Dragon Unit: this Unit cannot be in Attack Stance, then that Dragon Unit gains +14 ATK.",
+   "on_field": "If this Unit is Protected by a Dragon Unit: this Unit cannot be in Attack Stance, then that Dragon Unit gains +10 ATK.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If this Unit is Protected by a Dragon Unit: this Unit cannot be in Attack Stance, then that Dragon Unit gains +14 ATK.",
+   "description": "If this Unit is Protected by a Dragon Unit: this Unit cannot be in Attack Stance, then that Dragon Unit gains +10 ATK.",
    "art": {
     "image": "135.png",
     "card_img": "087.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 87,
     "raw": {
-     "On Field": "If this Unit is Protected by a Dragon Unit: This Unit cannot be in Attack Stance, then that Dragon Unit gains +14 ATK."
+     "On Field": "If this Unit is Protected by a Dragon Unit: This Unit cannot be in Attack Stance, then that Dragon Unit gains +10 ATK."
     }
    }
   },
@@ -2707,25 +2699,22 @@
    "def": 0,
    "keywords": [],
    "condition": "",
-   "on_summon": "Move a card from Spent to the top of Draw.",
+   "on_summon": "You must move a card from Spent to the top of Draw.",
    "on_field": "This Unit cannot be in Defence Stance. If this Unit is Sacrificed or Tributed: gain +1 AP.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Move a card from Spent to the top of Draw. This Unit cannot be in Defence Stance. If this Unit is Sacrificed or Tributed: gain +1 AP.",
+   "description": "On Summon: You must move a card from Spent to the top of Draw. This Unit cannot be in Defence Stance. If this Unit is Sacrificed or Tributed: gain +1 AP.",
    "art": {
     "image": "150.png",
     "card_img": "088.png",
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
-    "index": 88,
-    "raw": {
-     "On Summon/Play": "move a card from Spent to the top of Draw."
-    }
+    "index": 88
    }
   },
   {
@@ -2753,7 +2742,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 89,
     "raw": {
@@ -2773,24 +2762,24 @@
    "def": 0,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 1 Eternal to this Unit.",
+   "on_summon": "",
    "on_field": "If this Unit is Protected by a Unit: that Unit gains +6 ATK.",
    "on_destruction": "",
    "material": "",
-   "evolve": "At the start of your turn you can Evolve this Unit.",
+   "evolve": "At the start of your turn: you can Evolve this Unit.",
    "evolves_into": 156,
-   "description": "On Summon: Apply 1 Eternal to this Unit. If this Unit is Protected by a Unit: that Unit gains +6 ATK.",
+   "description": "If this Unit is Protected by a Unit: that Unit gains +6 ATK.",
    "art": {
     "image": "155.png",
     "card_img": "090.png",
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 90,
     "raw": {
-     "On Summon/Play": "apply 1 Eternal to this Unit."
+     "condition": "Evolution: at the start of your turn: you can Evolve this Unit."
     }
    }
   },
@@ -2801,29 +2790,29 @@
    "race": "Monster",
    "type": "Light",
    "cost_kind": "ap",
-   "cost": 2,
+   "cost": 1,
    "atk": 0,
    "def": 0,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 1 Eternal to this Unit.",
+   "on_summon": "",
    "on_field": "If this Unit is Protected by a Unit: that Unit gains +6 ATK. At the start of your turn: draw a card, then discard a card.",
    "on_destruction": "",
    "material": "",
-   "evolve": "At the start of your turn you can Evolve this Unit.",
+   "evolve": "At the start of your turn: you can Evolve this Unit.",
    "evolves_into": 157,
-   "description": "On Summon: Apply 1 Eternal to this Unit. If this Unit is Protected by a Unit: that Unit gains +6 ATK. At the start of your turn: draw a card, then discard a card.",
+   "description": "If this Unit is Protected by a Unit: that Unit gains +6 ATK. At the start of your turn: draw a card, then discard a card.",
    "art": {
     "image": "156.png",
     "card_img": "091.png",
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 91,
     "raw": {
-     "On Summon/Play": "apply 1 Eternal to this Unit."
+     "condition": "Evolution: at the start of your turn: you can Evolve this Unit."
     }
    }
   },
@@ -2834,30 +2823,27 @@
    "race": "Monster",
    "type": "Light",
    "cost_kind": "ap",
-   "cost": 3,
+   "cost": 2,
    "atk": 0,
    "def": 0,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 1 Eternal to this Unit.",
+   "on_summon": "",
    "on_field": "If this Unit is Protected by a Unit: Adjacent Units gain +6 ATK. At the start of your turn: draw a card.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 1 Eternal to this Unit. If this Unit is Protected by a Unit: Adjacent Units gain +6 ATK. At the start of your turn: draw a card.",
+   "description": "If this Unit is Protected by a Unit: Adjacent Units gain +6 ATK. At the start of your turn: draw a card.",
    "art": {
     "image": "157.png",
     "card_img": "092.png",
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
-    "index": 92,
-    "raw": {
-     "On Summon/Play": "apply 1 Eternal to this Unit."
-    }
+    "index": 92
    }
   },
   {
@@ -2868,24 +2854,24 @@
    "type": "Water",
    "cost_kind": "ap",
    "cost": 1,
-   "atk": 6,
-   "def": 6,
+   "atk": 12,
+   "def": 4,
    "keywords": [],
    "condition": "",
-   "on_summon": "If you Control 2 Adjacent 'Divine Serpent' Units: your opponent must take -30 HP Damage, then Destroy your 'Divine Serpent' Units.",
+   "on_summon": "",
    "on_field": "Once per turn: you can apply 1 Paralyse to a Unit in this Column.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: If you Control 2 Adjacent 'Divine Serpent' Units: your opponent must take -30 HP Damage, then Destroy your 'Divine Serpent' Units. Once per turn: you can apply 1 Paralyse to a Unit in this Column.",
+   "description": "Once per turn: you can apply 1 Paralyse to a Unit in this Column.",
    "art": {
     "image": "158.png",
     "card_img": "093.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 93
    }
@@ -2898,24 +2884,24 @@
    "type": "Water",
    "cost_kind": "ap",
    "cost": 1,
-   "atk": 10,
+   "atk": 2,
    "def": 10,
    "keywords": [],
    "condition": "",
-   "on_summon": "If you Control 2 Adjacent 'Divine Serpent' Units: your opponent must take -30 HP Damage, then Destroy your 'Divine Serpent' Units.",
-   "on_field": "Adjacent Units gain +10 DEF.",
+   "on_summon": "",
+   "on_field": "Adjacent Units gain +8 DEF.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: If you Control 2 Adjacent 'Divine Serpent' Units: your opponent must take -30 HP Damage, then Destroy your 'Divine Serpent' Units. Adjacent Units gain +10 DEF.",
+   "description": "Adjacent Units gain +8 DEF.",
    "art": {
     "image": "159.png",
     "card_img": "094.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
     "index": 94
    }
@@ -2929,25 +2915,29 @@
    "cost_kind": "ap",
    "cost": 2,
    "atk": 10,
-   "def": 10,
+   "def": 16,
    "keywords": [],
    "condition": "",
-   "on_summon": "If you Control 2 Adjacent 'Divine Serpent' Units: your opponent must take -30 HP Damage, then Destroy your 'Divine Serpent' Units.",
-   "on_field": "Once per turn: you can make your opponent's Units Permanently lose -4 ATK.",
+   "on_summon": "",
+   "on_field": "Once per turn: you can add a Water Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP.",
    "on_destruction": "",
    "material": "",
-   "evolve": "",
-   "evolves_into": null,
-   "description": "On Summon: If you Control 2 Adjacent 'Divine Serpent' Units: your opponent must take -30 HP Damage, then Destroy your 'Divine Serpent' Units. Once per turn: you can make your opponent's Units Permanently lose -4 ATK.",
+   "evolve": "If you Control Divine Serpent - Head, Body and Tail: you can Evolve this Unit, then Exhaust Divine Serpent - Head, Body and Tail.",
+   "evolves_into": 197,
+   "description": "Once per turn: you can add a Water Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP.",
    "art": {
     "image": "160.png",
     "card_img": "095.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "unit",
-    "index": 95
+    "index": 95,
+    "raw": {
+     "On Field": "Once per turn: you can add a Water Unit from Draw to Hand, until the end of this turn, that Units costs -1 AP.",
+     "condition": "Evolution: if you control Divine Serpent - 'Head', ' Body' & 'Tail', then you can Evole this Unit, then Exhaust Divine Serpent - 'Head', ' Body' & 'Tail'."
+    }
    }
   },
   {
@@ -2975,7 +2965,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 96,
     "raw": {
@@ -3008,7 +2998,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 97,
     "raw": {
@@ -3018,7 +3008,7 @@
   },
   {
    "id": 82,
-   "name": "Fusion Ceremony",
+   "name": "Fusion Configuration",
    "category": "spell",
    "race": "",
    "type": "",
@@ -3041,7 +3031,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 98
    }
@@ -3071,7 +3061,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 99,
     "raw": {
@@ -3104,7 +3094,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 100
    }
@@ -3121,20 +3111,20 @@
    "def": null,
    "keywords": [],
    "condition": "",
-   "on_summon": "Switch the ATK/DEF of all Units currently on the Field until the end of this turn.",
+   "on_summon": "Switch the current ATK/DEF of all Units on the Field until the end of this turn.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "Switch the ATK/DEF of all Units currently on the Field until the end of this turn.",
+   "description": "Switch the current ATK/DEF of all Units on the Field until the end of this turn.",
    "art": {
     "image": "43.png",
     "card_img": "101.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 101
    }
@@ -3164,12 +3154,9 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
-    "index": 102,
-    "raw": {
-     "On Summon/Play": "Until the end of this turn: all new and ongoing gains and losses are reversed."
-    }
+    "index": 102
    }
   },
   {
@@ -3197,7 +3184,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 103,
     "raw": {
@@ -3230,7 +3217,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 104
    }
@@ -3260,7 +3247,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 105
    }
@@ -3290,7 +3277,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 106,
     "raw": {
@@ -3323,7 +3310,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 107
    }
@@ -3340,20 +3327,20 @@
    "def": null,
    "keywords": [],
    "condition": "",
-   "on_summon": "Destroy a Unit with a Buff.",
+   "on_summon": "Apply 1 Cleanse to a Unit, then apply 1 Curse to a Unit.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "Destroy a Unit with a Buff.",
+   "description": "Apply 1 Cleanse to a Unit, then apply 1 Curse to a Unit.",
    "art": {
     "image": "138.png",
     "card_img": "108.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 108
    }
@@ -3383,14 +3370,14 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 109
    }
   },
   {
    "id": 182,
-   "name": "Shimmer Serum",
+   "name": "Street Venom",
    "category": "spell",
    "race": "",
    "type": "",
@@ -3400,24 +3387,24 @@
    "def": null,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 1 Blind and 1 Infiltrate to a Unit, until the end of this turn: that Unit gains +10 ATK, that Unit Permanently costs +1 AP.",
+   "on_summon": "Apply 1 Blind and 1 Infiltrate to a Unit, until the end of this turn: that Unit gains +10 ATK. If this Spell is activated: this Spell Permanently costs +1 AP.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "Apply 1 Blind and 1 Infiltrate to a Unit, until the end of this turn: that Unit gains +10 ATK, that Unit Permanently costs +1 AP.",
+   "description": "Apply 1 Blind and 1 Infiltrate to a Unit, until the end of this turn: that Unit gains +10 ATK. If this Spell is activated: this Spell Permanently costs +1 AP.",
    "art": {
     "image": "182.png",
     "card_img": "110.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 110,
     "raw": {
-     "On Summon/Play": "apply 1 Blind and 1 Infiltrate to a Unit, until the end of this turn: that Unit gains +10 ATK, that Unit Permanently costs +1 AP."
+     "On Summon/Play": "apply 1 Blind and 1 Infiltrate to a Unit, until the end of this turn: that Unit gains +10 ATK. If this Spell is activated: this Spell Permanently costs +1 AP."
     }
    }
   },
@@ -3446,7 +3433,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "spell",
     "index": 111
    }
@@ -3476,7 +3463,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 112,
     "raw": {
@@ -3496,24 +3483,24 @@
    "def": null,
    "keywords": [],
    "condition": "If your opponent Destroys one of your Units:",
-   "on_summon": "Apply 4 Medic to a Unit.",
+   "on_summon": "Apply 6 Medic to a Unit.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your opponent Destroys one of your Units: Apply 4 Medic to a Unit.",
+   "description": "If your opponent Destroys one of your Units: Apply 6 Medic to a Unit.",
    "art": {
     "image": "86.png",
     "card_img": "113.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 113,
     "raw": {
-     "On Summon/Play": "apply 4 Medic to a Unit."
+     "On Summon/Play": "apply 6 Medic to a Unit."
     }
    }
   },
@@ -3528,61 +3515,58 @@
    "atk": null,
    "def": null,
    "keywords": [],
-   "condition": "If your Unit is Destroyed by an Effect:",
+   "condition": "If your card is Destroyed by an Effect:",
    "on_summon": "Destroy an opponent's card.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your Unit is Destroyed by an Effect: Destroy an opponent's card.",
+   "description": "If your card is Destroyed by an Effect: Destroy an opponent's card.",
    "art": {
     "image": "87.png",
     "card_img": "114.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 114
    }
   },
   {
    "id": 45,
-   "name": "Magic Cylinder",
+   "name": "Dimensional Redirect",
    "category": "trap",
    "race": "",
    "type": "",
    "cost_kind": "ap",
-   "cost": 1,
+   "cost": 2,
    "atk": null,
    "def": null,
    "keywords": [],
    "condition": "If your opponent's Unit in this Column declares an Attack:",
-   "on_summon": "Your opponent must take HP Damage equal to the Attacking Unit's ATK. If this Trap is activated: this Trap Permanently costs +1 AP.",
+   "on_summon": "Your opponent takes HP Damage equal to the Attacking Unit's ATK. If this Trap is activated: this Trap Permanently costs +1 AP.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your opponent's Unit in this Column declares an Attack: Your opponent must take HP Damage equal to the Attacking Unit's ATK. If this Trap is activated: this Trap Permanently costs +1 AP.",
+   "description": "If your opponent's Unit in this Column declares an Attack: Your opponent takes HP Damage equal to the Attacking Unit's ATK. If this Trap is activated: this Trap Permanently costs +1 AP.",
    "art": {
     "image": "45.png",
     "card_img": "115.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
-    "index": 115,
-    "raw": {
-     "condition": "If your opponent declares an Attack in this Column:"
-    }
+    "index": 115
    }
   },
   {
    "id": 46,
-   "name": "Mirror Force",
+   "name": "Sorcerer's Forcefield",
    "category": "trap",
    "race": "",
    "type": "",
@@ -3605,17 +3589,14 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
-    "index": 116,
-    "raw": {
-     "condition": "If your opponent Controls 4 or more Units and declares an Attack:"
-    }
+    "index": 116
    }
   },
   {
    "id": 47,
-   "name": "Damage Conversion",
+   "name": "Dimensional Conversion",
    "category": "trap",
    "race": "",
    "type": "",
@@ -3638,13 +3619,9 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
-    "index": 117,
-    "raw": {
-     "condition": "If your opponent declares an Attack in this Column:",
-     "cost": "0"
-    }
+    "index": 117
    }
   },
   {
@@ -3659,30 +3636,27 @@
    "def": null,
    "keywords": [],
    "condition": "If your opponent Summons a Unit and now Controls 3 or more Units:",
-   "on_summon": "One of your opponent's Units Permanently loses -20 ATK.",
+   "on_summon": "Your opponent's Units Permanently lose -10 ATK.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your opponent Summons a Unit and now Controls 3 or more Units: One of your opponent's Units Permanently loses -20 ATK.",
+   "description": "If your opponent Summons a Unit and now Controls 3 or more Units: Your opponent's Units Permanently lose -10 ATK.",
    "art": {
     "image": "48.png",
     "card_img": "118.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
-    "index": 118,
-    "raw": {
-     "On Summon/Play": "Your opponent's Unit with the highest ATK Permanently loses -20 ATK."
-    }
+    "index": 118
    }
   },
   {
    "id": 49,
-   "name": "Trap Hole",
+   "name": "Trap Hole of Ensnarement",
    "category": "trap",
    "race": "",
    "type": "",
@@ -3691,31 +3665,31 @@
    "atk": null,
    "def": null,
    "keywords": [],
-   "condition": "If your opponent Summons a Unit:",
-   "on_summon": "Apply 3 Paralyse to that Unit.",
+   "condition": "If your opponent Summons a Unit in this cards Column:",
+   "on_summon": "Apply 2 Paralyse to your opponent's Units in this Column.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your opponent Summons a Unit: Apply 3 Paralyse to that Unit.",
+   "description": "If your opponent Summons a Unit in this cards Column: Apply 2 Paralyse to your opponent's Units in this Column.",
    "art": {
     "image": "49.png",
     "card_img": "119.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 119,
     "raw": {
-     "On Summon/Play": "apply 3 Paralyse to that Unit."
+     "On Summon/Play": "apply 2 Paralyse to your opponent's Units in this Column."
     }
    }
   },
   {
    "id": 50,
-   "name": "Wabuku",
+   "name": "Perfect Dodge",
    "category": "trap",
    "race": "",
    "type": "",
@@ -3724,21 +3698,21 @@
    "atk": null,
    "def": null,
    "keywords": [],
-   "condition": "If your opponent declares an Attack:",
+   "condition": "If your opponent declares an Attack on a Unit in this Column:",
    "on_summon": "Apply 1 Eternal to a Unit in this Column.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your opponent declares an Attack: Apply 1 Eternal to a Unit in this Column.",
+   "description": "If your opponent declares an Attack on a Unit in this Column: Apply 1 Eternal to a Unit in this Column.",
    "art": {
     "image": "50.png",
     "card_img": "120.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 120,
     "raw": {
@@ -3748,7 +3722,7 @@
   },
   {
    "id": 51,
-   "name": "Rushed Recklessly",
+   "name": "Defensive Rally",
    "category": "trap",
    "race": "",
    "type": "",
@@ -3757,21 +3731,21 @@
    "atk": null,
    "def": null,
    "keywords": [],
-   "condition": "If your opponent declares an Attack:",
+   "condition": "If your opponent declares an Attack on a Unit in this Column:",
    "on_summon": "Until the end of this turn: your Units in this Column gain +8 DEF.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your opponent declares an Attack: Until the end of this turn: your Units in this Column gain +8 DEF.",
+   "description": "If your opponent declares an Attack on a Unit in this Column: Until the end of this turn: your Units in this Column gain +8 DEF.",
    "art": {
     "image": "51.png",
     "card_img": "121.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 121
    }
@@ -3801,7 +3775,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 122
    }
@@ -3831,7 +3805,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 123
    }
@@ -3861,7 +3835,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 124
    }
@@ -3891,7 +3865,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 125
    }
@@ -3908,24 +3882,24 @@
    "def": null,
    "keywords": [],
    "condition": "If your opponent declares an Attack:",
-   "on_summon": "Apply 1 Curse to the Attacked Unit, then that Unit gains ATK/DEF equal to the ATK/DEF of a Unit Adjacent to it, then send that Adjacent Unit to Spent.",
+   "on_summon": "Apply 1 Curse to the Attacked Unit, then until the end of this turn: that Unit gains ATK/DEF equal to the ATK/DEF of a Unit Adjacent to it, then send that Adjacent Unit to Spent.",
    "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "If your opponent declares an Attack: Apply 1 Curse to the Attacked Unit, then that Unit gains ATK/DEF equal to the ATK/DEF of a Unit Adjacent to it, then send that Adjacent Unit to Spent.",
+   "description": "If your opponent declares an Attack: Apply 1 Curse to the Attacked Unit, then until the end of this turn: that Unit gains ATK/DEF equal to the ATK/DEF of a Unit Adjacent to it, then send that Adjacent Unit to Spent.",
    "art": {
     "image": "164.png",
     "card_img": "126.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 126,
     "raw": {
-     "On Summon/Play": "apply 1 Curse to the Attacked Unit, then that Unit gains ATK/DEF equal to the ATK/DEF of a Unit Adjacent to it, then send that Adjacent Unit to Spent."
+     "On Summon/Play": "apply 1 Curse to the Attacked Unit, then until the end of this turn: that Unit gains ATK/DEF equal to the ATK/DEF of a Unit Adjacent to it, then send that Adjacent Unit to Spent."
     }
    }
   },
@@ -3954,7 +3928,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 127
    }
@@ -3984,7 +3958,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 128
    }
@@ -4014,7 +3988,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": 129
    }
@@ -4044,7 +4018,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 130
    }
@@ -4074,7 +4048,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 131
    }
@@ -4092,19 +4066,19 @@
    "keywords": [],
    "condition": "",
    "on_summon": "",
-   "on_field": "Units you Control gain +4 ATK/DEF for each unique Race on Units you Control.",
+   "on_field": "Units you Control gain +4 ATK/DEF for each unique Race of Units you Control.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "Units you Control gain +4 ATK/DEF for each unique Race on Units you Control.",
+   "description": "Units you Control gain +4 ATK/DEF for each unique Race of Units you Control.",
    "art": {
     "image": "54.png",
     "card_img": "132.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 132
    }
@@ -4134,7 +4108,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 133
    }
@@ -4164,7 +4138,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 134
    }
@@ -4194,7 +4168,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 135
    }
@@ -4224,7 +4198,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 136
    }
@@ -4236,7 +4210,7 @@
    "race": "",
    "type": "",
    "cost_kind": "ap",
-   "cost": 2,
+   "cost": 1,
    "atk": null,
    "def": null,
    "keywords": [],
@@ -4254,7 +4228,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 137
    }
@@ -4284,7 +4258,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 138
    }
@@ -4314,7 +4288,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 139
    }
@@ -4332,19 +4306,19 @@
    "keywords": [],
    "condition": "",
    "on_summon": "",
-   "on_field": "You cannot activate this Power if your Deck contains a 0 Cost card. At the start of your turn: if you have 1 or more cards in Exhaust, gain +1 AP.",
+   "on_field": "You cannot activate this Power if your Deck contains a 0 Cost card. Your base AP increases by +1 AP.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "You cannot activate this Power if your Deck contains a 0 Cost card. At the start of your turn: if you have 1 or more cards in Exhaust, gain +1 AP.",
+   "description": "You cannot activate this Power if your Deck contains a 0 Cost card. Your base AP increases by +1 AP.",
    "art": {
     "image": "149.png",
     "card_img": "140.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 140
    }
@@ -4374,7 +4348,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 141
    }
@@ -4404,7 +4378,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 142
    }
@@ -4434,7 +4408,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 143
    }
@@ -4464,7 +4438,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 144
    }
@@ -4494,7 +4468,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 145
    }
@@ -4524,7 +4498,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 146
    }
@@ -4532,31 +4506,35 @@
   {
    "id": 179,
    "name": "Tyrant's Lantern",
-   "category": "power",
+   "category": "spell",
    "race": "",
    "type": "",
    "cost_kind": "ap",
-   "cost": 2,
+   "cost": 1,
    "atk": null,
    "def": null,
    "keywords": [],
    "condition": "",
-   "on_summon": "",
-   "on_field": "Your Fire Units gain +8 ATK. If your Fire Unit is Destroyed: take -6 HP Damage, then your opponent must take -6 HP Damage.",
+   "on_summon": "Apply 1 Burn to a Unit, until the end of this turn: that Unit gains +4 ATK and is Fire Type.",
+   "on_field": "",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "Your Fire Units gain +8 ATK. If your Fire Unit is Destroyed: take -6 HP Damage, then your opponent must take -6 HP Damage.",
+   "description": "Apply 1 Burn to a Unit, until the end of this turn: that Unit gains +4 ATK and is Fire Type.",
    "art": {
     "image": "179.png",
     "card_img": "147.png",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
-    "sheet": "power",
-    "index": 147
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "spell",
+    "index": 147,
+    "raw": {
+     "On Field": "Apply 1 Burn to a Unit, until the end of this turn: that Unit gains + 4 ATK and is Fire Type.",
+     "On Summon/Play": ""
+    }
    }
   },
   {
@@ -4584,7 +4562,7 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "power",
     "index": 148
    }
@@ -4601,26 +4579,22 @@
    "def": 22,
    "keywords": [],
    "condition": "Unit with 20 or more ATK or DEF + Lightning Unit",
-   "on_summon": "Apply Reveal to all Spells/Traps.",
+   "on_summon": "You must apply Reveal to all Spells/Traps.",
    "on_field": "",
-   "on_destruction": "Apply 1 Paralyse to all Units.",
+   "on_destruction": "You must apply 1 Paralyse to all Units.",
    "material": "Unit with 20 or more ATK or DEF + Lightning Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply Reveal to all Spells/Traps. On Destroy: Apply 1 Paralyse to all Units.",
+   "description": "On Summon: You must apply Reveal to all Spells/Traps. On Destroy: You must apply 1 Paralyse to all Units.",
    "art": {
     "image": "56.png",
     "card_img": "149.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
-    "index": 149,
-    "raw": {
-     "On Destruction": "apply 1 Paralyse to all Units.",
-     "On Summon/Play": "apply Reveal to all Spells/Traps."
-    }
+    "index": 149
    }
   },
   {
@@ -4631,7 +4605,7 @@
    "type": "Earth",
    "cost_kind": "fusion",
    "cost": null,
-   "atk": 20,
+   "atk": 22,
    "def": 46,
    "keywords": [],
    "condition": "Unit with 20 or more ATK or DEF + Earth Unit",
@@ -4648,7 +4622,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 150
    }
@@ -4678,7 +4652,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 151
    }
@@ -4708,7 +4682,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 152
    }
@@ -4725,30 +4699,30 @@
    "def": 30,
    "keywords": [],
    "condition": "Debuffed Unit + Buffed Unit",
-   "on_summon": "Apply 3 Debilitate to a Unit.",
+   "on_summon": "You must apply 3 Debilitate to a Unit.",
    "on_field": "Once per turn: you can apply 3 Poison to a Unit.",
    "on_destruction": "",
    "material": "Debuffed Unit + Buffed Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 3 Debilitate to a Unit. Once per turn: you can apply 3 Poison to a Unit.",
+   "description": "On Summon: You must apply 3 Debilitate to a Unit. Once per turn: you can apply 3 Poison to a Unit.",
    "art": {
     "image": "60.png",
     "card_img": "153.png",
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 153,
     "raw": {
-     "On Summon/Play": "apply 3 Debilitate to a Unit."
+     "On Summon/Play": "you must apply 3 Debilitate to a Unit."
     }
    }
   },
   {
    "id": 61,
-   "name": "Sanctified Blade",
+   "name": "Sanctified Paladin",
    "category": "fusion",
    "race": "Warrior",
    "type": "Light",
@@ -4771,7 +4745,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 154
    }
@@ -4801,11 +4775,12 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 155,
     "raw": {
-     "On Summon/Play": "apply 1 Eternal to this Unit."
+     "On Summon/Play": "apply 1 Eternal to this Unit.",
+     "condition": ""
     }
    }
   },
@@ -4823,18 +4798,18 @@
    "condition": "2 Units with the same Type",
    "on_summon": "This Unit's ATK/DEF become the combined ATK/DEF of the Units Tributed for its Fusion Summon, and this Unit's Type becomes their Type.",
    "on_field": "",
-   "on_destruction": "Destroy a Unit with the same Type as this Unit.",
+   "on_destruction": "You must Destroy a Unit with the same Type as this Unit.",
    "material": "2 Units with the same Type",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: This Unit's ATK/DEF become the combined ATK/DEF of the Units Tributed for its Fusion Summon, and this Unit's Type becomes their Type. On Destroy: Destroy a Unit with the same Type as this Unit.",
+   "description": "On Summon: This Unit's ATK/DEF become the combined ATK/DEF of the Units Tributed for its Fusion Summon, and this Unit's Type becomes their Type. On Destroy: You must Destroy a Unit with the same Type as this Unit.",
    "art": {
     "image": "94.png",
     "card_img": "156.png",
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 156
    }
@@ -4864,7 +4839,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 157
    }
@@ -4894,7 +4869,7 @@
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 158,
     "raw": {
@@ -4910,24 +4885,24 @@
    "type": "Water",
    "cost_kind": "fusion",
    "cost": null,
-   "atk": 26,
+   "atk": 20,
    "def": 44,
    "keywords": [],
    "condition": "Unit with 20 or more ATK or DEF + Water Unit",
    "on_summon": "Apply 2 Blind to your opponent's Units.",
-   "on_field": "Once per turn: you can apply 1 Nimble to your Units. Once per turn: you can switch the ATK/DEF of all Units currently on the Field until the end of this turn.",
+   "on_field": "Once per turn: you can apply 1 Nimble to your Units. Once per turn: you can switch the ATK/DEF of your Units currently on the Field until the end of this turn.",
    "on_destruction": "",
    "material": "Unit with 20 or more ATK or DEF + Water Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 2 Blind to your opponent's Units. Once per turn: you can apply 1 Nimble to your Units. Once per turn: you can switch the ATK/DEF of all Units currently on the Field until the end of this turn.",
+   "description": "On Summon: Apply 2 Blind to your opponent's Units. Once per turn: you can apply 1 Nimble to your Units. Once per turn: you can switch the ATK/DEF of your Units currently on the Field until the end of this turn.",
    "art": {
     "image": "143.png",
     "card_img": "159.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 159,
     "raw": {
@@ -4960,7 +4935,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 160
    }
@@ -4977,25 +4952,22 @@
    "def": 12,
    "keywords": [],
    "condition": "Mage Unit + Fire Unit",
-   "on_summon": "Apply 10 Burn to all Units.",
+   "on_summon": "You must apply 10 Burn to all Units.",
    "on_field": "Once per turn: you can lose -1 AP to Heal +10 HP.",
    "on_destruction": "",
    "material": "Mage Unit + Fire Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 10 Burn to all Units. Once per turn: you can lose -1 AP to Heal +10 HP.",
+   "description": "On Summon: You must apply 10 Burn to all Units. Once per turn: you can lose -1 AP to Heal +10 HP.",
    "art": {
     "image": "145.png",
     "card_img": "161.png",
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
-    "index": 161,
-    "raw": {
-     "On Summon/Play": "apply 10 Burn to all Units."
-    }
+    "index": 161
    }
   },
   {
@@ -5023,7 +4995,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 162,
     "raw": {
@@ -5039,29 +5011,27 @@
    "type": "Dark",
    "cost_kind": "fusion",
    "cost": null,
-   "atk": 20,
+   "atk": 26,
    "def": 42,
    "keywords": [],
    "condition": "Unit with 20 or more ATK or DEF + Dark Unit",
    "on_summon": "Apply 2 Paralyse to your opponent's Unprotected Units.",
    "on_field": "At the start of your turn: your opponent's Units lose -8 DEF. Your opponent's Units cannot attack other Units if they can attack this Unit.",
-   "on_destruction": "Change the Stance of all Units.",
+   "on_destruction": "You must change the Stance of all Units.",
    "material": "Unit with 20 or more ATK or DEF + Dark Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 2 Paralyse to your opponent's Unprotected Units. At the start of your turn: your opponent's Units lose -8 DEF. Your opponent's Units cannot attack other Units if they can attack this Unit. On Destroy: Change the Stance of all Units.",
+   "description": "On Summon: Apply 2 Paralyse to your opponent's Unprotected Units. At the start of your turn: your opponent's Units lose -8 DEF. Your opponent's Units cannot attack other Units if they can attack this Unit. On Destroy: You must change the Stance of all Units.",
    "art": {
     "image": "147.png",
     "card_img": "163.png",
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 163,
     "raw": {
-     "On Destruction": "change the Stance of all Units.",
-     "On Field": "At the start of your turn: your opponent's Units lose -8 DEF. If your opponent's Unit attacks and this Unit is Unprotected: that Unit must attack this Unit.",
      "On Summon/Play": "apply 2 Paralyse to your opponent's Unprotected Units."
     }
    }
@@ -5069,33 +5039,33 @@
   {
    "id": 181,
    "name": "Solomon, the Tyrannical",
-   "category": "fusion",
+   "category": "unit",
    "race": "Warrior",
    "type": "Fire",
-   "cost_kind": "fusion",
-   "cost": null,
+   "cost_kind": "ap",
+   "cost": 3,
    "atk": 30,
-   "def": 24,
+   "def": 14,
    "keywords": [],
-   "condition": "Warrior Unit + Fire Unit",
+   "condition": "",
    "on_summon": "Apply 2 Pierce to this Unit.",
-   "on_field": "Once per turn: if this Unit is Protecting a Unit, you can Exhaust that Unit to apply 1 Eternal to this Unit and gain +1 AP.",
-   "on_destruction": "Take -12 HP Damage.",
-   "material": "Warrior Unit + Fire Unit",
+   "on_field": "Once per turn: if this Unit is Protected by a Unit, you can Destroy that Unit to apply 1 Eternal to this Unit and gain +1 AP.",
+   "on_destruction": "Take -10 HP Damage.",
+   "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 2 Pierce to this Unit. Once per turn: if this Unit is Protecting a Unit, you can Exhaust that Unit to apply 1 Eternal to this Unit and gain +1 AP. On Destroy: Take -12 HP Damage.",
+   "description": "On Summon: Apply 2 Pierce to this Unit. Once per turn: if this Unit is Protected by a Unit, you can Destroy that Unit to apply 1 Eternal to this Unit and gain +1 AP. On Destroy: Take -10 HP Damage.",
    "art": {
     "image": "181.png",
     "card_img": "164.png",
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
-    "sheet": "fusion",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "unit",
     "index": 164,
     "raw": {
-     "On Destruction": "take -12 HP Damage.",
+     "On Destruction": "take -10 HP Damage.",
      "On Summon/Play": "apply 2 Pierce to this Unit."
     }
    }
@@ -5112,25 +5082,22 @@
    "def": 30,
    "keywords": [],
    "condition": "Monster Unit + Dark Unit",
-   "on_summon": "Apply all Debuffs on all Units to this Unit.",
+   "on_summon": "You must apply all Debuffs on all Units to this Unit.",
    "on_field": "Once per turn: you can double the Debuffs on this Unit, then apply those Debuffs to an opponent's Unit.",
    "on_destruction": "",
    "material": "Monster Unit + Dark Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply all Debuffs on all Units to this Unit. Once per turn: you can double the Debuffs on this Unit, then apply those Debuffs to an opponent's Unit.",
+   "description": "On Summon: You must apply all Debuffs on all Units to this Unit. Once per turn: you can double the Debuffs on this Unit, then apply those Debuffs to an opponent's Unit.",
    "art": {
     "image": "187.png",
     "card_img": "163.png",
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
-    "index": 165,
-    "raw": {
-     "On Summon/Play": "apply all Debuffs on all Units to this Unit."
-    }
+    "index": 165
    }
   },
   {
@@ -5158,7 +5125,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": 166
    }
@@ -5175,25 +5142,24 @@
    "def": 8,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 8 Burn to this Unit.",
+   "on_summon": "You must apply 8 Burn to this Unit.",
    "on_field": "Once per turn: you can apply Reveal to a Spell/Trap.",
    "on_destruction": "Apply 4 Burn to the Unit that Destroyed this Unit.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 8 Burn to this Unit. Once per turn: you can apply Reveal to a Spell/Trap. On Destroy: Apply 4 Burn to the Unit that Destroyed this Unit.",
+   "description": "On Summon: You must apply 8 Burn to this Unit. Once per turn: you can apply Reveal to a Spell/Trap. On Destroy: Apply 4 Burn to the Unit that Destroyed this Unit.",
    "art": {
     "image": "98.png",
     "card_img": "166.png",
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 167,
     "raw": {
-     "On Destruction": "apply 4 Burn to the Unit that Destroyed this Unit.",
-     "On Summon/Play": "apply 8 Burn to this Unit."
+     "On Destruction": "apply 4 Burn to the Unit that Destroyed this Unit."
     }
    }
   },
@@ -5222,7 +5188,7 @@
     "type_icon": "Card/types/light.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 168
    }
@@ -5239,25 +5205,22 @@
    "def": 6,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 1 Curse to this Unit.",
+   "on_summon": "You must apply 1 Curse to this Unit.",
    "on_field": "Once per turn: you can apply 1 Debilitate to a Unit in this Column.",
    "on_destruction": "You can apply 1 Curse to a Unit.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 1 Curse to this Unit. Once per turn: you can apply 1 Debilitate to a Unit in this Column. On Destroy: You can apply 1 Curse to a Unit.",
+   "description": "On Summon: You must apply 1 Curse to this Unit. Once per turn: you can apply 1 Debilitate to a Unit in this Column. On Destroy: You can apply 1 Curse to a Unit.",
    "art": {
     "image": "62.png",
     "card_img": "167.png",
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
-    "index": 169,
-    "raw": {
-     "On Summon/Play": "apply 1 Curse to this Unit."
-    }
+    "index": 169
    }
   },
   {
@@ -5274,18 +5237,18 @@
    "condition": "",
    "on_summon": "You can apply Reveal to all Spells/Traps.",
    "on_field": "Once per turn: you can switch the ATK/DEF of all Units currently on the Field until the end of this turn. At the end of your turn: apply 1 Eternal to this Unit.",
-   "on_destruction": "Exhaust a card from Spent.",
+   "on_destruction": "You must Exhaust a card from Spent.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: You can apply Reveal to all Spells/Traps. Once per turn: you can switch the ATK/DEF of all Units currently on the Field until the end of this turn. At the end of your turn: apply 1 Eternal to this Unit. On Destroy: Exhaust a card from Spent.",
+   "description": "On Summon: You can apply Reveal to all Spells/Traps. Once per turn: you can switch the ATK/DEF of all Units currently on the Field until the end of this turn. At the end of your turn: apply 1 Eternal to this Unit. On Destroy: You must Exhaust a card from Spent.",
    "art": {
     "image": "63.png",
     "card_img": "168.png",
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 170
    }
@@ -5315,7 +5278,7 @@
     "type_icon": "Card/types/dark.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 171
    }
@@ -5332,25 +5295,22 @@
    "def": 28,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 1 Eternal to an Adjacent Unit.",
+   "on_summon": "You can apply 1 Eternal to an Adjacent Unit.",
    "on_field": "Once per turn: you can draw a card, then discard a card.",
    "on_destruction": "",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 1 Eternal to an Adjacent Unit. Once per turn: you can draw a card, then discard a card.",
+   "description": "On Summon: You can apply 1 Eternal to an Adjacent Unit. Once per turn: you can draw a card, then discard a card.",
    "art": {
     "image": "66.png",
     "card_img": "170.png",
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
-    "index": 172,
-    "raw": {
-     "On Summon/Play": "apply 1 Eternal to an Adjacent Unit."
-    }
+    "index": 172
    }
   },
   {
@@ -5378,7 +5338,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 173,
     "raw": {
@@ -5401,18 +5361,18 @@
    "condition": "",
    "on_summon": "You can apply 1 Rune to a Unit.",
    "on_field": "Once per turn: you can apply 1 Debilitate to a Unit.",
-   "on_destruction": "Destroy a Unit with Rune applied.",
+   "on_destruction": "You must Destroy a Unit with a Rune.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: You can apply 1 Rune to a Unit. Once per turn: you can apply 1 Debilitate to a Unit. On Destroy: Destroy a Unit with Rune applied.",
+   "description": "On Summon: You can apply 1 Rune to a Unit. Once per turn: you can apply 1 Debilitate to a Unit. On Destroy: You must Destroy a Unit with a Rune.",
    "art": {
     "image": "65.png",
     "card_img": "172.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 174
    }
@@ -5442,7 +5402,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 175,
     "raw": {
@@ -5458,28 +5418,28 @@
    "type": "Fire",
    "cost_kind": "ritual",
    "cost": 3,
-   "atk": 10,
-   "def": 18,
+   "atk": 8,
+   "def": 0,
    "keywords": [],
    "condition": "",
-   "on_summon": "Apply 8 Eternal to this Unit.",
-   "on_field": "Once per turn: you can apply 6 Poison to a Unit in this Column.",
-   "on_destruction": "You can add a Power from Draw or Spent to Hand.",
+   "on_summon": "Apply 8 Eternal and 8 Nimble to this Unit.",
+   "on_field": "Once per turn: you can apply 4 Poison to a Unit in this Column.",
+   "on_destruction": "Your opponent can add a Power from Draw or Spent to Hand, until the end of this turn: that Power costs 0 AP.",
    "material": "",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Apply 8 Eternal to this Unit. Once per turn: you can apply 6 Poison to a Unit in this Column. On Destroy: You can add a Power from Draw or Spent to Hand.",
+   "description": "On Summon: Apply 8 Eternal and 8 Nimble to this Unit. Once per turn: you can apply 4 Poison to a Unit in this Column. On Destroy: Your opponent can add a Power from Draw or Spent to Hand, until the end of this turn: that Power costs 0 AP.",
    "art": {
     "image": "183.png",
     "card_img": "174.png",
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 176,
     "raw": {
-     "On Summon/Play": "apply 8 Eternal to this Unit."
+     "On Summon/Play": "apply 8 Eternal and 8 Nimble to this Unit."
     }
    }
   },
@@ -5508,7 +5468,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "ritual",
     "index": 177
    }
@@ -5538,7 +5498,7 @@
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 178,
     "raw": {
@@ -5560,18 +5520,18 @@
    "condition": "Exhaust Units from Spent whose combined Cost equals this Unit's Cost.",
    "on_summon": "",
    "on_field": "At the start of your turn: this Unit gains +6 ATK. This Unit can attack your opponent directly.",
-   "on_destruction": "Exhaust this Unit.",
+   "on_destruction": "You must Exhaust this Unit.",
    "material": "Exhaust Units from Spent whose combined Cost equals this Unit's Cost.",
    "evolve": "",
    "evolves_into": null,
-   "description": "At the start of your turn: this Unit gains +6 ATK. This Unit can attack your opponent directly. On Destroy: Exhaust this Unit.",
+   "description": "At the start of your turn: this Unit gains +6 ATK. This Unit can attack your opponent directly. On Destroy: You must Exhaust this Unit.",
    "art": {
     "image": "171.png",
     "card_img": "177.png",
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 179
    }
@@ -5601,7 +5561,7 @@
     "type_icon": "Card/types/fire.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 180
    }
@@ -5631,7 +5591,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 181
    }
@@ -5650,22 +5610,22 @@
    "condition": "Exhaust Units from Spent whose combined Cost equals this Unit's Cost.",
    "on_summon": "Your opponent takes -4 HP Damage for each Unit your opponent Controls.",
    "on_field": "",
-   "on_destruction": "Apply 1 Paralyse to all Units, then Exhaust this Unit.",
+   "on_destruction": "Apply 1 Paralyse to all Units, then you must Exhaust this Unit.",
    "material": "Exhaust Units from Spent whose combined Cost equals this Unit's Cost.",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Your opponent takes -4 HP Damage for each Unit your opponent Controls. On Destroy: Apply 1 Paralyse to all Units, then Exhaust this Unit.",
+   "description": "On Summon: Your opponent takes -4 HP Damage for each Unit your opponent Controls. On Destroy: Apply 1 Paralyse to all Units, then you must Exhaust this Unit.",
    "art": {
     "image": "173.png",
     "card_img": "179.png",
     "type_icon": "Card/types/lightning.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 182,
     "raw": {
-     "On Destruction": "apply 1 Paralyse to all Units, then Exhaust this Unit."
+     "On Destruction": "apply 1 Paralyse to all Units, then you must Exhaust this Unit."
     }
    }
   },
@@ -5694,7 +5654,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 183
    }
@@ -5724,7 +5684,7 @@
     "type_icon": "Card/types/physical.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 184
    }
@@ -5741,25 +5701,22 @@
    "def": 20,
    "keywords": [],
    "condition": "Exhaust Units from Spent whose combined Cost equals this Unit's Cost.",
-   "on_summon": "Change the Stance of your opponent's Units.",
+   "on_summon": "You must change the Stance of your opponent's Units.",
    "on_field": "Once per turn: you can apply 1 Debilitate to a Unit.",
    "on_destruction": "Your Units Permanently gain +10 DEF.",
    "material": "Exhaust Units from Spent whose combined Cost equals this Unit's Cost.",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: Change the Stance of your opponent's Units. Once per turn: you can apply 1 Debilitate to a Unit. On Destroy: Your Units Permanently gain +10 DEF.",
+   "description": "On Summon: You must change the Stance of your opponent's Units. Once per turn: you can apply 1 Debilitate to a Unit. On Destroy: Your Units Permanently gain +10 DEF.",
    "art": {
     "image": "175.png",
     "card_img": "182.png",
     "type_icon": "Card/types/earth.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
-    "index": 185,
-    "raw": {
-     "On Summon/Play": "change the Stance of your opponent's Units."
-    }
+    "index": 185
    }
   },
   {
@@ -5787,7 +5744,7 @@
     "type_icon": "Card/types/water.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 186
    }
@@ -5817,7 +5774,7 @@
     "type_icon": "Card/types/unknown.png"
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "arcane",
     "index": 187
    }
@@ -5847,10 +5804,11 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": null,
     "raw": {
+     "condition": "Unit with 20 or more ATK or DEF + Physical Unit",
      "name": "Owlbear Druid inspired"
     }
    }
@@ -5868,19 +5826,19 @@
    "keywords": [],
    "condition": "Beast Unit + Light Unit",
    "on_summon": "You can Summon a 2 Cost or lower Unit from Draw in this Column.",
-   "on_field": "At the start of your turn: if this Unit is Protecting a Unit, then your Traps cost -1 AP. If this Unit is Protected by a Unit, then your Traps cannot be Destroyed.",
+   "on_field": "If this Unit is Protecting a Unit, then your Traps cost -1 AP. If this Unit is Protected by a Unit, then your Traps cannot be Destroyed.",
    "on_destruction": "",
    "material": "Beast Unit + Light Unit",
    "evolve": "",
    "evolves_into": null,
-   "description": "On Summon: You can Summon a 2 Cost or lower Unit from Draw in this Column. At the start of your turn: if this Unit is Protecting a Unit, then your Traps cost -1 AP. If this Unit is Protected by a Unit, then your Traps cannot be Destroyed.",
+   "description": "On Summon: You can Summon a 2 Cost or lower Unit from Draw in this Column. If this Unit is Protecting a Unit, then your Traps cost -1 AP. If this Unit is Protected by a Unit, then your Traps cannot be Destroyed.",
    "art": {
     "image": "",
     "card_img": "",
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "fusion",
     "index": null,
     "raw": {
@@ -5913,9 +5871,208 @@
     "type_icon": ""
    },
    "source": {
-    "file": "RLDB Master - Card Database (2026-11-03).csv",
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
     "sheet": "trap",
     "index": null
+   }
+  },
+  {
+   "id": 192,
+   "name": "Mithral Dome",
+   "category": "power",
+   "race": "",
+   "type": "",
+   "cost_kind": "ap",
+   "cost": 1,
+   "atk": null,
+   "def": null,
+   "keywords": [],
+   "condition": "",
+   "on_summon": "",
+   "on_field": "If your Spell, Trap or Power would be Destroyed, you can Destroy this card instead.",
+   "on_destruction": "",
+   "material": "",
+   "evolve": "",
+   "evolves_into": null,
+   "description": "If your Spell, Trap or Power would be Destroyed, you can Destroy this card instead.",
+   "art": {
+    "image": "",
+    "card_img": "",
+    "type_icon": ""
+   },
+   "source": {
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "power",
+    "index": null
+   }
+  },
+  {
+   "id": 193,
+   "name": "A Great Heist",
+   "category": "spell",
+   "race": "",
+   "type": "",
+   "cost_kind": "ap",
+   "cost": 2,
+   "atk": null,
+   "def": null,
+   "keywords": [],
+   "condition": "",
+   "on_summon": "Take Control of an opponent's Power.",
+   "on_field": "",
+   "on_destruction": "",
+   "material": "",
+   "evolve": "",
+   "evolves_into": null,
+   "description": "Take Control of an opponent's Power.",
+   "art": {
+    "image": "",
+    "card_img": "",
+    "type_icon": ""
+   },
+   "source": {
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "spell",
+    "index": null,
+    "raw": {
+     "On Field": "Take Control of an opponent's Power",
+     "On Summon/Play": ""
+    }
+   }
+  },
+  {
+   "id": 194,
+   "name": "Trap Hole of Suppression",
+   "category": "trap",
+   "race": "",
+   "type": "",
+   "cost_kind": "ap",
+   "cost": 1,
+   "atk": null,
+   "def": null,
+   "keywords": [],
+   "condition": "If your opponent Summons a Unit in this card's Column:",
+   "on_summon": "Apply 1 Debilitate to your opponent's Units in this Column.",
+   "on_field": "",
+   "on_destruction": "",
+   "material": "",
+   "evolve": "",
+   "evolves_into": null,
+   "description": "If your opponent Summons a Unit in this card's Column: Apply 1 Debilitate to your opponent's Units in this Column.",
+   "art": {
+    "image": "",
+    "card_img": "",
+    "type_icon": ""
+   },
+   "source": {
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "trap",
+    "index": null,
+    "raw": {
+     "On Summon/Play": "apply 1 Debilitate to your opponent's Units in this Column.",
+     "condition": "If your opponent Summons a Unit in this cards Column:"
+    }
+   }
+  },
+  {
+   "id": 195,
+   "name": "Trap Hole of Spikes",
+   "category": "trap",
+   "race": "",
+   "type": "",
+   "cost_kind": "ap",
+   "cost": 1,
+   "atk": null,
+   "def": null,
+   "keywords": [],
+   "condition": "If your opponent Summons a Unit in this card's Column:",
+   "on_summon": "Destroy your opponent's Units with 10 ATK or less in this Column.",
+   "on_field": "",
+   "on_destruction": "",
+   "material": "",
+   "evolve": "",
+   "evolves_into": null,
+   "description": "If your opponent Summons a Unit in this card's Column: Destroy your opponent's Units with 10 ATK or less in this Column.",
+   "art": {
+    "image": "",
+    "card_img": "",
+    "type_icon": ""
+   },
+   "source": {
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "trap",
+    "index": null,
+    "raw": {
+     "condition": "If your opponent Summons a Unit in this cards Column:"
+    }
+   }
+  },
+  {
+   "id": 196,
+   "name": "Divine Serpent - Tail",
+   "category": "unit",
+   "race": "Beast",
+   "type": "Water",
+   "cost_kind": "ap",
+   "cost": 1,
+   "atk": 8,
+   "def": 6,
+   "keywords": [],
+   "condition": "",
+   "on_summon": "",
+   "on_field": "Once per turn: you can make your opponent's Units Permanently lose -4 ATK.",
+   "on_destruction": "",
+   "material": "",
+   "evolve": "",
+   "evolves_into": null,
+   "description": "Once per turn: you can make your opponent's Units Permanently lose -4 ATK.",
+   "art": {
+    "image": "",
+    "card_img": "",
+    "type_icon": ""
+   },
+   "source": {
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "unit",
+    "index": null,
+    "raw": {
+     "id": ""
+    }
+   }
+  },
+  {
+   "id": 197,
+   "name": "The Great Leviathan",
+   "category": "unit",
+   "race": "God",
+   "type": "",
+   "cost_kind": "ap",
+   "cost": 4,
+   "atk": 40,
+   "def": 28,
+   "keywords": [],
+   "condition": "",
+   "on_summon": "Destroy all Spells, Traps and Powers, then apply 1 Eternal and 1 Cleanse to this Unit.",
+   "on_field": "If your opponent Controls a Unit: this Unit can make a second attack.",
+   "on_destruction": "",
+   "material": "",
+   "evolve": "",
+   "evolves_into": null,
+   "description": "On Summon: Destroy all Spells, Traps and Powers, then apply 1 Eternal and 1 Cleanse to this Unit. If your opponent Controls a Unit: this Unit can make a second attack.",
+   "art": {
+    "image": "",
+    "card_img": "",
+    "type_icon": ""
+   },
+   "source": {
+    "file": "RLDB Master - Card Database (2026-11-10).csv",
+    "sheet": "unit",
+    "index": null,
+    "raw": {
+     "On Field": "If you opponent Controls a Unit: this Unit can make second attack.",
+     "On Summon/Play": "Destroy all Spell, Traps and Powers, then apply 1 Eternal and 1 Cleanse to this Unit.",
+     "id": ""
+    }
    }
   }
  ],

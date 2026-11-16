@@ -130,7 +130,7 @@ func test_spectator_payloads_without_permission_never_contain_hidden_cards(timeo
 	assert_bool(await _wait(func(): return _sv().get("match", {}).get("players", [{}])[0].get("backrow", [null])[0] != null)).is_true()
 	var blob := JSON.stringify(spec.raw_received)
 	assert_str(blob).not_contains("Dragon of the Cave")
-	assert_str(blob).not_contains("Magic Cylinder")
+	assert_str(blob).not_contains("Dimensional Redirect")
 	assert_array(_leaked(blob, _hidden_uids(m, 0) + _hidden_uids(m, 1))).is_empty()
 	for p in 2:
 		assert_bool(_sv()["match"]["players"][p].has("hand")).is_false()

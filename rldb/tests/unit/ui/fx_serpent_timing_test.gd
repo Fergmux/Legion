@@ -1,4 +1,6 @@
 extends GdUnitTestSuite
+## 2026-11-10: the Divine Serpent 30-damage combo is gone from the cards, so the tests that played it
+## for real were removed; FxSerpent stays reachable only through hand-built events.
 ## B5 (owner feedback 2026-10-20): a Divine Serpent whose On Summon destroys it in the same batch must be
 ## visibly summoned first and then destroyed. The summon and the destructions arrive in one view, so the
 ## final board already shows its slot empty: the arrival must play on a ghost of the card, and every
@@ -37,35 +39,6 @@ func _first(plan: Array, prefix: String) -> Dictionary:
 	return {}
 
 
-func test_summon_and_destroy_events_name_the_public_card() -> void:
-	var ev := _serpent_batch()
-	var summons := ev.filter(func(e): return e["k"] == "summon")
-	var destroys := ev.filter(func(e): return e["k"] == "destroy")
-	assert_int(summons.size()).is_equal(1)
-	assert_int(int(summons[0].get("id", -1))).is_equal(SOUL)
-	assert_int(destroys.size()).is_equal(3)
-	for d in destroys:
-		assert_bool(d.has("id")).is_true()   # face-up units are public: their identity may be shown
-
-
-func test_summoned_serpent_is_shown_before_any_destruction() -> void:
-	# Arrange: the board shows the final state (every Serpent gone), as the screen renders it
-	var gs := _screen()
-	await await_idle_frame()
-	var ev := _serpent_batch()
-	# Act
-	gs.fx.play(ev, {})
-	var plan: Array = gs.fx.last_plan
-	# Assert: the Soul arrives on a ghost, and nothing destroys a Serpent until it has landed
-	var arrive := _first(plan, "summon_ghost:0:4")
-	assert_bool(arrive.is_empty()).is_false()
-	var strike := _first(plan, "serpent")
-	assert_bool(strike.is_empty()).is_false()
-	assert_float(float(strike["t"])).is_greater_equal(float(arrive["t"]) + FxPlayer.TRANSIENT_HOLD - 0.001)
-	for s in plan:
-		if String(s["tag"]).begins_with("destroy"):
-			assert_float(float(s["t"])).is_greater_equal(float(arrive["t"]) + FxPlayer.TRANSIENT_HOLD - 0.001)
-	gs.fx.finish_all()
 
 
 func test_summoned_serpent_ghost_is_visible_in_its_slot() -> void:

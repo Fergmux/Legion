@@ -27,7 +27,7 @@ const FROST_WYVERN := 32             # Water Dragon, cost 2
 const DIGGIE := 162                  # can attack directly
 const FUSION_CEREMONY := 82
 const SACRED_OFFERINGS := 83         # Spell
-const MAGIC_CYLINDER := 45           # Trap, cost 1
+const MAGIC_CYLINDER := 45           # Trap (Dimensional Redirect), cost 2 since 2026-11-10
 const MIRROR_FORCE := 46             # Trap, cost 2
 const RAZEON := 56
 const GEOLOCK := 57
@@ -245,17 +245,22 @@ func test_c143_simorgh_blinds_the_opponent_twice_on_summon() -> void:
 	assert_int(m.status_count(ally, "blind")).is_equal(0)
 
 
-func test_c143_simorgh_second_ability_switches_atk_and_def_of_every_unit_this_turn() -> void:
+## 2026-11-10: the switch is your units only (it was every unit on the Field); Simorgh is 20/44.
+func test_c143_simorgh_second_ability_switches_atk_and_def_of_your_units_only_this_turn() -> void:
 	var m := TB.make()
-	var sim := TB.unit(m, 0, SIMORGH, 0)                                  # 26/44
+	var sim := TB.unit(m, 0, SIMORGH, 0)                                  # 20/44
+	var ally := TB.unit(m, 0, MAGE_WATER, 1, "atk", 6, 16)
 	var foe := TB.unit(m, 1, MAGE_WATER, 0, "atk", 4, 18)
 	assert_str(TB.ability(m, sim, 1)).is_empty()
 	assert_int(m.atk_of(sim)).is_equal(44)
-	assert_int(m.def_of(sim)).is_equal(26)
-	assert_int(m.atk_of(foe)).is_equal(18)
+	assert_int(m.def_of(sim)).is_equal(20)
+	assert_int(m.atk_of(ally)).is_equal(16)
+	assert_int(m.atk_of(foe)).is_equal(4)                                 # the opponent's units keep theirs
+	assert_int(m.def_of(foe)).is_equal(18)
 	assert_int(m.status_count(foe, "blind")).is_equal(0)                  # the old Blind ability is gone
 	CF.end_turn(m)
-	assert_int(m.atk_of(foe)).is_equal(4)                                 # until the end of this turn
+	assert_int(m.atk_of(sim)).is_equal(20)                                # until the end of this turn
+	assert_int(m.atk_of(ally)).is_equal(6)
 
 
 # ---------------------------------------------------------------- Akiramari
@@ -515,27 +520,23 @@ func test_c190_snow_tiger_on_summon_calls_a_cheap_unit_from_draw_into_its_column
 	assert_int(int(m.cards[pick]["slot"])).is_equal(3)                   # this column, back row
 
 
-func test_c190_snow_tiger_protecting_makes_your_traps_cheaper_until_your_next_turn() -> void:
+## 2026-11-10: both Snow Tiger effects are continuous (they were checked at the start of its controller's
+## turn and lasted until the next): the discount holds exactly while it is Protecting a unit.
+func test_c190_snow_tiger_protecting_makes_your_traps_cheaper_only_while_it_protects() -> void:
 	var m := TB.make()
 	TB.unit(m, 0, SNOW_TIGER, 0)
 	var behind := TB.unit(m, 0, MAGE_WATER, 3)                            # Snow Tiger protects it
 	var cyl := TB.card(m, 0, MAGIC_CYLINDER)
 	var mf := TB.card(m, 0, MIRROR_FORCE)
-	m.cards[cyl]["st"]["retain"] = 9                                      # keep them in Hand
-	m.cards[mf]["st"]["retain"] = 9
-	assert_int(m.current_cost(cyl)).is_equal(1)                            # nothing before its turn starts
-	_to_turn_of(m, 0)
-	assert_int(m.current_cost(cyl)).is_equal(0)
-	assert_int(m.current_cost(mf)).is_equal(1)
-	assert_str(TB.log_text(m)).contains("Traps cost 1 AP less until the start of their next turn")
+	assert_int(m.current_cost(cyl)).is_equal(2 - 1)                        # at once, no turn start needed
+	assert_int(m.current_cost(mf)).is_equal(2 - 1)
 	TB.kill(m, behind)                                                    # no longer Protecting
-	CF.end_turn(m)
-	assert_int(m.current_cost(mf)).is_equal(1)                            # lasts through the opponent's turn
-	CF.end_turn(m)
-	assert_int(m.current_cost(mf)).is_equal(2)                            # gone at the start of the next
+	assert_int(m.current_cost(cyl)).is_equal(2)                            # gone at once
+	assert_int(m.current_cost(mf)).is_equal(2)
 
 
-func test_c190_snow_tiger_protected_makes_your_traps_indestructible_until_your_next_turn() -> void:
+## 2026-11-10: continuous: the Traps cannot be Destroyed exactly while it is Protected by a unit.
+func test_c190_snow_tiger_protected_makes_your_traps_indestructible_only_while_protected() -> void:
 	var m := TB.make()
 	var front := TB.unit(m, 0, MAGE_WATER, 0)
 	TB.unit(m, 0, SNOW_TIGER, 3)                                          # protected by `front`
@@ -543,28 +544,24 @@ func test_c190_snow_tiger_protected_makes_your_traps_indestructible_until_your_n
 	var open_trap := TB.set_card(m, 0, MIRROR_FORCE, 1)
 	m.cards[open_trap]["face_up"] = true
 	var spell := TB.set_card(m, 0, SACRED_OFFERINGS, 2)
-	_to_turn_of(m, 0)
 	assert_bool(m.destroy(set_trap, "effect", -1, 1)).is_false()
 	assert_bool(m.destroy(open_trap, "effect", -1, 0)).is_false()          # any cause, either player
 	assert_str(CF.zone(m, set_trap)).is_equal("backrow")
 	assert_str(CF.zone(m, open_trap)).is_equal("backrow")
 	assert_bool(m.destroy(spell, "effect", -1, 1)).is_true()               # Traps only
-	assert_int(m.current_cost(set_trap)).is_equal(1)                      # not Protecting: no discount
+	assert_int(m.current_cost(set_trap)).is_equal(2)                      # not Protecting: no discount
 	TB.kill(m, front)                                                     # no longer Protected
-	CF.end_turn(m)
-	assert_bool(m.destroy(set_trap, "effect", -1, 0)).is_false()          # still the opponent's turn
-	CF.end_turn(m)
-	assert_bool(m.destroy(set_trap, "effect", -1, 1)).is_true()
+	assert_bool(m.destroy(set_trap, "effect", -1, 1)).is_true()            # gone at once
 
 
-func test_c190_snow_tiger_alone_does_not_trigger_at_turn_start() -> void:
+func test_c190_snow_tiger_alone_gives_no_discount_and_no_protection() -> void:
 	var m := TB.make()
 	TB.unit(m, 0, SNOW_TIGER, 0)
 	TB.unit(m, 0, MAGE_WATER, 1)                                          # beside it: neither condition
 	var trap := TB.set_card(m, 0, MAGIC_CYLINDER, 0)
 	_to_turn_of(m, 0)
 	assert_str(TB.log_text(m)).not_contains("Snow Tiger Paladin (start of turn)")
-	assert_int(m.current_cost(trap)).is_equal(1)
+	assert_int(m.current_cost(trap)).is_equal(2)
 	assert_bool(m.destroy(trap, "effect", -1, 1)).is_true()
 
 
@@ -693,11 +690,11 @@ func test_c183_yamata_poisons_a_unit_in_its_column_instead_of_burning_hp() -> vo
 	assert_str(TB.ability(m, yam)).is_empty()
 	assert_array(CF.offered(m)).contains_exactly_in_any_order([yam, in_col])
 	TB.choose_uids(m, [in_col])
-	assert_int(m.status_count(in_col, "poison")).is_equal(6)
+	assert_int(m.status_count(in_col, "poison")).is_equal(4)               # 4 since 2026-11-10 (was 6)
 	assert_int(m.status_count(off_col, "poison")).is_equal(0)
 	var hp1 := CF.hp(m, 1)
 	_to_turn_of(m, 0)
-	assert_int(CF.hp(m, 1)).is_equal(hp1 - 6)                              # only the Poison's own 6, on their end turn
+	assert_int(CF.hp(m, 1)).is_equal(hp1 - 4)                              # only the Poison's own 4, on their end turn
 
 
 # ---------------------------------------------------------------- Arcane

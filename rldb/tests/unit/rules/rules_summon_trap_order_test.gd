@@ -29,7 +29,7 @@ func test_energy_dispel_answers_the_on_summon_effect_after_it_resolves() -> void
 	var r := _summon_into(ENERGY_DISPEL)
 	var m: MatchEngine = r["m"]
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")
-	assert_str(String(m.pending["prompt"])).contains("Chidori Monk's effect")
+	assert_str(String(m.pending["prompt"])).contains("Chidori, Monk of Speed's effect")
 	assert_int(m.status_count(r["u"], "infiltrate")).is_equal(1)
 	TB.choose(m, ["Activate Energy Dispel"])
 	assert_str(m.cards[r["u"]]["zone"]).is_not_equal("unit")

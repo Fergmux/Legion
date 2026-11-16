@@ -91,15 +91,21 @@ func test_c084_assassinate_def_boundary_is_inclusive_at_20() -> void:
 
 # ---------------------------------------------------------------- 138 No Hubris
 
-func test_c138_no_hubris_offers_only_buffed_units() -> void:
+## 2026-11-10: No Hubris is "1 Cleanse to a unit, then 1 Curse to a unit": any unit is offered for each
+## (it used to offer only Buffed units, to destroy one).
+func test_c138_no_hubris_offers_every_unit_for_the_cleanse_and_the_curse() -> void:
 	var m := CF.make()
 	var buffed := TB.unit(m, 1, TB.WATER, 0)
-	m.apply_status(buffed, "pierce", 1)   # Rune is neither a Buff nor a Debuff
+	m.apply_status(buffed, "pierce", 1)
 	var debuffed := TB.unit(m, 1, TB.WATER, 1)
 	m.apply_status(debuffed, "poison", 1)
+	var own := TB.unit(m, 0, TB.WATER, 0)
 	TB.cast(m, 0, 138)
-	assert_bool(buffed in CF.offered(m)).is_true()
-	assert_bool(debuffed in CF.offered(m)).is_false()
+	for u in [buffed, debuffed, own]:
+		assert_bool(u in CF.offered(m)).is_true()
+	TB.choose_uids(m, [debuffed])
+	for u in [buffed, debuffed, own]:
+		assert_bool(u in CF.offered(m)).is_true()
 
 
 # ---------------------------------------------------------------- 182 Shimmer Serum
@@ -116,20 +122,21 @@ func test_c182_shimmer_serum_atk_lasts_until_end_of_turn_and_blinds_and_infiltra
 	assert_int(m.atk_of(own)).is_equal(8)
 
 
-# 2026-10-18: each use raises the target unit's cost, for the rest of the game; the Spell stays free.
-func test_c182_shimmer_serum_target_cost_keeps_rising_and_persists_in_spent() -> void:
+# 2026-11-10 (Street Venom): each use raises the Spell's own cost, for the rest of the game; the
+# target's cost is unchanged (2026-10-18 to 2026-11-10 it was the other way round).
+func test_c182_street_venom_own_cost_keeps_rising_and_persists_in_spent() -> void:
 	var m := CF.make()
 	var own := TB.unit(m, 0, TB.WATER, 0)
 	var s := TB.cast(m, 0, 182)
 	TB.choose_uids(m, [own])
 	assert_str(CF.zone(m, s)).is_equal("spent")
 	m.move_to_pile(s, "hand")
-	m.submit(0, {"t": "cast", "uid": s})
+	assert_str(m.submit(0, {"t": "cast", "uid": s})).is_empty()
 	TB.choose_uids(m, [own])
-	assert_int(m.current_cost(s)).is_equal(0)
-	assert_int(m.current_cost(own)).is_equal(3)
-	m.move_to_pile(own, "spent")
-	assert_int(m.current_cost(own)).is_equal(3)
+	assert_int(m.current_cost(s)).is_equal(0 + 2)
+	assert_int(m.current_cost(own)).is_equal(1)
+	assert_str(CF.zone(m, s)).is_equal("spent")
+	assert_int(m.current_cost(s)).is_equal(2)
 
 
 # ---------------------------------------------------------------- 152 Ruler No More
@@ -193,7 +200,7 @@ func test_c050_wabuku_offers_only_own_units_in_its_column() -> void:
 	var back := TB.unit(m, 0, TB.WATER, 4)
 	var other := TB.unit(m, 0, TB.WATER, 0)
 	TB.attack(m, a, front)
-	TB.choose(m, ["Activate Wabuku"])
+	TB.choose(m, ["Activate Perfect Dodge"])
 	var offered := CF.offered(m)
 	assert_bool(front in offered).is_true()
 	assert_bool(back in offered).is_true()
@@ -208,25 +215,26 @@ func test_c103_alexanders_arrow_uses_lowest_own_atk() -> void:
 	TB.set_card(m, 0, 103, 0)
 	TB.unit(m, 0, TB.WATER, 0, "atk", 10)
 	TB.unit(m, 0, TB.WATER, 1, "atk", 4)
-	var u := TB.summon(m, 1, 24, 2)                             # Chidori Monk, 16 ATK (2026-11-03)
+	var u := TB.summon(m, 1, 24, 2)                             # Chidori, Monk of Speed, 14 ATK (2026-11-10)
 	TB.choose(m, ["Activate Alexander's Arrow"])
-	assert_int(m.atk_of(u)).is_equal(16 - 4)
+	assert_int(m.atk_of(u)).is_equal(14 - 4)
 
 
 # ---------------------------------------------------------------- 140 Energy Dispel
 
 # 2026-10-18: Energy Dispel destroys the activating card but no longer negates its effect.
+# 2026-11-10: Avatar (the old fixture) lost its Burn ability; Fledgling Drake's 4 Burn is used instead.
 func test_c140_energy_dispel_destroys_a_unit_using_its_ability_but_the_burn_still_lands() -> void:
 	var m := CF.p1_main()
 	var dispel := TB.set_card(m, 0, 140, 0)
-	var av := TB.unit(m, 1, 14, 0)
+	var drake := TB.unit(m, 1, 33, 0)                          # Fledgling Drake: 4 Burn to a unit in this column
 	var foe := TB.unit(m, 0, TB.WATER, 0)
-	assert_str(TB.ability(m, av)).is_empty()
+	assert_str(TB.ability(m, drake)).is_empty()
 	if TB.pend_kind(m) == "select":
 		TB.choose_uids(m, [foe])
 	TB.choose(m, ["Activate Energy Dispel"])
-	assert_int(m.status_count(foe, "burn")).is_equal(6)
-	assert_str(CF.zone(m, av)).is_equal("spent")
+	assert_int(m.status_count(foe, "burn")).is_equal(4)
+	assert_str(CF.zone(m, drake)).is_equal("spent")
 	assert_str(CF.zone(m, dispel)).is_equal("spent")
 	assert_int(m.current_cost(dispel)).is_equal(2)
 

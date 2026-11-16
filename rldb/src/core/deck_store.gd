@@ -84,11 +84,17 @@ static func is_extra(id: int) -> bool:
 ## Why one more copy of card `id` cannot join a deck holding `main` + `extra` cards, or ""
 ## when it can. The editor uses this to disable its Add action (legal-action availability).
 static func add_block_reason(main: int, extra: int, id: int) -> String:
+	if CardDB.is_disabled(id):
+		return DISABLED_REASON
 	if main + extra >= MAX_CARDS:
 		return "The deck is full."
 	if is_extra(id) and extra >= MAX_EXTRA:
 		return "The Extra Deck is full."
 	return ""
+
+
+## Why a disabled card (CardDB.DISABLED) cannot be added.
+const DISABLED_REASON := "This card is disabled for now. A deck that holds it plays without it."
 
 
 ## Why deck `cards` (id list) is not legal to save or play, or "" when it is.

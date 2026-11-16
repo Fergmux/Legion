@@ -26,8 +26,8 @@ func test_into_the_void_reveals_host_spent_to_client_only_while_choosing() -> vo
 	client.local_seat.send({"t": "cast", "uid": itv})
 	assert_bool(await _await_pending(m, 1, "select")).is_true()
 	var names: Array = cpend()["options"].filter(func(o): return o.has("card")).map(func(o): return o["card"]["name"])
-	assert_array(names).contains(["Dragon of the Cave", "Magic Cylinder"])
-	_client_choose(["Magic Cylinder"])
+	assert_array(names).contains(["Dragon of the Cave", "Dimensional Redirect"])
+	_client_choose(["Dimensional Redirect"])
 	assert_bool(await _await_idle(m)).is_true()
 	# Assert
 	assert_str(m.cards[mc]["zone"]).is_equal("exhaust")

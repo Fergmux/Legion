@@ -87,13 +87,16 @@ func test_c013_chaos_witch_type_change_carries_every_mage() -> void:
 	assert_str(m.unit_type(witch)).is_equal("Fire")
 
 
-func test_c014_avatar_applies_six_burn() -> void:
+## 2026-11-10: Avatar's 6 Burn ability is gone; On Destruction it applies 10 Burn to the unit that
+## destroyed it.
+func test_c014_avatar_burns_the_unit_that_destroys_it_for_ten() -> void:
 	var m := TB.make()
-	var av := TB.unit(m, 0, 14, 0)
-	var foe := TB.unit(m, 1, TB.WATER, 0)
-	TB.ability(m, av)
-	TB.choose_uids(m, [foe])
-	assert_int(m.status_count(foe, "burn")).is_equal(6)
+	TB.p1_battle(m)
+	var av := TB.unit(m, 0, 14, 0, "def")                     # 18/14
+	var foe := TB.unit(m, 1, TB.WATER, 0, "atk", 40)
+	assert_str(TB.attack(m, foe, av)).is_empty()
+	assert_str(String(m.cards[av]["zone"])).is_equal("spent")
+	assert_int(m.status_count(foe, "burn")).is_equal(10)
 
 
 func test_c015_da_mage_applies_pierce() -> void:
@@ -124,7 +127,7 @@ func test_c020_spirit_bomb_copies_buffs_and_grows_per_opposing_unit() -> void:
 	var bomb := TB.summon(m, 0, 20, 0)
 	assert_int(m.status_count(bomb, "pierce")).is_equal(2)
 	assert_int(m.status_count(bomb, "nimble")).is_equal(1)
-	assert_int(m.atk_of(bomb)).is_equal(18 + 4)               # 18 ATK (2026-11-03) + 4 per opposing unit
+	assert_int(m.atk_of(bomb)).is_equal(18 + 6)               # 18 ATK (2026-11-03) + 6 per opposing unit (2026-11-10)
 
 
 func test_c021_shen_gains_protection_scales_with_exhaust_and_raises_cost() -> void:
@@ -300,15 +303,17 @@ func test_c036_dante_revives_next_turn_for_one_ap() -> void:
 	assert_int(m.players[0]["ap"]).is_equal(1)
 
 
-func test_c038_lone_warrior_weakens_per_adjacent_ally_and_refuses_buffs() -> void:
+## 2026-11-10: -4 per adjacent ally (was -6); "cannot receive Buffs" became "Unaffected by Trap Effects",
+## so a Buff now lands on it.
+func test_c038_lone_warrior_weakens_four_per_adjacent_ally_and_accepts_buffs() -> void:
 	var m := TB.make()
 	var lw := TB.unit(m, 0, 38, 1)
 	TB.unit(m, 0, TB.WATER, 0)
 	TB.unit(m, 0, TB.WATER, 2)
-	assert_int(m.atk_of(lw)).is_equal(24 - 2 * 6)                # 24/16 since 2026-11-03
-	assert_int(m.def_of(lw)).is_equal(16 - 2 * 6)
+	assert_int(m.atk_of(lw)).is_equal(24 - 2 * 4)                # 24/16 since 2026-11-03
+	assert_int(m.def_of(lw)).is_equal(16 - 2 * 4)
 	m.apply_status(lw, "eternal", 1)
-	assert_int(m.status_count(lw, "eternal")).is_equal(0)
+	assert_int(m.status_count(lw, "eternal")).is_equal(1)
 
 
 func test_c039_steadfast_soldier_survives_battle_with_30_atk() -> void:
@@ -396,7 +401,7 @@ func test_c070_krakeshin_gains_atk_when_moving() -> void:
 	assert_int(m.status_count(k, "nimble")).is_equal(3)
 	m.submit(0, {"t": "move", "uid": k})
 	TB.choose(m, ["Front row, column 2"])
-	assert_int(m.atk_of(k)).is_equal(12 + 6)                 # 12 ATK, +6 per move (2026-11-03)
+	assert_int(m.atk_of(k)).is_equal(16 + 6)                 # 16 ATK (2026-11-10), +6 per move (2026-11-03)
 
 
 func test_c071_faerie_flight_gains_three_medic_when_moving() -> void:
@@ -483,7 +488,7 @@ func test_c077_radablast_gains_rune_when_trap_activates() -> void:
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 5)
 	var foe := TB.unit(m, 0, TB.WATER, 0)
 	TB.attack(m, a, foe)
-	TB.choose(m, ["Activate Wabuku"])
+	TB.choose(m, ["Activate Perfect Dodge"])
 	assert_int(m.status_count(rb, "rune")).is_equal(1)
 
 
@@ -538,7 +543,7 @@ func test_c135_dragon_rider_boosts_protecting_dragon_and_cannot_attack() -> void
 	TB.p1_battle(m)
 	var dragon := TB.unit(m, 1, 2, 0)
 	var rider := TB.unit(m, 1, 135, 3)
-	assert_int(m.atk_of(dragon)).is_equal(22)
+	assert_int(m.atk_of(dragon)).is_equal(8 + 10)             # +10 since 2026-11-10 (was +14)
 	assert_str(m.validate(1, {"t": "attack", "uid": rider})).contains("Dragon Rider")
 
 
@@ -560,11 +565,12 @@ func test_c162_diggie_blinds_the_unit_that_destroyed_it() -> void:
 	assert_int(m.status_count(a, "blind")).is_equal(1)
 
 
-func test_c155_symbiote_spawn_still_boosts_its_protector() -> void:
+## 2026-11-10: no Eternal on Summon any more.
+func test_c155_symbiote_spawn_boosts_its_protector_without_eternal_on_summon() -> void:
 	var m := TB.make()
 	var front := TB.unit(m, 0, TB.WATER, 0)
 	var sym := TB.summon(m, 0, 155, 3)
-	assert_int(m.status_count(sym, "eternal")).is_equal(1)
+	assert_int(m.status_count(sym, "eternal")).is_equal(0)
 	assert_int(m.atk_of(front)).is_equal(8 + 6)               # +6 since 2026-11-03 (was +10)
 
 
@@ -590,14 +596,28 @@ func test_c159_divine_serpent_body_adjacent_def_aura() -> void:
 	var m := TB.make()
 	var friend := TB.unit(m, 0, TB.WATER, 1)
 	TB.unit(m, 0, 159, 0)
-	assert_int(m.def_of(friend)).is_equal(18)
+	assert_int(m.def_of(friend)).is_equal(8 + 8)              # +8 since 2026-11-10 (was +10)
 
 
-func test_c160_divine_serpent_soul_weakens_opposing_units() -> void:
-	var m := TB.make()
+## 2026-11-10: Soul's -4 ATK ability moved to the Tail (196); Soul now adds a Water unit from Draw to
+## Hand, which costs 1 AP less this turn.
+func test_c160_divine_serpent_soul_adds_a_water_unit_from_draw_that_costs_one_less() -> void:
+	var m := TB.make(7, 0)
 	var s := TB.unit(m, 0, 160, 0)
+	var water := TB.card(m, 0, TB.WATER, "draw")
+	TB.card(m, 0, TB.FIRE, "draw")                             # not Water: not offered
+	assert_str(TB.ability(m, s)).is_empty()
+	assert_array(m.pending.get("options", []).map(func(o): return int(o["v"]))).contains_exactly([water])
+	TB.choose_uids(m, [water])
+	assert_str(String(m.cards[water]["zone"])).is_equal("hand")
+	assert_int(m.current_cost(water)).is_equal(0)
+
+
+func test_c196_divine_serpent_tail_weakens_opposing_units() -> void:
+	var m := TB.make()
+	var t := TB.unit(m, 0, 196, 0)
 	var a := TB.unit(m, 1, TB.WATER, 0)
 	var b := TB.unit(m, 1, TB.WATER, 1)
-	TB.ability(m, s)
+	TB.ability(m, t)
 	assert_int(m.atk_of(a)).is_equal(4)
 	assert_int(m.atk_of(b)).is_equal(4)

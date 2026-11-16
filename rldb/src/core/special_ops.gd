@@ -22,9 +22,11 @@ func _op_let(f: Dictionary, op: Dictionary) -> int:
 ## Cost change limited to this turn (Tag Team searches).
 func _op_cost_turn(f: Dictionary, op: Dictionary) -> int:
 	for u in refs(f, op["target"]):
-		cards[u]["cost_t"].append({"n": op["n"], "turn": turn})
-		add_log("%s costs %+d AP this turn." % [public_label(u) if cards[u]["zone"] != "hand" else "That card", op["n"]],
-			{cards[u]["owner"]: "%s costs %+d AP this turn." % [name_of(u), op["n"]]})
+		# `zero`: the card costs 0 AP this turn (Yamata's On Destruction): minus its current cost.
+		var n: int = -maxi(current_cost(u), 0) if op.get("zero", false) else eval_num(f, op["n"])
+		cards[u]["cost_t"].append({"n": n, "turn": turn})
+		add_log("%s costs %+d AP this turn." % [public_label(u) if cards[u]["zone"] != "hand" else "That card", n],
+			{cards[u]["owner"]: "%s costs %+d AP this turn." % [name_of(u), n]})
 	return R.CONT
 
 
@@ -279,7 +281,8 @@ func _op_swap_all(f: Dictionary, op: Dictionary) -> int:
 		swap_count = 0
 		swapped = {}
 	swap_count += 1
-	var units := all_field_units()
+	# Typhoon Simorgh (143, 2026-11-10): "your Units" only (`side: self`); Freaky Funday: every unit.
+	var units := all_field_units() if op.get("side", "") != "self" else field_units(f["ctl"])
 	for u in units:
 		if swapped.has(u):
 			swapped.erase(u)
@@ -373,6 +376,37 @@ func _op_planb_heal(f: Dictionary, op: Dictionary) -> int:
 	return R.CONT
 
 
+## A Great Heist (193, 2026-11-10): "Take Control of an opponent's Power." The Power moves to a free
+## Power zone of the frame's controller and stays under their control (no end-of-turn return); its
+## owner is unchanged, so it goes to its owner's piles when it leaves the Field.
+func _op_take_power(f: Dictionary, op: Dictionary) -> int:
+	for u in refs(f, op["target"]):
+		if cards[u]["zone"] != "power" or int(cards[u]["ctl"]) == int(f["ctl"]):
+			continue
+		var free := free_power_slots(f["ctl"])
+		if free.is_empty():
+			add_log("No free Power zone: control of %s cannot be taken." % name_of(u))
+			continue
+		var from := fx_pos(u)
+		var prev: int = cards[u]["ctl"]
+		players[prev]["powers"][cards[u]["slot"]] = -1
+		cards[u]["ctl"] = f["ctl"]
+		cards[u]["slot"] = free[0]
+		players[f["ctl"]]["powers"][free[0]] = u
+		add_log("%s takes control of %s." % [pname(f["ctl"]), name_of(u)])
+		add_fx({"k": "control", "from": from, "to": fx_pos(u), "p": f["ctl"], "id": d(u)["id"], "back": false})
+	return R.CONT
+
+
+## Tyrant's Lantern (179, 2026-11-10): the units become `type` until the end of this turn.
+func _op_type_turn(f: Dictionary, op: Dictionary) -> int:
+	for u in refs(f, op["target"]):
+		if unit_on_field(u):
+			cards[u]["type_t"] = {"type": String(op["type"]), "turn": turn}
+			add_log("%s is %s Type this turn." % [name_of(u), String(op["type"])])
+	return R.CONT
+
+
 ## No Loyalty: attacked unit gains ATK/DEF of an adjacent unit, which is sent to Spent.
 func _op_no_loyalty(f: Dictionary, op: Dictionary) -> int:
 	var tgt := refs(f, "event.target")
@@ -394,7 +428,8 @@ func _op_no_loyalty(f: Dictionary, op: Dictionary) -> int:
 	var gd := def_of(a)
 	_leave_field(a, "spent", "effect")
 	add_log("%s is sent to Spent." % name_of(a))
-	_splice(f, [{"op": "stat", "target": u, "atk": ga, "def": gd}])
+	# 2026-11-10: the gain lasts until the end of this turn (was permanent).
+	_splice(f, [{"op": "stat", "target": u, "atk": ga, "def": gd, "until": "turn"}])
 	return R.CONT
 
 

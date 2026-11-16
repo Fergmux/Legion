@@ -12,9 +12,9 @@ extends GdUnitTestSuite
 ## 2026-11-03: rows re-pinned to the 3 Nov sheet (design/card-database-update-2026-11-03.md,
 ## "Stat-only changes"); the 2026-10-17 value each one replaced is kept in its comment.
 const BALANCE := [
-	[9, 2, 10, 16],      # Tag Team - F: cost 1 -> 2 (10-17); 16/22 -> 10/16 (11-03)
+	[9, 2, 10, 18],      # Tag Team - F: cost 1 -> 2 (10-17); 16/22 -> 10/16 (11-03) -> 10/18 (11-10)
 	[23, 4, 30, 16],     # Auric: 50/50 -> 30/16 (10-17)
-	[69, -1, 16, 16],    # Magentric: 8/26 -> 20/20 (10-17) -> 16/16 (11-03)
+	[69, -1, 20, 16],    # Magentric: 8/26 -> 20/20 (10-17) -> 16/16 (11-03) -> 20/16 (11-10)
 	[71, -1, -1, 18],    # Faerie Flight: DEF 18 -> 16 (10-17) -> 18 (11-03)
 	[78, -1, 8, -1],     # Abraxus Terrormane: ATK 26 -> 24 (10-17) -> 8 (11-03)
 	[162, -1, 6, -1],    # Diggie: ATK 2 -> 6 (10-17)
@@ -87,9 +87,9 @@ func test_c045_magic_cylinder_reflects_attacker_atk_and_costs_one_more() -> void
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 30)
 	var d := TB.unit(m, 0, TB.WATER, 0)
 	TB.attack(m, a, d)
-	TB.choose(m, ["Activate Magic Cylinder"])
+	TB.choose(m, ["Activate Dimensional Redirect"])
 	assert_int(CF.hp(m, 1)).is_equal(GameCore.START_HP - 30)
-	assert_int(m.current_cost(cyl)).is_equal(2)
+	assert_int(m.current_cost(cyl)).is_equal(2 + 1)            # Dimensional Redirect costs 2 since 2026-11-10
 
 
 # 2026-11-03 (intent changed on purpose, replaces C-03): the trigger is the attacker's column,
@@ -100,12 +100,12 @@ func test_c045_magic_cylinder_follows_the_attackers_column_direct_attacks_includ
 	var a := TB.unit(m, 1, TB.WATER, 1, "atk", 30)           # attacker in column 2
 	var mine := TB.unit(m, 0, TB.WATER, 0)
 	TB.attack(m, a, mine)                                    # attack on the Trap's column 1
-	assert_bool(CF.labels(m).has("Activate Magic Cylinder")).is_false()
+	assert_bool(CF.labels(m).has("Activate Dimensional Redirect")).is_false()
 	var m2 := CF.p1_battle()
 	TB.set_card(m2, 0, 45, 0)
 	var a2 := TB.unit(m2, 1, TB.WATER, 0, "atk", 30)
 	TB.attack(m2, a2, -1)                                    # direct attack from column 1
-	assert_bool(CF.labels(m2).has("Activate Magic Cylinder")).is_true()
+	assert_bool(CF.labels(m2).has("Activate Dimensional Redirect")).is_true()
 
 
 # ---------------------------------------------------------------- 46 Mirror Force
@@ -118,7 +118,7 @@ func test_c046_mirror_force_destroys_only_attack_stance_units_at_four_cards() ->
 	var defender := TB.unit(m, 1, TB.WATER, 2, "def")
 	TB.set_card(m, 1, 49, 0)                                 # 4th opposing card
 	TB.attack(m, a, -1)
-	TB.choose(m, ["Activate Mirror Force"])
+	TB.choose(m, ["Activate Sorcerer's Forcefield"])
 	assert_str(CF.zone(m, a)).is_equal("spent")
 	assert_str(CF.zone(m, atk2)).is_equal("spent")
 	assert_str(CF.zone(m, defender)).is_equal("unit")
@@ -132,7 +132,7 @@ func test_c046_mirror_force_unavailable_with_three_opposing_cards() -> void:
 	TB.unit(m, 1, TB.WATER, 1)
 	TB.unit(m, 1, TB.WATER, 2)
 	TB.attack(m, a, -1)
-	assert_bool(CF.labels(m).has("Activate Mirror Force")).is_false()
+	assert_bool(CF.labels(m).has("Activate Sorcerer's Forcefield")).is_false()
 
 
 # ---------------------------------------------------------------- 51 Rushed Recklessly
@@ -145,7 +145,7 @@ func test_c051_rushed_recklessly_gives_column_units_eight_def_this_turn() -> voi
 	var back := TB.unit(m, 0, TB.WATER, 3)
 	var other := TB.unit(m, 0, TB.WATER, 1)
 	TB.attack(m, a, d)
-	TB.choose(m, ["Activate Rushed Recklessly"])
+	TB.choose(m, ["Activate Defensive Rally"])
 	assert_str(CF.zone(m, d)).is_equal("unit")               # 16 DEF holds against 12 ATK
 	assert_int(m.def_of(back)).is_equal(16)
 	assert_int(m.def_of(other)).is_equal(8)

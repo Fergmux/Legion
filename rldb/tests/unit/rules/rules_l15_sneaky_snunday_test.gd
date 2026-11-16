@@ -7,8 +7,8 @@ extends GdUnitTestSuite
 const SNUNDAY := 154
 const HYPNOTISE := 180
 const SHIMMER_SERUM := 182
-const SERPENT_BODY := 159      # adjacent units +10 DEF
-const LONE_WARRIOR := 38       # cannot gain ATK/DEF; -6/-6 per adjacent unit of yours
+const SERPENT_BODY := 159      # adjacent units +8 DEF (2026-11-10; was +10)
+const LONE_WARRIOR := 38       # -4/-4 per adjacent unit of yours; can gain ATK/DEF since 2026-11-10
 
 
 ## Applies a card-effect ATK/DEF change to `u` (as a resolving effect of player 0).
@@ -80,9 +80,9 @@ func test_continuous_aura_reads_reversed_while_active() -> void:
 	var m := TB.make()
 	TB.unit(m, 0, SERPENT_BODY, 0)
 	var friend := TB.unit(m, 0, TB.WATER, 1, "atk", 8, 20)
-	assert_int(m.def_of(friend)).is_equal(30)
+	assert_int(m.def_of(friend)).is_equal(20 + 8)
 	TB.cast(m, 0, SNUNDAY)
-	assert_int(m.def_of(friend)).is_equal(10)
+	assert_int(m.def_of(friend)).is_equal(20 - 8)
 
 
 func test_both_seats_are_reversed_whoever_casts_it() -> void:
@@ -111,15 +111,18 @@ func test_costs_and_ap_are_not_reversed() -> void:
 	assert_int(int(m.players[0]["ap"])).is_equal(ap + 1)
 
 
-func test_shimmer_serum_after_snunday_reverses_its_atk_but_not_its_cost() -> void:
+## 2026-11-10 (Street Venom): the cost change is on the Spell itself now (it was on the target unit).
+func test_street_venom_after_snunday_reverses_its_atk_but_not_its_own_cost() -> void:
 	var m := TB.make()
 	var u := TB.unit(m, 0, TB.WATER, 0, "atk", 10, 10)
 	var cost_before := m.current_cost(u)
 	TB.cast(m, 0, SNUNDAY)
-	TB.cast(m, 0, SHIMMER_SERUM)
+	var s := TB.cast(m, 0, SHIMMER_SERUM)
+	var spell_before := int(CardDB.get_def(SHIMMER_SERUM)["cost"])
 	assert_str(TB.choose_uids(m, [u])).is_empty()
 	assert_int(m.atk_of(u)).is_less(10)         # its ATK gain reads as a loss
-	assert_int(m.current_cost(u)).is_equal(cost_before + 1)
+	assert_int(m.current_cost(s)).is_equal(spell_before + 1)
+	assert_int(m.current_cost(u)).is_equal(cost_before)
 
 
 func test_turn_end_resets_every_unit() -> void:
@@ -192,11 +195,13 @@ func test_freaky_funday_switch_is_not_a_gain_but_changes_after_it_mirror() -> vo
 	assert_int(m.def_of(u)).is_equal(20)        # the +10 (now on DEF) reads -10
 
 
-func test_a_unit_that_cannot_gain_is_not_raised_above_its_base() -> void:
+## 2026-11-10: The Lone Warrior (the only unit that could not gain ATK/DEF) lost that rule, so its
+## adjacency penalty now reads as a gain above its base under Snunday, like any other unit's.
+func test_lone_warrior_penalty_now_reads_as_a_gain_above_its_base() -> void:
 	var m := TB.make()
 	var lone := TB.unit(m, 0, LONE_WARRIOR, 0)
-	TB.unit(m, 0, TB.WATER, 1)                  # one adjacent ally: -6/-6
+	TB.unit(m, 0, TB.WATER, 1)                  # one adjacent ally: -4/-4
 	var base := m.base_atk(lone)
-	assert_int(m.atk_of(lone)).is_equal(maxi(base - 6, 0))
+	assert_int(m.atk_of(lone)).is_equal(maxi(base - 4, 0))
 	TB.cast(m, 0, SNUNDAY)
-	assert_int(m.atk_of(lone)).is_equal(base)
+	assert_int(m.atk_of(lone)).is_equal(base + 4)

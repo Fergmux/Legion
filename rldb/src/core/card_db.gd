@@ -99,6 +99,26 @@ static func evolves_into(id: int) -> int:
 	return -1 if nxt == null else int(nxt)
 
 
+## Cards switched off for now (owner, 2026-11-10: "temporarily remove it from the game, keep the code").
+## Add or remove an id here to turn a card off or on; nothing else needs changing. A disabled card
+## keeps its data and script, stays listed (greyed, "Disabled") in the deck builder and the card
+## library, cannot be added to a deck, is never drafted, offered as a reward or put in a starter deck,
+## and a saved deck that holds it plays without it (MatchEngine.setup).
+const DISABLED := [
+	44,   # Draw Virus
+]
+
+
+## True when card `id` is switched off (DISABLED).
+static func is_disabled(id: int) -> bool:
+	return DISABLED.has(id)
+
+
+## Deck `ids` without its disabled cards: what a game is actually played with.
+static func playable_deck(ids: Array) -> Array:
+	return ids.filter(func(i): return not is_disabled(int(i)))
+
+
 ## L23: true for a card players can own as a card: drafted, offered as a reward, put in a deck,
 ## listed in the deck builder and the card library. False for an evolution-only form (Symbiote
 ## Larva, Symbiote Siphonophore): it exists only by evolving its base card during a game, and is

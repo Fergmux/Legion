@@ -175,11 +175,11 @@ func test_review_opponent_view_hides_searched_cards() -> void:
 	var trap := TB.card(m, 0, 45, "draw")                      # Magic Cylinder
 	TB.summon(m, 0, 6, 0)                                      # Tag Team - L
 	var mid := JSON.stringify(MatchView.build(m, 1))
-	assert_str(mid).not_contains("Magic Cylinder")
+	assert_str(mid).not_contains("Dimensional Redirect")
 	TB.choose_uids(m, [trap])
 	var after := JSON.stringify(MatchView.build(m, 1))
-	assert_str(after).not_contains("Magic Cylinder")
-	assert_str(JSON.stringify(MatchView.build(m, 0))).contains("Magic Cylinder")
+	assert_str(after).not_contains("Dimensional Redirect")
+	assert_str(JSON.stringify(MatchView.build(m, 0))).contains("Dimensional Redirect")
 	# Accio: Draw unit to Spent, then a Retain on a Hand unit.
 	var m2 := TB.make(7, 0)
 	var dr := TB.card(m2, 0, 32, "draw")                       # Frost Wyvern

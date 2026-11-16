@@ -1166,6 +1166,8 @@ func _make_tile(id: int) -> Control:
 	w.pressed.connect(func(_w): _on_tile_clicked(id))
 	w.right_pressed.connect(func(tw): inspect_card(id, tw))
 	tile.add_child(w)
+	if CardDB.is_disabled(id):
+		CardBrowser.mark_disabled(w)       # 2026-11-10: a saved deck may still hold one
 	var slot := Control.new()
 	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	slot.position = Vector2(0, 4 + 135 + 4)

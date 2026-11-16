@@ -37,7 +37,8 @@ func setup(decks: Array, first_player: int, seed_value: int, cfg: Dictionary = {
 			players[p]["name"] = cfg["names"][p]
 		# L23: an evolution-only form never starts a game as its own card (an older saved deck or
 		# series may list one): it is its base card, which can evolve into it.
-		for id in CardDB.sanitize_deck(decks[p]):
+		# 2026-11-10: a disabled card (CardDB.DISABLED) is left out: the deck plays without it.
+		for id in CardDB.playable_deck(CardDB.sanitize_deck(decks[p])):
 			var uid := _create_instance(int(id), p)
 			if CardDB.is_extra_category(CardDB.get_def(int(id))["category"]):
 				cards[uid]["zone"] = "extra"
@@ -71,7 +72,9 @@ func _start_turn(p: int) -> void:
 		ap += m["n"]
 		notes.append("%+d %s" % [m["n"], m["src"]])
 	players[p]["ap_next"] = []
-	if player_has_flag(p, "abyss_ap") and not players[p]["exhaust"].is_empty():
+	# 2026-11-10: "Your base AP increases by +1 AP" (was +1 with a card in Exhaust). A base change, so
+	# copies do not stack: +1 while any is in play.
+	if player_has_flag(p, "abyss_ap"):
 		ap += 1
 		notes.append("+1 Marked by the Abyss")
 	players[p]["ap"] = maxi(ap, 0)
@@ -96,8 +99,10 @@ func _start_turn(p: int) -> void:
 	players[p]["delayed"] = []
 	# L23: Evolve prompts come first among the start-of-turn effects, one per evolvable unit in Field
 	# order; the "at the start of your turn" effects follow (start_turn_effects), and a unit that just
-	# evolved skips them this turn (its new form's first fire next turn).
-	var evolvers := field_units(p).filter(func(u): return can_evolve(u))
+	# evolved skips them this turn (its new form's first fire next turn). 2026-11-10: only the cards
+	# whose Evolve condition is "at the start of your turn" are asked here (`evolve_at_start`); the
+	# others Evolve through their on-card Evolve action while their condition holds.
+	var evolvers := field_units(p).filter(func(u): return can_evolve(u) and script_of(u).get("evolve_at_start", false))
 	if evolvers.is_empty():
 		emit("start_turn", {"player": p})
 	else:
@@ -107,14 +112,19 @@ func _start_turn(p: int) -> void:
 	run()
 
 
+## 2026-11-10: why an Evolve action is refused outside the Setup and Recovery Phases.
+const EVOLVE_MAIN_ONLY := "Evolving is a Summon: only in your Setup or Recovery Phase."
+
+
 ## L23: the two answers of an Evolve prompt (the bot always takes EVOLVE_YES).
 const EVOLVE_YES := "Evolve"
 const EVOLVE_SKIP := "Skip"
 
 
 ## L23 (owner feedback 2026-11-05, confirmed rules): "Evolve <card> into <next>?" for the frame's unit,
-## at the start of its controller's turn: free (no AP), Evolve or Skip, no response window (it is not
-## a Summon and not an effect activation). Asked only while the unit can still evolve.
+## at the start of its controller's turn: free (no AP), Evolve or Skip. Asked only while the unit can
+## still evolve. 2026-11-10 (owner): an evolution is a Summon: the new form's On Summon effects fire,
+## then the summon-response window opens (SpecialOps.summon_tail). It is not an effect activation.
 func _op_evolve_offer(f: Dictionary, op: Dictionary) -> int:
 	var uid: int = f["src"]
 	var ans: Variant = take_answer(f)
@@ -122,6 +132,7 @@ func _op_evolve_offer(f: Dictionary, op: Dictionary) -> int:
 	if ans != null:
 		if int(ans[0]) == 1 and ok:
 			evolve_unit(uid)
+			_splice(f, summon_tail(uid, int(f["ctl"])))
 		elif ok:
 			add_log("%s does not evolve %s." % [pname(f["ctl"]), name_of(uid)])
 		return R.CONT
@@ -130,6 +141,22 @@ func _op_evolve_offer(f: Dictionary, op: Dictionary) -> int:
 	var to := CardDB.evolves_into(int(cards[uid]["id"]))
 	return ask(f, f["ctl"], "evolve", "Evolve %s into %s?" % [name_of(uid), String(CardDB.get_def(to)["name"])],
 		[{"v": 1, "label": EVOLVE_YES}, {"v": 0, "label": EVOLVE_SKIP}], 1, 1, false, {"evolve_to": to})
+
+
+## 2026-11-10 (owner): the on-card Evolve action of a unit whose Evolve condition is a state ("If this
+## Unit has Burn applied and ATK is more than Base", "If you Control ..."), usable whenever it holds in
+## its controller's Setup or Recovery Phase (an evolution is a Summon, and nothing is summoned in the
+## Battle Phase or the opponent's turn). Free, not once per turn, no activation window. `then`: what
+## the Evolve text does after evolving (Divine Serpent - Soul exhausts the other three), before the
+## new form's On Summon effects and the summon-response window.
+func _op_evolve(f: Dictionary, op: Dictionary) -> int:
+	f["committed"] = true
+	var uid: int = f["src"]
+	if not cards.has(uid) or not can_evolve(uid) or int(cards[uid]["ctl"]) != int(f["ctl"]):
+		return R.END
+	evolve_unit(uid)
+	_splice(f, op.get("then", []) + summon_tail(uid, int(f["ctl"])))
+	return R.CONT
 
 
 ## L23: the start-of-turn triggers after the Evolve prompts. A unit that evolved this turn does not
@@ -385,6 +412,9 @@ func validate(p: int, cmd: Dictionary) -> String:
 			var abs: Array = script_of(uid).get("abilities", [])
 			var idx: int = int(cmd.get("idx", 0))
 			if idx < 0 or idx >= abs.size(): return "No such ability."
+			if abs[idx].get("evolve", false):
+				if not main: return EVOLVE_MAIN_ONLY
+				if not can_evolve(uid): return "This unit cannot Evolve."
 			return _ability_check(p, uid, idx, abs[idx])
 		"stance":
 			if inst["ctl"] != p or inst["zone"] != "unit": return "Not your unit."
@@ -642,21 +672,11 @@ func _execute(p: int, cmd: Dictionary) -> void:
 		"ability":
 			var idx: int = int(cmd.get("idx", 0))
 			var ab: Dictionary = script_of(uid)["abilities"][idx]
-			# Targets/modes first and cancellable; the cost is paid once they are confirmed.
-			var split := _lead_choices(ab["ops"])
-			var flead := _fusion_lead(ab["ops"], split[0], true)
-			split[0] += flead
-			var ops: Array = split[0] + [{"op": "ability_cost", "idx": idx}]
-			# F04-22: a Fusion method's self-destruction / exhaustion placed before its Fusion is a
-			# cost, paid with the AP/HP cost right after the committing stance, before the window.
-			# (Since 2026-11-03 Seppuku and Void Basilisk do it after the summon, in the op's `then`.)
-			if not flead.is_empty():
-				while not split[1].is_empty() and split[1][0]["op"] in ["move", "destroy"] and split[1][0].get("target", "") == "self":
-					ops.append(split[1].pop_front())
-			ops.append({"op": "window", "event": {"name": "activate", "player": p, "card": uid, "text": "%s activates %s" % [pname(p), name_of(uid)]}})
-			ops.append({"op": "check_negated"})
-			ops += split[1]
-			push_frame(make_frame(uid, p, ops, "%s: %s" % [name_of(uid), ab.get("label", "ability")]))
+			if ab.get("evolve", false):
+				# 2026-11-10: an Evolve action is a Summon, not an effect activation (no activate window).
+				push_frame(make_frame(uid, p, ab["ops"].duplicate(true), "%s: Evolve" % name_of(uid)))
+			else:
+				_push_ability(p, uid, idx, ab)
 		"stance":
 			cards[uid]["stance_turn"] = turn
 			_flip_stance(uid)
@@ -695,6 +715,27 @@ func _execute(p: int, cmd: Dictionary) -> void:
 ## frame, cancellable, before any cost, self-destruction or response window. Empty when the
 ## effect has other lead choices or no Fusion. `ability`: a "move/destroy self" cost before the
 ## Fusion means the paying unit leaves (never a material; it frees its own zone).
+
+
+## Pushes the frame of activated ability `idx` of `uid` (targets, cost, activation window, effect).
+func _push_ability(p: int, uid: int, idx: int, ab: Dictionary) -> void:
+		# Targets/modes first and cancellable; the cost is paid once they are confirmed.
+		var split := _lead_choices(ab["ops"])
+		var flead := _fusion_lead(ab["ops"], split[0], true)
+		split[0] += flead
+		var ops: Array = split[0] + [{"op": "ability_cost", "idx": idx}]
+		# F04-22: a Fusion method's self-destruction / exhaustion placed before its Fusion is a
+		# cost, paid with the AP/HP cost right after the committing stance, before the window.
+		# (Since 2026-11-03 Seppuku and Void Basilisk do it after the summon, in the op's `then`.)
+		if not flead.is_empty():
+			while not split[1].is_empty() and split[1][0]["op"] in ["move", "destroy"] and split[1][0].get("target", "") == "self":
+				ops.append(split[1].pop_front())
+		ops.append({"op": "window", "event": {"name": "activate", "player": p, "card": uid, "text": "%s activates %s" % [pname(p), name_of(uid)]}})
+		ops.append({"op": "check_negated"})
+		ops += split[1]
+		push_frame(make_frame(uid, p, ops, "%s: %s" % [name_of(uid), ab.get("label", "ability")]))
+
+
 func _fusion_lead(ops: Array, lead: Array, ability: bool) -> Array:
 	if not lead.is_empty():
 		return []

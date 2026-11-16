@@ -73,9 +73,9 @@ class ImportRegressionTest(unittest.TestCase):
 
     def test_unique_stable_ids(self):
         ids = [c["id"] for c in self.data["cards"]]
-        self.assertEqual(len(ids), 191)                     # 189-191 arrived on 2026-11-03
-        self.assertEqual(len(set(ids)), 191)
-        self.assertEqual(set(ids), set(range(1, 192)))
+        self.assertEqual(len(ids), 197)                     # 189-191 arrived on 2026-11-03, 192-197 on 2026-11-10
+        self.assertEqual(len(set(ids)), 197)
+        self.assertEqual(set(ids), set(range(1, 198)))
 
     def test_new_cards_of_2026_10_18(self):
         expect = {184: ("Counter Transmutation", "trap"), 185: ("Drako, Councillor of The Order", "arcane"),
@@ -109,7 +109,7 @@ class ImportRegressionTest(unittest.TestCase):
         for cid, name in expect.items():
             self.assertEqual(self.by_id[cid]["name"], name, cid)
         self.assertEqual(self.by_id[157]["name"], "Symbiote Siphonophore")
-        for cid, name in {68: "Seppuku", 73: "Man's Best Friend", 49: "Trap Hole", 166: "Saboteurs' Guild",
+        for cid, name in {68: "Zeph, Monk of Ancient Wisdom", 73: "Man's Best Friend", 49: "Trap Hole of Ensnarement", 166: "Saboteurs' Guild",
                           179: "Tyrant's Lantern", 96: "Roma, Exile of The Order"}.items():
             self.assertEqual(self.by_id[cid]["name"], name, cid)
         names = [c["name"] for c in self.data["cards"] if c["category"] != "basic_unit"]
@@ -117,7 +117,7 @@ class ImportRegressionTest(unittest.TestCase):
 
     def test_typed_special_values(self):
         self.assertEqual((self.by_id[95]["cost_kind"], self.by_id[95]["cost"]), ("ritual", 2))   # Mimic 2R
-        self.assertEqual((self.by_id[183]["cost"], self.by_id[183]["atk"], self.by_id[183]["def"]), (3, 10, 18))
+        self.assertEqual((self.by_id[183]["cost"], self.by_id[183]["atk"], self.by_id[183]["def"]), (3, 8, 0))
         self.assertEqual((self.by_id[175]["atk"], self.by_id[174]["atk"], self.by_id[174]["def"]), (20, 8, 20))
         self.assertIsNone(self.by_id[176]["def"])          # Tritu ?/? since 2026-10-18
         self.assertEqual((self.by_id[65]["atk"], self.by_id[65]["def"]), (36, 12))
@@ -127,10 +127,10 @@ class ImportRegressionTest(unittest.TestCase):
         self.assertEqual(self.by_id[177]["type"], "")      # The Illusionist: typeless
         self.assertEqual(self.by_id[177]["atk"], 30)
         self.assertEqual(self.by_id[177]["art"]["type_icon"], "Card/types/unknown.png")
-        self.assertEqual((self.by_id[9]["cost"], self.by_id[9]["def"]), (2, 16))
+        self.assertEqual((self.by_id[9]["cost"], self.by_id[9]["def"]), (2, 18))
 
     def test_confirmed_corrections_survive(self):
-        self.assertEqual(self.by_id[48]["on_summon"], "One of your opponent's Units Permanently loses -20 ATK.")
+        self.assertEqual(self.by_id[48]["on_summon"], "Your opponent's Units Permanently lose -10 ATK.")   # the sheet's own, 2026-11-10
         self.assertNotIn("highest", self.by_id[48]["description"])
         for cid in (45, 47):
             self.assertEqual(self.by_id[cid]["condition"], "If your opponent's Unit in this Column declares an Attack:")
@@ -143,38 +143,39 @@ class ImportRegressionTest(unittest.TestCase):
         self.assertEqual(self.by_id[169]["on_field"], "At the start of your turn: draw a card.")
         self.assertNotIn("raw", self.by_id[169]["source"])
         self.assertEqual(self.by_id[90]["on_field"], "Once per turn: you can apply 1 Paralyse to a Unit.")
-        self.assertEqual(self.by_id[183]["on_field"], "Once per turn: you can apply 6 Poison to a Unit in this Column.")
+        self.assertEqual(self.by_id[183]["on_field"], "Once per turn: you can apply 4 Poison to a Unit in this Column.")
 
     def test_mirror_force_keeps_counting_cards_in_the_new_sentence_shape(self):
-        # The 2026-10-20 and 2026-11-03 exports say "4 or more Units"; the owner confirmed cards (2026-11-03).
+        # The 2026-10-20 and 2026-11-03 exports said "4 or more Units"; the owner confirmed cards (2026-11-03),
+        # and the 2026-11-10 sheet says it itself.
         self.assertEqual(self.by_id[46]["condition"], "If your opponent Controls 4 or more cards and declares an Attack:")
-        self.assertIn("condition", self.by_id[46]["source"]["raw"])
+        self.assertNotIn("raw", self.by_id[46]["source"])
 
     def test_rules_texts_and_their_sections_start_with_a_capital(self):
         self.assertEqual(ic.sentence_case("change the Stance."), "Change the Stance.")
         self.assertEqual(ic.sentence_case("On Destroy: change it. Once per turn: you can"), "On Destroy: Change it. Once per turn: you can")
         self.assertTrue(self.by_id[104]["on_summon"].startswith("Change the Stance"))
-        self.assertIn("On Destroy: Change the Stance of all Units.", self.by_id[147]["description"])
+        self.assertIn("On Destroy: You must change the Stance of all Units.", self.by_id[147]["description"])
 
     def test_standardised_export_needs_no_typo_corrections(self):
         for cid in (40, 102, 141, 184, 186, 187):
             self.assertNotIn("raw", self.by_id[cid]["source"], cid)
         self.assertIn("Unit's", self.by_id[102]["on_field"])
-        self.assertEqual(sorted(ic.TEXT_CORRECTIONS), [21, 45, 46, 47, 48, 135, 146, 147, 154, 170])
+        self.assertEqual(sorted(ic.TEXT_CORRECTIONS), [21, 135, 146, 160, 170, 179, 193, 194, 195, 197])
         self.assertTrue(self.by_id[147]["on_field"].endswith("Your opponent's Units cannot attack other Units if they can attack this Unit."))
 
     def test_l15_sneaky_snunday_reads_atk_def_only(self):
         text = "Until the end of this turn: all new and ongoing ATK/DEF gains and losses are reversed."
         self.assertEqual(self.by_id[154]["on_summon"], text)
         self.assertEqual(self.by_id[154]["description"], text)
-        self.assertIn("On Summon/Play", self.by_id[154]["source"]["raw"])
+        self.assertNotIn("raw", self.by_id[154]["source"])      # the 2026-11-10 sheet says it itself
 
     # ---- 2026-11-03 (JB Edit export): new layout and owner rulings
 
     def test_lowercase_sentence_starts_are_capitalised_and_kept_as_provenance(self):
-        self.assertEqual(self.by_id[73]["on_summon"], "Add a Warrior Unit from Draw to Hand.")
-        self.assertEqual(self.by_id[73]["source"]["raw"]["On Summon/Play"], "add a Warrior Unit from Draw to Hand.")
-        self.assertEqual(self.by_id[14]["on_destruction"], "Take -6 HP Damage, then your opponent must take -6 HP Damage.")
+        self.assertEqual(self.by_id[37]["on_summon"], "Apply 2 Pierce to this Unit.")
+        self.assertEqual(self.by_id[37]["source"]["raw"]["On Summon/Play"], "apply 2 Pierce to this Unit.")
+        self.assertEqual(self.by_id[181]["on_destruction"], "Take -10 HP Damage.")
         for c in self.data["cards"]:
             for k in ("condition", "on_summon", "on_field", "on_destruction"):
                 self.assertFalse(c[k][:1].islower(), (c["id"], k))
@@ -201,25 +202,63 @@ class ImportRegressionTest(unittest.TestCase):
         for cid in (189, 190, 191):
             self.assertIsNone(self.by_id[cid]["source"]["index"], cid)
             self.assertEqual(self.by_id[cid]["art"], {"image": "", "card_img": "", "type_icon": ""}, cid)
-        self.assertEqual([c["id"] for c in self.data["cards"][-3:]], [189, 190, 191])   # no index: sorted last
+        self.assertEqual([c["id"] for c in self.data["cards"][-9:]], list(range(189, 198)))   # no index: sorted last
 
-    def test_evolve_chain_of_2026_11_05(self):
-        # L23: Spawn -> Larva -> Siphonophore, each step with the owner's exact Evolve text; every
-        # other card carries the empty fields, and the Evolve text never joins the rules texts.
-        text = "At the start of your turn you can Evolve this Unit."
-        self.assertEqual((self.by_id[155]["evolve"], self.by_id[155]["evolves_into"]), (text, 156))
-        self.assertEqual((self.by_id[156]["evolve"], self.by_id[156]["evolves_into"]), (text, 157))
-        self.assertEqual((self.by_id[157]["evolve"], self.by_id[157]["evolves_into"]), ("", None))
+    def test_evolve_chains_of_2026_11_10(self):
+        # L23 chains, with the Evolve text the 2026-11-10 sheet states in `condition` ("Evolution: ...",
+        # kept in source.raw). Every other card carries the empty fields; the Evolve text never joins the
+        # rules texts or the description.
+        start = "At the start of your turn: you can Evolve this Unit."
+        burn = "If this Unit has Burn applied and ATK is more than Base: you can Evolve this Unit."
+        expect = {155: (start, 156), 156: (start, 157), 16: (burn, 14), 37: (burn, 181),
+                  160: ("If you Control Divine Serpent - Head, Body and Tail: you can Evolve this Unit, then Exhaust "
+                        "Divine Serpent - Head, Body and Tail.", 197)}
+        for cid, pair in expect.items():
+            self.assertEqual((self.by_id[cid]["evolve"], self.by_id[cid]["evolves_into"]), pair, cid)
+            self.assertEqual(self.by_id[cid]["condition"], "", cid)
+            self.assertTrue(self.by_id[cid]["source"]["raw"]["condition"].startswith("Evolution:"), cid)
         for c in self.data["cards"]:
             self.assertIn("evolve", c)
             self.assertIn("evolves_into", c)
-            if c["id"] not in (155, 156):
+            if c["id"] not in expect:
                 self.assertEqual((c["evolve"], c["evolves_into"]), ("", None), c["id"])
             self.assertNotIn("Evolve", c["description"], c["id"])
 
+    def test_an_older_export_builds_without_the_new_chains(self):
+        old = {c["id"]: c for c in ic.build(os.path.join(ic.SRC, "RLDB Master - Card Database (2026-11-03).csv"))["cards"]}
+        self.assertEqual((old[37]["evolve"], old[37]["evolves_into"]), ("", None))   # 181 was a Fusion then
+        self.assertEqual(old[155]["evolves_into"], 156)
+
+    # ---- 2026-11-10 (CD - JB edit)
+
+    def test_new_cards_of_2026_11_10(self):
+        expect = {192: ("Mithral Dome", "power", 1), 193: ("A Great Heist", "spell", 2),
+                  194: ("Trap Hole of Suppression", "trap", 1), 195: ("Trap Hole of Spikes", "trap", 1),
+                  196: ("Divine Serpent - Tail", "unit", 1), 197: ("The Great Leviathan", "unit", 4)}
+        for cid, (name, cat, cost) in expect.items():
+            c = self.by_id[cid]
+            self.assertEqual((c["name"], c["category"], c["cost"]), (name, cat, cost), cid)
+        self.assertEqual((self.by_id[196]["atk"], self.by_id[196]["def"]), (8, 6))
+        self.assertEqual((self.by_id[197]["race"], self.by_id[197]["type"], self.by_id[197]["atk"], self.by_id[197]["def"]), ("God", "", 40, 28))
+        self.assertEqual(self.by_id[196]["source"]["raw"]["id"], "")          # assigned, not in the sheet
+        self.assertEqual(self.by_id[194]["condition"], "If your opponent Summons a Unit in this card's Column:")
+        self.assertEqual(self.by_id[197]["on_field"], "If your opponent Controls a Unit: this Unit can make a second attack.")
+
+    def test_spell_text_moves_from_on_field_to_on_play(self):
+        for cid in (179, 193):
+            self.assertEqual(self.by_id[cid]["on_field"], "", cid)
+            self.assertTrue(self.by_id[cid]["on_summon"], cid)
+            self.assertIn("On Field", self.by_id[cid]["source"]["raw"], cid)
+        self.assertEqual(self.by_id[179]["on_summon"], "Apply 1 Burn to a Unit, until the end of this turn: that Unit gains +4 ATK and is Fire Type.")
+
+    def test_overwritten_materials_keep_their_previous_value(self):
+        self.assertEqual(self.by_id[93]["material"], "Unit with 20 or more ATK or DEF + Physical Unit")
+        self.assertEqual(self.by_id[189]["material"], "Beast Unit + Physical Unit")
+        self.assertEqual(self.by_id[189]["source"]["raw"]["condition"], "Unit with 20 or more ATK or DEF + Physical Unit")
+
     def test_damage_conversion_costs_one_by_owner_ruling(self):
         self.assertEqual(self.by_id[47]["cost"], 1)
-        self.assertEqual(self.by_id[47]["source"]["raw"]["cost"], "0")
+        self.assertNotIn("raw", self.by_id[47]["source"])         # the 2026-11-10 sheet says 1 itself
 
     def test_art_and_material_come_through_without_their_columns(self):
         prev = {c["id"]: c for c in ic.build(os.path.join(ic.SRC, "RLDB Master - Card Database (2026-10-20).csv"))["cards"]}

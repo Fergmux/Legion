@@ -120,7 +120,7 @@ func test_trap_prompt_suspends_remote_attacker_until_host_answers(timeout := 300
 	assert_str(m.phase).is_equal("battle")
 	assert_bool(_client_view()["match"]["pending"]["mine"]).is_false()
 	# The waiting client's payload does not expose the trap's identity or options.
-	assert_bool(JSON.stringify(client.raw_received).contains("Magic Cylinder")).is_false()
+	assert_bool(JSON.stringify(client.raw_received).contains("Dimensional Redirect")).is_false()
 	# Host activates Magic Cylinder: HP loss first, then battle.
 	host.local_seat.send({"t": "choose", "id": m.pending["id"], "indices": [_activate_i(m)]})
 	assert_bool(await _wait(func(): return m.pending.is_empty() and m.stack.is_empty())).is_true()

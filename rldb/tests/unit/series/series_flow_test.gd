@@ -21,8 +21,10 @@ func test_starter_decks_are_valid_and_fully_implemented() -> void:
 			main_count += 1
 			if d["category"] == "basic_unit":
 				basics += 1
-		# F06-03 structure decks: 3 copies of one basic unit plus 9 other main-deck cards.
-		assert_int(main_count).is_equal(12)
+		# F06-03 structure decks: 3 copies of one basic unit plus 9 other main-deck cards. 2026-11-10 (owner):
+		# Yamata's Fire plays Solomon, the Captain in its Main Deck (Solomon, the Tyrannical is evolution-only)
+		# and Divine Serpent's Rising adds the Tail, so those two have 10.
+		assert_int(main_count).is_between(12, 13)
 		assert_int(basics).is_equal(3)
 		assert_int(deck["extra"].size()).is_between(1, 3)
 		for id in deck["extra"]:

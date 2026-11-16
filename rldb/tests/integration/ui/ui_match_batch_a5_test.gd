@@ -353,7 +353,7 @@ func test_method_picker_buttons_name_the_action_and_are_not_clipped() -> void:
 		var need := font.get_string_size(bt.text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x + sb.get_margin(SIDE_LEFT) + sb.get_margin(SIDE_RIGHT)
 		assert_float(bt.size.x).override_failure_message("'%s' needs %.0f px, has %.0f" % [bt.text, need, bt.size.x]).is_greater_equal(need)
 		assert_str(bt.tooltip_text).is_not_equal(bt.text)        # the tooltip carries the full label
-		assert_bool(bt.tooltip_text.begins_with("Cast Fusion Ceremony") or bt.tooltip_text.begins_with("Aleister the Invoker:")).is_true()
+		assert_bool(bt.tooltip_text.begins_with("Cast Fusion Configuration") or bt.tooltip_text.begins_with("Aleister the Inventor:")).is_true()
 	assert_array(texts).contains(["Cast"])
 	assert_bool(texts.all(func(t): return not String(t).contains("Aleister"))).is_true()   # no card name on the button
 	gs.details.close_method_picker()

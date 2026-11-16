@@ -71,5 +71,9 @@ static func build(lesson: Dictionary) -> Dictionary:
 	# learner's turn exactly as in a real game.
 	m.turn = turn - 1
 	m.active = 1 - me
+	# `bonus_ap`: extra AP for the learner's first turn, when the lesson's cards cost more than the base
+	# (Lesson 4 since Dimensional Redirect costs 2, 2026-11-10).
+	if int(spec.get("bonus_ap", 0)) != 0:
+		m.players[me]["ap_next"].append({"n": int(spec["bonus_ap"]), "src": "lesson"})
 	m._start_turn(me)
 	return {"match": m, "keys": keys}

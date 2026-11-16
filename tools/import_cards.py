@@ -87,22 +87,29 @@ LEGACY_CONDITION_TO_SUMMON = {63, 97}
 #         "Summon"; 135 and 170 a capital just after a colon (house style is lowercase there).
 TEXT_CORRECTIONS = {
     21: {"on_field": "This Unit gains +10 ATK/DEF for each card in Exhaust. If your opponent Summons a Unit, then that Unit Permanently loses -10 ATK."},
-    45: {"condition": "If your opponent's Unit in this Column declares an Attack:"},
-    46: {"condition": "If your opponent Controls 4 or more cards and declares an Attack:"},
-    47: {"condition": "If your opponent's Unit in this Column declares an Attack:"},
-    48: {"on_summon": "One of your opponent's Units Permanently loses -20 ATK."},
-    135: {"on_field": "If this Unit is Protected by a Dragon Unit: this Unit cannot be in Attack Stance, then that Dragon Unit gains +14 ATK."},
+    # 2026-11-10: Dragon Rider's Dragon gains +10 (was +14); only the capital after the colon is fixed.
+    135: {"on_field": "If this Unit is Protected by a Dragon Unit: this Unit cannot be in Attack Stance, then that Dragon Unit gains +10 ATK."},
     146: {"on_field": "Once per turn: you can Summon a Basic Unit from Draw to an Adjacent Zone. This Unit gains +8 ATK/DEF for each of your Adjacent Basic Units."},
-    147: {"on_field": "At the start of your turn: your opponent's Units lose -8 DEF. Your opponent's Units cannot attack other Units if they can attack this Unit."},
-    # L15 (owner, 2026-11-05): Sneaky Snunday reverses ATK/DEF only (no longer costs), permanent changes included.
-    154: {"on_summon": "Until the end of this turn: all new and ongoing ATK/DEF gains and losses are reversed."},
     170: {"on_summon": "If your opponent Controls more cards: you can discard a card to gain +1 AP."},
+    # 2026-11-10 sheet, obvious typos the owner asked to fix (spelling, grammar, spacing only):
+    160: {"on_field": "Once per turn: you can add a Water Unit from Draw to Hand, until the end of this turn: that Unit costs -1 AP."},
+    179: {"on_summon": "Apply 1 Burn to a Unit, until the end of this turn: that Unit gains +4 ATK and is Fire Type."},
+    193: {"on_summon": "Take Control of an opponent's Power."},
+    194: {"condition": "If your opponent Summons a Unit in this card's Column:"},
+    195: {"condition": "If your opponent Summons a Unit in this card's Column:"},
+    197: {"on_summon": "Destroy all Spells, Traps and Powers, then apply 1 Eternal and 1 Cleanse to this Unit.",
+          "on_field": "If your opponent Controls a Unit: this Unit can make a second attack."},
 }
 
-# Owner rulings of 2026-11-03: the new cards drop the sheet's working suffix "inspired", and Damage
-# Conversion costs 1 (the sheet says 0).
+# Owner rulings of 2026-11-03: the new cards drop the sheet's working suffix "inspired". (Damage
+# Conversion's cost 1 is in the sheet itself from 2026-11-10.)
 NAME_CORRECTIONS = {189: "Owlbear Druid", 190: "Snow Tiger Paladin"}
-COST_CORRECTIONS = {47: "1"}
+COST_CORRECTIONS = {}
+# 2026-11-10 (owner): the sheet's material for Owlbear Druid was overwritten with Bastion Wyrm's, and
+# Bastion Wyrm's was cleared. Both keep their previous material.
+MATERIAL_CORRECTIONS = {93: "Unit with 20 or more ATK or DEF + Physical Unit", 189: "Beast Unit + Physical Unit"}
+# 2026-11-10: two new rows arrive without an id. Ids are stable once given (saved decks use them).
+ID_ASSIGNMENTS = {"Divine Serpent - Tail": 196, "The Great Leviathan": 197}
 
 # From the 2026-11-03 export the sheet no longer carries the art columns (image, card_img, type_icon)
 # or `material`. Art references come from the newest earlier pinned export that has them (by ID; a new
@@ -120,12 +127,25 @@ AMBIGUOUS_ARCANE = "equivilant"
 BASIC_TYPE_SUFFIX = " ("
 
 # L23 (owner feedback 2026-11-05): the Evolve mechanic. A card with `evolves_into` carries its own
-# Evolve section (`evolve`, shown apart from the rules texts, like a Fusion's Material) and, at the
-# start of its controller's turn, may be replaced by that card for the rest of the game. The evolved
-# forms are evolution-only: never drafted, offered or deck-built (CardDB.is_collectible). Not a sheet
-# column yet, so the chain is declared here. Every card gets both fields ("" / null when none).
-EVOLVE_TEXT = "At the start of your turn you can Evolve this Unit."
-EVOLUTIONS = {155: 156, 156: 157}    # Symbiote Spawn -> Symbiote Larva -> Symbiote Siphonophore
+# Evolve section (`evolve`, shown apart from the rules texts, like a Fusion's Material) and may be
+# replaced by that card for the rest of the game. The evolved forms are evolution-only: never drafted,
+# offered or deck-built (CardDB.is_collectible).
+# 2026-11-10: the sheet states each Evolve condition in the `condition` cell ("Evolution: ..."); it is
+# moved to `evolve` (raw kept). The sheet does not name the target, so the chain is declared here.
+# The owner's rulings: an evolution is a Summon (On Summon fires), allowed whenever its condition holds
+# in its controller's own turn outside battle, and the unit keeps its statuses.
+EVOLVE_PREFIX = "Evolution:"
+EVOLVE_TEXT = "At the start of your turn: you can Evolve this Unit."   # a chain card without a sheet condition
+EVOLUTIONS = {
+    155: 156, 156: 157,   # Symbiote Spawn -> Symbiote Larva -> Symbiote Siphonophore
+    16: 14,               # Edwin, Initiatus of The Order -> Avatar of the Flame Spirit
+    37: 181,              # Solomon, the Captain -> Solomon, the Tyrannical
+    160: 197,             # Divine Serpent - Soul -> The Great Leviathan
+}
+# Typos in the sheet's Evolve texts (owner: fix obvious typos).
+EVOLVE_CORRECTIONS = {
+    160: "If you Control Divine Serpent - Head, Body and Tail: you can Evolve this Unit, then Exhaust Divine Serpent - Head, Body and Tail.",
+}
 
 
 # 2026-10-20 export: a find-and-replace left some rules texts starting "change the Stance". A text
@@ -210,8 +230,12 @@ def build(card_csv=None):
             # Unidentified rows (blank, or an unassigned effect) are not cards. The 2026-10-17
             # and 2026-10-18 exports have none; an orphan effect is never attached to a card or shown in play.
             continue
-        cid = int(row["id"])
-        raw = {}
+        if row["id"].strip():
+            cid = int(row["id"])
+            raw = {}
+        else:
+            cid = ID_ASSIGNMENTS[name]
+            raw = {"id": row["id"]}
         category = CATEGORY_KEYS[row["category"].strip()]
         cost_cell = row["cost"]
         if cid in COST_CORRECTIONS and cost_cell.strip() != COST_CORRECTIONS[cid]:
@@ -224,6 +248,23 @@ def build(card_csv=None):
             material = row["material"].strip()
         else:
             material = condition if category in ("fusion", "arcane") else ""
+        if cid in MATERIAL_CORRECTIONS and material != MATERIAL_CORRECTIONS[cid]:
+            raw["condition"] = row["condition"]
+            material = condition = MATERIAL_CORRECTIONS[cid]
+        evolve = ""
+        if condition.startswith(EVOLVE_PREFIX):
+            raw["condition"] = row["condition"]
+            evolve, condition = condition[len(EVOLVE_PREFIX):].strip(), ""
+            evolve = EVOLVE_CORRECTIONS.get(cid, evolve[:1].upper() + evolve[1:])
+        elif cid in EVOLUTIONS:
+            evolve = EVOLVE_TEXT
+        assert not evolve or cid in EVOLUTIONS, ("Evolve text without a declared target", cid)
+        # 2026-11-10: two Spells carry their text in the On Field column; a Spell's text is its On Play.
+        on_field = row["On Field"].strip()
+        if category == "spell" and on_field and not on_summon:
+            raw["On Field"] = row["On Field"]
+            raw["On Summon/Play"] = row["On Summon/Play"]
+            on_summon, on_field = on_field, ""
         description = row["description"].strip()
         if art_rows is None:
             art = {k: row[k].strip() for k in ART_COLUMNS}
@@ -255,10 +296,10 @@ def build(card_csv=None):
             "keywords": [k.strip().lower() for k in row["keywords"].split(",") if k.strip()],
             "condition": condition,
             "on_summon": on_summon,
-            "on_field": row["On Field"].strip(),
+            "on_field": on_field,
             "on_destruction": row["On Destruction"].strip(),
             "material": material,
-            "evolve": EVOLVE_TEXT if cid in EVOLUTIONS else "",
+            "evolve": evolve,
             "evolves_into": EVOLUTIONS.get(cid),
             "description": description,
             "art": {"image": art["image"], "card_img": art["card_img"], "type_icon": art["type_icon"]},
@@ -299,8 +340,12 @@ def build(card_csv=None):
         assert "temp" not in (c["condition"] + c["on_summon"]).lower().split(), c["id"]
     by_id = {c["id"]: c for c in cards}
     for base, nxt in EVOLUTIONS.items():
-        assert base in by_id and nxt in by_id and nxt != base, (base, nxt)
-        assert {by_id[base]["category"], by_id[nxt]["category"]} <= {"basic_unit", "unit"}, (base, nxt)
+        ok = base in by_id and nxt in by_id and nxt != base and             {by_id[base]["category"], by_id[nxt]["category"]} <= {"basic_unit", "unit"}
+        if card_csv is None:
+            assert ok, (base, nxt)        # the active source must carry every declared chain
+        elif not ok and base in by_id:
+            # An older export (comparison history) predates the chain: no Evolve there.
+            by_id[base]["evolve"], by_id[base]["evolves_into"] = "", None
     cards.sort(key=lambda c: (c["source"]["index"] is None, c["source"]["index"] or 0, c["id"]))
     return {"cards": cards, "unassigned_source_notes": []}
 

@@ -436,6 +436,30 @@ func _summary(id: int) -> Dictionary:
 
 
 ## One cell: soft glow (marked), the card, an implementation-status chip and an optional footer.
+## 2026-11-10: greys card widget `w` of a disabled card (CardDB.DISABLED) and lays a "Disabled" ribbon
+## across it; the tooltip says why. Used by the catalogue cells and the deck builder's deck tiles.
+static func mark_disabled(w: CardWidget) -> void:
+	w.modulate = Color(0.72, 0.72, 0.72, 0.85)
+	w.tooltip_text += "
+
+" + DeckStore.DISABLED_REASON
+	var band := PanelContainer.new()
+	band.name = "DisabledBand"
+	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bs := UIStyle.flat(Color(0.06, 0.05, 0.05, 0.88), UIStyle.BAD, 1, 3)
+	bs.content_margin_top = 3
+	bs.content_margin_bottom = 3
+	band.add_theme_stylebox_override("panel", bs)
+	var lab := UIStyle.label("DISABLED", 12, UIStyle.BAD)
+	lab.add_theme_font_override("font", UIStyle.font_bold())
+	lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	band.add_child(lab)
+	band.set_anchors_and_offsets_preset(Control.PRESET_HCENTER_WIDE)
+	band.offset_top = -12
+	band.offset_bottom = 12
+	w.add_child(band)
+
+
 func _make_cell(d: Dictionary) -> Control:
 	var id := int(d["id"])
 	var sm := _summary(id)
@@ -466,6 +490,8 @@ func _make_cell(d: Dictionary) -> Control:
 	w.mouse_exited.connect(func(): w.ease_hover(false))
 	w.hover_sound = true
 	c.add_child(w)
+	if CardDB.is_disabled(id):
+		mark_disabled(w)
 	if status != "full":
 		var warn := PanelContainer.new()
 		var ws := UIStyle.flat(Color(0, 0, 0, 0.6), UIStyle.BAD, 1, 9)

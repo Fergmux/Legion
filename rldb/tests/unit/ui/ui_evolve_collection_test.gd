@@ -8,6 +8,10 @@ const SPAWN := 155
 const LARVA := 156
 const SIPHONOPHORE := 157
 const MAGE := 1
+## 2026-11-10: three more evolution-only forms: Avatar of the Flame Spirit (from Edwin, 16), Solomon, the
+## Tyrannical (from Solomon, the Captain, 37) and The Great Leviathan (from Divine Serpent - Soul, 160).
+const EVOLVED_2026_11_10 := [14, 181, 197]
+const BASES_2026_11_10 := [16, 37, 160]
 
 
 func test_only_the_evolved_forms_are_not_collectible() -> void:
@@ -16,9 +20,11 @@ func test_only_the_evolved_forms_are_not_collectible() -> void:
 	assert_bool(CardDB.is_collectible(SIPHONOPHORE)).is_false()
 	assert_bool(CardDB.is_collectible(-5)).is_false()
 	var ids := CardDB.collectible().map(func(d): return int(d["id"]))
-	assert_int(ids.size()).is_equal(CardDB.all().size() - 2)
+	assert_int(ids.size()).is_equal(CardDB.all().size() - 2 - EVOLVED_2026_11_10.size())
 	assert_array(ids).not_contains([LARVA, SIPHONOPHORE])
+	assert_array(ids).not_contains(EVOLVED_2026_11_10)
 	assert_array(ids).contains([SPAWN])
+	assert_array(ids).contains(BASES_2026_11_10)
 
 
 func test_evolution_chain_helpers() -> void:

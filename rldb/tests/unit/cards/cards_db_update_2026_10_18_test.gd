@@ -16,7 +16,7 @@ const SACRED_OFFERINGS := 83         # Spell, cost 1: Apply 1 Rune to a Unit
 const MAGIC_CYLINDER := 45           # Trap
 const MAGICAL_COUNCIL := 139         # Power, cost 2
 const SABOTEURS_GUILD := 166         # Power, cost 2
-const PRESERVATION_JAR := 92         # Power, cost 2
+const PRESERVATION_JAR := 92         # Power, cost 1 since 2026-11-10 (was 2)
 const MARKED_BY_THE_ABYSS := 149     # Power: cannot be activated with a 0-cost card in the deck
 const ENERGY_DISPEL := 140
 const COUNTER_TRANSMUTATION := 184
@@ -179,7 +179,7 @@ func test_a_destroyed_set_card_is_logged_as_a_set_spell_trap() -> void:
 	var hidden := TB.set_card(m, 1, MAGIC_CYLINDER, 0)
 	TB.kill(m, hidden, 0)
 	assert_str(TB.log_text(m)).contains("A set Spell/Trap is destroyed.")
-	assert_str(TB.log_text(m)).not_contains("Magic Cylinder")
+	assert_str(TB.log_text(m)).not_contains("Dimensional Redirect")
 
 
 # ---------------------------------------------------------------- Chaos Witch
@@ -229,7 +229,9 @@ func test_c013_a_second_witch_can_change_the_mages_again() -> void:
 
 # ---------------------------------------------------------------- Shimmer Serum
 
-func test_c182_shimmer_serum_raises_the_targets_cost_not_its_own() -> void:
+## 2026-11-10 (Street Venom): the Spell itself permanently costs 1 AP more each time it is activated; the
+## target's cost is unchanged (it used to be the other way round).
+func test_c182_street_venom_raises_its_own_cost_not_the_targets() -> void:
 	var m := TB.make()
 	var u := TB.unit(m, 0, MAGE_WATER, 0)
 	var spell := TB.cast(m, 0, 182)
@@ -237,13 +239,11 @@ func test_c182_shimmer_serum_raises_the_targets_cost_not_its_own() -> void:
 	assert_int(m.status_count(u, "blind")).is_equal(1)
 	assert_int(m.status_count(u, "infiltrate")).is_equal(1)
 	assert_int(m.atk_of(u)).is_equal(8 + 10)                  # +10 since 2026-11-03 (was +20)
-	assert_int(m.current_cost(u)).is_equal(2)
-	assert_int(m.current_cost(spell)).is_equal(0)             # the Spell's own cost is unchanged
-	m.move_to_pile(u, "hand")
-	assert_int(m.current_cost(u)).is_equal(2)                 # permanent: kept off the Field
+	assert_int(m.current_cost(u)).is_equal(1)                 # the target's cost is unchanged
+	assert_int(m.current_cost(spell)).is_equal(0 + 1)
 	m.turn += 2
-	m.move_to_pile(u, "spent")
-	assert_int(m.current_cost(u)).is_equal(2)
+	m.move_to_pile(spell, "hand")
+	assert_int(m.current_cost(spell)).is_equal(1)             # permanent: kept in later turns and piles
 
 
 func test_c182_shimmer_serum_atk_gain_lasts_this_turn_only() -> void:
@@ -257,16 +257,18 @@ func test_c182_shimmer_serum_atk_gain_lasts_this_turn_only() -> void:
 
 # ---------------------------------------------------------------- Divine Serpents
 
+## 2026-11-10: the 30-damage combo is gone from Head, Body and Soul: a Serpent summoned beside two
+## others deals no Damage and destroys no Serpent.
 # @cards 158,159,160
-func test_divine_serpents_deal_30_damage_then_destroy_every_serpent_you_control() -> void:
+func test_divine_serpents_beside_each_other_no_longer_deal_30_damage_or_destroy_themselves() -> void:
 	var m := TB.make()
 	var head := TB.unit(m, 0, 158, 0)
 	var body := TB.unit(m, 0, 159, 1)
 	var bystander := TB.unit(m, 0, MAGE_WATER, 2)
 	var soul := TB.summon(m, 0, 160, 4)
-	assert_int(CF.hp(m, 1)).is_equal(30)
+	assert_int(CF.hp(m, 1)).is_equal(GameCore.START_HP)
 	for u in [head, body, soul]:
-		assert_str(CF.zone(m, u)).is_equal("spent")
+		assert_str(CF.zone(m, u)).is_equal("unit")
 	assert_str(CF.zone(m, bystander)).is_equal("unit")
 
 
@@ -328,7 +330,7 @@ func test_c049_trap_hole_now_answers_a_one_cost_summon() -> void:
 	var u := TB.summon(m, 1, MAGE_FIRE, 0)
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")
 	TB.choose(m, ["Activate Trap Hole"])
-	assert_int(m.status_count(u, "paralyse")).is_equal(3)
+	assert_int(m.status_count(u, "paralyse")).is_equal(2)      # 2 since 2026-11-10 (was 3), summon in its column
 
 
 func test_c140_energy_dispel_destroys_the_activating_unit_but_does_not_negate() -> void:
@@ -414,7 +416,7 @@ func test_c184_response_panel_names_a_public_destroyed_card_and_hides_a_face_dow
 	m.apply_status(shown, "reveal", 1)
 	TB.kill(m, shown, 0)
 	pv = MatchView.build(m, 1)["pending"]
-	assert_str(String(pv["mentions"][0]["card"]["name"])).is_equal("Magic Cylinder")
+	assert_str(String(pv["mentions"][0]["card"]["name"])).is_equal("Dimensional Redirect")
 
 
 func test_c184_counter_transmutation_answers_a_destroyed_trap_of_either_side() -> void:
@@ -521,7 +523,7 @@ func test_c088_elemental_mastery_adds_6_per_copy() -> void:
 
 # @cards 44,82,89
 func test_renamed_and_recosted_powers_and_spells() -> void:
-	assert_str(CardDB.get_def(82)["name"]).is_equal("Fusion Ceremony")
+	assert_str(CardDB.get_def(82)["name"]).is_equal("Fusion Configuration")
 	assert_str(CardDB.get_def(89)["name"]).is_equal("Fusion Laboratory")
 	assert_int(CardDB.get_def(89)["cost"]).is_equal(1)
 	assert_int(CardDB.get_def(44)["cost"]).is_equal(2)
@@ -576,7 +578,7 @@ func test_c018_corrupted_narzyl_still_gains_a_rune_when_it_destroys_by_battle() 
 func test_c185_drako_searches_a_power_from_draw_or_spent_with_a_discount() -> void:
 	var m := TB.make(7, 0)
 	var in_draw := TB.card(m, 0, MAGICAL_COUNCIL, "draw")
-	var in_spent := TB.card(m, 0, PRESERVATION_JAR, "spent")
+	var in_spent := TB.card(m, 0, SABOTEURS_GUILD, "spent")     # cost 2 (the Jar costs 1 since 2026-11-10)
 	TB.card(m, 0, SACRED_OFFERINGS, "draw")                   # not a Power
 	TB.special(m, 0, DRAKO, 0)
 	assert_array(_opts(m)).contains_exactly_in_any_order([-1, in_draw, in_spent])

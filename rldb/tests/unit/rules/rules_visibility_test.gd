@@ -21,10 +21,10 @@ func test_set_card_is_anonymous_to_opponent_in_view_and_log() -> void:
 	assert_bool(shown.has("uid")).is_false()
 	assert_bool(shown.has("name")).is_false()
 	var text := JSON.stringify(v)
-	assert_bool(text.contains("Magic Cylinder")).is_false()
+	assert_bool(text.contains("Dimensional Redirect")).is_false()
 	assert_bool(text.contains(str(trap))).is_false()
 	var own := MatchView.build(m, 0)
-	assert_str(own["players"][0]["backrow"][1]["name"]).is_equal("Magic Cylinder")
+	assert_str(own["players"][0]["backrow"][1]["name"]).is_equal("Dimensional Redirect")
 
 
 func test_opponent_log_hides_drawn_card_identities() -> void:
