@@ -1,4 +1,4 @@
-"""Import the RLDB source CSVs into rldb/data/*.json.
+"""Import the Legion source CSVs into legion/data/*.json.
 
 The active card source is pinned (file name and SHA-256) in rules/sources/active-card-source.json;
 earlier snapshots listed there are comparison history only and are never read. No CSV is modified.
@@ -9,7 +9,7 @@ feedback 03-06, the 2026-10-18 owner rulings) and records every raw cell the imp
 `source.raw`, so the export stays auditable.
 
 Run from the repo root:
-  python -I tools/import_cards.py                    regenerate rldb/data/cards.json
+  python -I tools/import_cards.py                    regenerate legion/data/cards.json
   python -I tools/import_cards.py --check            exit 1 if the JSON is stale
   python -I tools/import_cards.py --adopt <csv>      take a new export from the sheet: validate it,
                                                      keep a dated copy in rules/sources, pin it,
@@ -18,7 +18,7 @@ The output is deterministic so it can be committed and re-generated.
 
 What the CSV drives: names, stats, costs, Types, Races, categories, keywords and every card text the
 player reads. What it does not: card behaviour, which is scripted per card ID in
-rldb/src/core/card_scripts.gd. --adopt flags effect-text changes and new IDs for that reason.
+legion/src/core/card_scripts.gd. --adopt flags effect-text changes and new IDs for that reason.
 """
 import csv
 import hashlib
@@ -29,7 +29,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "rules", "sources")
-OUT = os.path.join(ROOT, "rldb", "data")
+OUT = os.path.join(ROOT, "legion", "data")
 
 ACTIVE = os.path.join(SRC, "active-card-source.json")
 

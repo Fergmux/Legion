@@ -9,13 +9,13 @@ const { execFileSync } = require('node:child_process');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const admin = require('firebase-admin');
-const { playerStats } = require('../tools/rldb-admin');
+const { playerStats } = require('../tools/legion-admin');
 
 const GODOT = process.env.GODOT || 'C:/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe';
 const STEAM = '76561198000000777';
 
 function machine(m, duels, wipe) {
-  const args = ['--headless', '--path', path.join(__dirname, '..', '..', 'rldb'), '-s', 'res://src/dev/telemetry_tool.gd', '--',
+  const args = ['--headless', '--path', path.join(__dirname, '..', '..', 'legion'), '-s', 'res://src/dev/telemetry_tool.gd', '--',
     '--stats-sync', '--telemetry-emulator', `--machine=${m}`, `--fake-steam=${STEAM}`, `--duels=${duels}`];
   if (wipe) args.push('--wipe');
   let out;

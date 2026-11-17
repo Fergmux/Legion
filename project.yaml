@@ -40,10 +40,10 @@ engine:
   name: Godot
   version: "4.7.2"
   language: GDScript
-  # The Godot resource root is the nested rldb/ folder, not the repo root.
-  project_root: rldb/
-  code_root: rldb/src/
-  test_root: rldb/tests/
+  # The Godot resource root is the nested legion/ folder, not the repo root.
+  project_root: legion/
+  code_root: legion/src/
+  test_root: legion/tests/
 
 # NOTE: this template ships with no `modes:` block, and the six knobs below must
 # never be added to one.

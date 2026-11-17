@@ -2,7 +2,7 @@
 
 ## Commands
 
-Run everything from `rldb/`. `<godot>` is `/c/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe`.
+Run everything from `legion/`. `<godot>` is `/c/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe`.
 
 - **Full suite:** `<godot> --headless --path . -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode -c`
 - **f02 live driver:** `timeout 600 <godot> --path . -- --f02-shots=<dir> --no-steam`

@@ -1,4 +1,4 @@
-# RLDB
+# Legion
 
 A two-player roguelike deck-builder card game in **Godot 4.7.2 (GDScript)**, built from the
 specification in [`rules/`](rules/00-START-HERE.md). Play hot-seat, over LAN (dev harness) or
@@ -8,9 +8,9 @@ over Steam (lobbies + friend invites).
 
 | What | How |
 | --- | --- |
-| Exported Windows build | `build/windows/RLDB.exe` (re-export: see *Build* below; `build/` is git-ignored) |
-| From source | Open `rldb/project.godot` in Godot 4.7.2, press Play (main scene `res://main.tscn`) |
-| Headless/CLI | `godot --path rldb -- --local` (hot-seat), `-- --bot` (vs bot), `-- --host=24680`, `-- --join=127.0.0.1:24680` |
+| Exported Windows build | `build/windows/Legion.exe` (re-export: see *Build* below; `build/` is git-ignored) |
+| From source | Open `legion/project.godot` in Godot 4.7.2, press Play (main scene `res://main.tscn`) |
+| Headless/CLI | `godot --path legion -- --local` (hot-seat), `-- --bot` (vs bot), `-- --host=24680`, `-- --join=127.0.0.1:24680` |
 
 Main menu: **Play vs Bot** (you against the computer; the bot picks a random starter deck),
 **Host Steam lobby & invite a friend**, **Find lobbies** (public lobbies only),
@@ -31,9 +31,9 @@ Extra command-line flags (after `--`): `--no-steam`, `--seed=N`, `--draft`, `--b
 
 ## Steam
 
-- Uses **GodotSteam 4.23 GDExtension** (`rldb/addons/godotsteam`) and **App ID 480** (Valve's
+- Uses **GodotSteam 4.23 GDExtension** (`legion/addons/godotsteam`) and **App ID 480** (Valve's
   Spacewar test app) for development. Change `steam/initialization/app_data/app_id` in
-  `rldb/project.godot` (and `steam_appid.txt` next to a dev build) when you have your own App ID.
+  `legion/project.godot` (and `steam_appid.txt` next to a dev build) when you have your own App ID.
 - GodotSteam initialises Steam at engine startup, before the renderer, so the Steam overlay
   (invite dialog) works with D3D12 even when the exe is not launched through Steam.
 - The Steam client must be running and logged in before the game starts; otherwise the menu
@@ -45,10 +45,10 @@ Extra command-line flags (after `--`): `--no-steam`, `--seed=N`, `--draft`, `--b
 **Two-account test (not yet run).** Single-account checks pass (init, lobbies, host socket, search:
 `production/qa/evidence/2026-10-15-steam/`). To test two clients you need two PCs (or a PC + VM), each
 logged into a different Steam account, the accounts being Steam friends. Copy the whole
-`build/windows/` folder (RLDB.exe, RLDB.pck, steam_api64.dll, libgodotsteam…dll, steam_appid.txt) to both.
+`build/windows/` folder (Legion.exe, Legion.pck, steam_api64.dll, libgodotsteam…dll, steam_appid.txt) to both.
 
-1. Both: start Steam, log in, run `RLDB.exe`.
-2. B: keep RLDB open on the main menu (with dev App ID 480 an invite cannot launch RLDB — Steam would start Spacewar).
+1. Both: start Steam, log in, run `Legion.exe`.
+2. B: keep Legion open on the main menu (with dev App ID 480 an invite cannot launch Legion — Steam would start Spacewar).
 3. A: *Play → Play online → Host game* (tick *List my lobby publicly* as a fallback) → *Host and invite* → invite B from the overlay (Shift+Tab if it does not open).
 4. B: accept the invite in the Steam overlay/chat → B joins. Fallback: B → *Play → Play online → Join game → Browse public lobbies*.
 5. Both pick decks; play a turn each: summon in Defense, use an ability, attack with a combat preview; let A attack into B's set Trap and confirm A's screen says it is waiting while B gets the response prompt.
@@ -58,7 +58,7 @@ logged into a different Steam account, the accounts being Steam friends. Copy th
 
 ## Bot opponent
 
-`rldb/src/ai/bot_brain.gd` is a heuristic opponent, not machine learning. For each legal move it
+`legion/src/ai/bot_brain.gd` is a heuristic opponent, not machine learning. For each legal move it
 plays the move on a private copy of the match (`MatchEngine.clone_for_sim`), lets effects resolve,
 and scores the position: HP difference, each side's units (ATK/DEF, a stance that suits the stats,
 buffs minus debuffs, runes), Powers, set cards and hand size. It makes the best move while that beats
@@ -66,12 +66,12 @@ doing nothing, otherwise it moves to the next phase; its own targets, zones and 
 chosen the same way. It only scores public information (in its simulations you always pass on Traps,
 and your hand is only counted). `bot_player.gd` drives the seat with a 0.8–1.3 s pause before every
 move, waits for animations, and thinks on a worker thread. Weights and delays are constants at the top
-of both files. Live check: `godot --path rldb -- --bot-shots=<dir>`.
+of both files. Live check: `godot --path legion -- --bot-shots=<dir>`.
 
 ## Tests
 
 ```
-godot --headless --path rldb -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode -c
+godot --headless --path legion -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode -c
 ```
 
 434 GdUnit4 tests (rules, decisions, cards, series, UI stores, network, adversarial QA): rules acceptance checks from `rules/05`, Sneaky Snunday checks, statuses,
@@ -85,17 +85,17 @@ Do not pass `-d` headless: the debugger pauses on script errors.
 
 | Path | Contents |
 | --- | --- |
-| `rldb/src/core/` | Deterministic rules authority: `game_core` → `effect_engine` → `effect_ops` → `special_ops` → `fusion_ops` → `battle_ops` → `summon_ops` → `match_engine`; `card_scripts` (all 183 cards as typed ops), `match_view` (per-player redaction), `series` (decks/draft/rewards/score) |
-| `rldb/src/net/` | `net_session` (ENet/Steam transport, pause/reconnect, sequence numbers), `steam_bridge`, `local_host` (hot-seat) |
-| `rldb/src/ui/` | Code-built UI: `main` (screen flow), `game_screen` (match coordinator), `card_widget`, `deck_builder`, `ui_style`, `zones`, `ui_layers` |
-| `rldb/src/ui/game/` | Game screen components: board, hand, hover, selection, targeting, prompt banner, action row, sidebar, log, details, series overlay, reward panels, in-game menu, plus the board drawing classes |
-| `rldb/src/ui/card/` | Card widget parts: geometry, layouts, painter, art, text layout, stat badges, chips, overlays, back |
-| `rldb/src/ui/menu/` | Main menu, menu items, session options/launcher, saved-series list, lobby list, card list, screen fader |
-| `rldb/src/ui/fx/` | `fx_player` (effect queue) and its effects: bursts, rune rings, spotlight, banners, card and resource effects |
-| `rldb/src/ui/widgets/` | Shared widgets such as `confirm_dialog` |
-| `rldb/src/ai/` | `bot_brain` (one-ply look-ahead heuristic), `bot_player` (threaded driver) |
-| `rldb/src/dev/` | Windowed screenshot/check drivers (`--f02-shots`, `--bot-shots`, `--shots`, `--deckbuilder-shots`) |
-| `rldb/data/` | `cards.json` (generated), `mode_config.json`, `starter_decks.json` |
+| `legion/src/core/` | Deterministic rules authority: `game_core` → `effect_engine` → `effect_ops` → `special_ops` → `fusion_ops` → `battle_ops` → `summon_ops` → `match_engine`; `card_scripts` (all 183 cards as typed ops), `match_view` (per-player redaction), `series` (decks/draft/rewards/score) |
+| `legion/src/net/` | `net_session` (ENet/Steam transport, pause/reconnect, sequence numbers), `steam_bridge`, `local_host` (hot-seat) |
+| `legion/src/ui/` | Code-built UI: `main` (screen flow), `game_screen` (match coordinator), `card_widget`, `deck_builder`, `ui_style`, `zones`, `ui_layers` |
+| `legion/src/ui/game/` | Game screen components: board, hand, hover, selection, targeting, prompt banner, action row, sidebar, log, details, series overlay, reward panels, in-game menu, plus the board drawing classes |
+| `legion/src/ui/card/` | Card widget parts: geometry, layouts, painter, art, text layout, stat badges, chips, overlays, back |
+| `legion/src/ui/menu/` | Main menu, menu items, session options/launcher, saved-series list, lobby list, card list, screen fader |
+| `legion/src/ui/fx/` | `fx_player` (effect queue) and its effects: bursts, rune rings, spotlight, banners, card and resource effects |
+| `legion/src/ui/widgets/` | Shared widgets such as `confirm_dialog` |
+| `legion/src/ai/` | `bot_brain` (one-ply look-ahead heuristic), `bot_player` (threaded driver) |
+| `legion/src/dev/` | Windowed screenshot/check drivers (`--f02-shots`, `--bot-shots`, `--shots`, `--deckbuilder-shots`) |
+| `legion/data/` | `cards.json` (generated), `mode_config.json`, `starter_decks.json` |
 | `tools/` | `import_cards.py` (CSV → JSON with confirmed corrections), `card_ledger.py` |
 | `docs/card-support-ledger.md` | Per-card implementation/test status and interpretation notes |
 | `design/decision-register.md` | Confirmed decisions (C-xx) and labelled prototype proposals (P-xx) |
@@ -104,7 +104,7 @@ Do not pass `-d` headless: the debugger pauses on script errors.
 ## Artwork
 
 Placeholders are drawn from each card's Type/Race. Drop supplied art into
-`rldb/art/cards/` using the source filenames (`image` field, e.g. `170.png`); cards pick it up
+`legion/art/cards/` using the source filenames (`image` field, e.g. `170.png`); cards pick it up
 automatically. Live stats/statuses are overlays and are never baked into art.
 
 ## Trust model
@@ -118,4 +118,4 @@ Host migration and recovering a series after the host process exits are not impl
 ## Build
 
 Export templates for 4.7.2 must be installed (Editor → Manage Export Templates). Then:
-`godot --headless --path rldb --export-release "Windows Desktop" ../build/windows/RLDB.exe`
+`godot --headless --path legion --export-release "Windows Desktop" ../build/windows/Legion.exe`

@@ -1,8 +1,8 @@
 # Adversarial Network QA — 2026-10-15
 
-**Scope:** two-client (real ENet localhost) play of RLDB on the host authority, Godot 4.6.1, branch `build/rldb-game` (HEAD 504116d plus the uncommitted working tree).
-**Suites (new):** `rldb/tests/integration/qa/` (`qa_net_base.gd` harness plus 5 suites, 16 tests). Saves go to `user://test_saves`.
-**Command:** `Godot_v4.6.1-stable_win64_console.exe --headless --path rldb -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests/integration/qa --ignoreHeadlessMode -c`
+**Scope:** two-client (real ENet localhost) play of Legion on the host authority, Godot 4.6.1, branch `build/legion-game` (HEAD 504116d plus the uncommitted working tree).
+**Suites (new):** `legion/tests/integration/qa/` (`qa_net_base.gd` harness plus 5 suites, 16 tests). Saves go to `user://test_saves`.
+**Command:** `Godot_v4.6.1-stable_win64_console.exe --headless --path legion -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests/integration/qa --ignoreHeadlessMode -c`
 **Result (final run):** 16 tests, **12 passed, 4 failed**. All 4 failures come from **2 product defects**. No test bug remains. gdUnit also counted 10 "errors": these are the host's GDScript runtime errors from defect D1.
 
 ## Scenario results

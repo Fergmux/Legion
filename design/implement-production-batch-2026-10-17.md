@@ -5,7 +5,7 @@ Read this entire document before planning or editing. This is the durable instru
 
 ## Mission and required inputs
 
-Bring the existing RLDB game forward through all three workstreams below. The owner wants full production quality: flashy, polished, professional visuals and sound, strong playability, reliable backend collection and correct card behavior. No shortcuts, prototype substitutes or text-only implementations. Continue the existing Godot project at `rldb/project.godot`, preserve unrelated working code and all human changes.
+Bring the existing Legion game forward through all three workstreams below. The owner wants full production quality: flashy, polished, professional visuals and sound, strong playability, reliable backend collection and correct card behavior. No shortcuts, prototype substitutes or text-only implementations. Continue the existing Godot project at `legion/project.godot`, preserve unrelated working code and all human changes.
 
 Read all three specifications completely before beginning implementation, including linked inputs:
 

@@ -33,4 +33,4 @@ exported exe, screenshots in `production/qa/evidence/2026-10-16-fb3/`.
 
 ## Verification
 `--headless ... GdUnitCmdTool.gd -a res://tests` 398/398; live driver 66/66 (editor and exported
-`build/windows/RLDB.exe`); card gallery regenerated in `production/qa/evidence/2026-10-16-fb3/cards/`.
+`build/windows/Legion.exe`); card gallery regenerated in `production/qa/evidence/2026-10-16-fb3/cards/`.

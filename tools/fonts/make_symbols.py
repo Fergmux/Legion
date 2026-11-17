@@ -42,13 +42,13 @@ os2.fsSelection |= 1 << 7  # USE_TYPO_METRICS
 name = font["name"]
 for rec in name.names:
     if rec.nameID in (1, 16):
-        rec.string = "RLDB Symbols"
+        rec.string = "Legion Symbols"
     elif rec.nameID == 4:
-        rec.string = "RLDB Symbols Regular"
+        rec.string = "Legion Symbols Regular"
     elif rec.nameID == 6:
-        rec.string = "RLDBSymbols-Regular"
+        rec.string = "LegionSymbols-Regular"
     elif rec.nameID == 3:
-        rec.string = "RLDBSymbols-Regular;subset of Noto Sans Symbols 2"
+        rec.string = "LegionSymbols-Regular;subset of Noto Sans Symbols 2"
 font.save(out)
 cmap = font.getBestCmap()
 print(out, "glyphs:", len(font.getGlyphOrder()), "cmap:", len(cmap), "asc/desc:", asc, desc, "upm", font["head"].unitsPerEm)

@@ -19,9 +19,9 @@ What this means for the agent:
 - Work unsupervised to production quality. "Spare no expense": ElevenLabs credits and agent time are authorised.
 - Also make any other improvements you spot (log them under "Extra improvements" below).
 - Clarifying questions go up front, once. After that, work without asking.
-- When everything is done: export (check `Get-Process RLDB*` first), then run the `publish-release` skill to upload
-  the final build to GitHub (github.com/Fergmux/RLDB, public).
-- Standing rules from `production/handoff/rldb-context-2026-11-04.md` section 3 still apply. In particular: never
+- When everything is done: export (check `Get-Process Legion*` first), then run the `publish-release` skill to upload
+  the final build to GitHub (github.com/Fergmux/Legion, public).
+- Standing rules from `production/handoff/legion-context-2026-11-04.md` section 3 still apply. In particular: never
   `git stash`, never export over a running game, no secrets in files, copy card wording verbatim.
 
 ## The list (verbatim)
@@ -72,7 +72,7 @@ What this means for the agent:
 
 23. I want to add a new sort of mechanic, we wil be adding this for a few cards but foir now we will just implement it for symbiote spawn. It is an evolution mechanic, similar to a regular effect but only when a certain condition as defined on the card is met, so for symbiote spawn we should add a new bit of text that says "At the start of your turn you can Evolve this Unit." this should be treated almost like the material for a fusion summon, i.e seperate section in the preview right pane and tooltip and stuff, but it behaves like a regular action.. The new part is that the evolve action replaces that card with the evolved version so for symbiote spawn, it should evolve into symbiote larva, which means that card is replaced by the latter card permanently (even after it leavs the field), and symbiote larva has the same effect excpet it evolves into symbiote siphonophore, we should remove the symbiote larva/siphonopore cards from the draft/deck builder etc as seperate cards and they are instead contained within the original base card. We will however need some way to show what the card evoilves into, I'm thinking in the right click inspect panel it shows a preview of the card it evolves into in a special section, and then clicking on that preview brings up the ionspect modal for that card. Also we should make sure the evoltuion effect has a cool fancy animation and sound effect
 
-24. The three new cards now have card art, you can find them in C:\Users\fergm\Documents\rldb\tools\card-art-review\accepted-art please add these to those cards
+24. The three new cards now have card art, you can find them in C:\Users\fergm\Documents\legion\tools\card-art-review\accepted-art please add these to those cards
 
 25. Also in that folder is the new table background art I want you to use instead of what we currently use
 make a way for ai to automatically upload the build for us
@@ -111,12 +111,12 @@ make a way for ai to automatically upload the build for us
 - ElevenLabs MCP: the `sfx` flow node (model `eleven_text_to_sound_v2`, 0.5-30 s, loop option) is available, and so is
   image generation (for cursors and status icons if wanted).
 - Art for 189 ("189 - Owlbear Druid inspired.png"), 190 ("190 - Snow Tiger Paladin inspired.png") and 191 ("191 - Do
-  Not Open Box.png") is in `C:\Users\fergm\Documents\rldb\tools\card-art-review\accepted-art`. "0 - Luxury Fantasy
-  Table Background.png" is in the same folder and is byte-identical in size to `rldb/assets/art/background4.png`.
-- The four table backgrounds are already in `rldb/assets/art/` as `background1.jpg` (green leather), `background2.png`
+  Not Open Box.png") is in `C:\Users\fergm\Documents\legion\tools\card-art-review\accepted-art`. "0 - Luxury Fantasy
+  Table Background.png" is in the same folder and is byte-identical in size to `legion/assets/art/background4.png`.
+- The four table backgrounds are already in `legion/assets/art/` as `background1.jpg` (green leather), `background2.png`
   (wood parquet), `background3.png` (wood with gold dragon corners) and `background4.png` (forest ruins, the "Luxury"
-  file), all 2967x2156. `rldb/assets/art/background.jpg` is deleted in the working tree (the original is in
-  `rldb/assets/art/backup/`). The code still points at `res://assets/art/background.jpg` (`src/ui/ui_style.gd`).
+  file), all 2967x2156. `legion/assets/art/background.jpg` is deleted in the working tree (the original is in
+  `legion/assets/art/backup/`). The code still points at `res://assets/art/background.jpg` (`src/ui/ui_style.gd`).
 - Item 25's second line ("make a way for ai to automatically upload the build for us") is already done: the
   `publish-release` skill and `tools/publish_github.py` (commit efb72b6).
 - Themed fonts already shipped: Cinzel (variable) and Alegreya Sans (regular, bold, italic).

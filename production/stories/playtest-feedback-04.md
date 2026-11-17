@@ -4,7 +4,7 @@ Goal from the user: "I want this game looking as professional as possible." Each
 in the user's order with what was done.
 
 **Verification:** GdUnit 405/405; live driver (`-- --f02-shots=<dir>`) 72/72 in the editor and in
-the exported `build/windows/RLDB.exe`; series screenshots (`-- --shots=<dir>`) and the card
+the exported `build/windows/Legion.exe`; series screenshots (`-- --shots=<dir>`) and the card
 gallery. Evidence: `production/qa/evidence/2026-10-16-fb4/` (`series/` and `cards/` subfolders).
 
 | # | Request | Status | Implementation / evidence |

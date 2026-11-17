@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""L1 (2026-11-05): analyse, choose and master the ElevenLabs sound-effect takes for RLDB.
+"""L1 (2026-11-05): analyse, choose and master the ElevenLabs sound-effect takes for Legion.
 
 The cue sheet is design/audio/sfx-cues.json (prompts, tiers, length windows). The takes live in
 production/audio-staging/<cue>/<variant><n>.mp3 (gitignored). The committed choice of take per cue is
-design/audio/sfx-selection.json; the mastered result is rldb/assets/audio/sfx/<cue>.wav.
+design/audio/sfx-selection.json; the mastered result is legion/assets/audio/sfx/<cue>.wav.
 
 Needs numpy + scipy and ffmpeg on PATH. Run through uv so nothing is installed globally:
 
     uv run --no-project --with numpy --with scipy python -I tools/sfx_master.py analyse   # every take -> staging/*/analysis.json, auto picks
-    uv run --no-project --with numpy --with scipy python -I tools/sfx_master.py master    # selection -> rldb/assets/audio/sfx/*.wav
+    uv run --no-project --with numpy --with scipy python -I tools/sfx_master.py master    # selection -> legion/assets/audio/sfx/*.wav
     uv run --no-project --with numpy --with scipy python -I tools/sfx_master.py measure DIR   # loudness table of a folder of wavs
     uv run --no-project --with numpy --with scipy python -I tools/sfx_master.py sheet CUE    # spectrogram contact sheet of every take
 
 To swap a take: edit design/audio/sfx-selection.json (e.g. "attack": "b3.mp3"), run `master`, then
-`$G --headless --path rldb --import`.
+`$G --headless --path legion --import`.
 
 Loudness is measured as the loudest 100 ms of K-weighted (ITU-R BS.1770) power, in LUFS, with a mono file
 counted as played on both speakers. Short UI cues have no 400 ms momentary window, so one metric (M100)
@@ -32,7 +32,7 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 CUES = os.path.join(ROOT, "design", "audio", "sfx-cues.json")
 SELECTION = os.path.join(ROOT, "design", "audio", "sfx-selection.json")
 STAGING = os.path.join(ROOT, "production", "audio-staging")
-OUT = os.path.join(ROOT, "rldb", "assets", "audio", "sfx")
+OUT = os.path.join(ROOT, "legion", "assets", "audio", "sfx")
 SR = 44100
 TP_LIMIT_DB = -1.0       # true-peak ceiling of every mastered cue
 MAX_GR_DB = 6.0

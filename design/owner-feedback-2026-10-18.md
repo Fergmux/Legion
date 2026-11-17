@@ -1,6 +1,6 @@
 # Owner feedback, 18 October 2026 (afternoon batch)
 
-Online playtest feedback, implemented on `build/rldb-game`. Each item has its own commit and tests.
+Online playtest feedback, implemented on `build/legion-game`. Each item has its own commit and tests.
 
 | # | Request | What changed | Tests |
 |---|---|---|---|

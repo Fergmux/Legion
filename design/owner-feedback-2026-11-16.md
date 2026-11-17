@@ -35,7 +35,7 @@ Owner's text copied verbatim (typos kept). Evidence: `production/qa/evidence/202
 | # | Item | Status | Notes |
 |---|------|--------|-------|
 | N5 | Void Basilisk exhausts first | done | Exhausted before the Fusion Summon (a cost, paid with the committing stance), so its zone is offered and the Fusion unit may land there; it is no longer its own material. |
-| N6 | Softer phase chime | done | Owner pick: phase A take 1 (soft warm glass chime). Flow "RLDB sound options 16 Nov". |
+| N6 | Softer phase chime | done | Owner pick: phase A take 1 (soft warm glass chime). Flow "Legion sound options 16 Nov". |
 | N9 | Fusion slower | done | `FxSummon.LEN.fusion` 1.7 -> 2.3 s: the climax stays on the charge cue's peak (0.78 s); the resolution lasts as long as the impact cue rings. |
 | N10 | Magical direct damage | done | Owner pick: damage D take 4 (crystalline magic impact, arcane surge, warm low boom). |
 | N13 | Trap without a target | done | A Trap whose effect is on "all" matching units (Trap Hole of Spikes, ...) is not offered when none match. |

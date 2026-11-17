@@ -1,6 +1,6 @@
 """L29 (owner feedback 2026-11-05): the macOS build in the export and release tools.
 
-Covers tools/export_all.py (the RLDB-process refusal parser and the macOS zip checks) and the macOS asset and
+Covers tools/export_all.py (the Legion-process refusal parser and the macOS zip checks) and the macOS asset and
 release notes of tools/publish_github.py. No Godot, no network, no gh: zips and pcks are built in memory.
 """
 import contextlib
@@ -39,7 +39,7 @@ def make_zip(path, drop=(), binary=UNIVERSAL, pck_paths=GOOD_PCK_PATHS):
         for name in export_all.MACOS_REQUIRED:
             if name in drop:
                 continue
-            if name.endswith("Contents/MacOS/RLDB"):
+            if name.endswith("Contents/MacOS/Legion"):
                 z.writestr(name, binary)
             elif name.endswith(".pck"):
                 z.writestr(name, make_pck(pck_paths))
@@ -51,22 +51,26 @@ class ExportAllTest(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.dir.cleanup)
-        self.zip = os.path.join(self.dir.name, "RLDB-macos.zip")
+        self.zip = os.path.join(self.dir.name, "Legion-macos.zip")
 
-    def test_running_rldb_finds_game_and_dev_build_ignores_others(self):
-        out = '"RLDB.exe","123","Console","1","90,000 K"\n"rldb-dev.exe","9","Console","1","1 K"\n' \
+    def test_running_legion_finds_game_and_dev_build_ignores_others(self):
+        out = '"Legion.exe","123","Console","1","90,000 K"\n"legion-dev.exe","9","Console","1","1 K"\n' \
               '"Godot_v4.6.1-stable_win64.exe","7","Console","1","1 K"\n"svchost.exe","4","Services","0","1 K"\n'
-        self.assertEqual(export_all.running_rldb(out), ["RLDB.exe", "rldb-dev.exe"])
+        self.assertEqual(export_all.running_legion(out), ["Legion.exe", "legion-dev.exe"])
 
-    def test_running_rldb_empty_when_nothing_matches(self):
-        self.assertEqual(export_all.running_rldb('"svchost.exe","4","Services","0","1 K"\n'), [])
+    def test_running_legion_also_finds_a_build_with_the_old_name(self):
+        out = '"RLDB.exe","10","Console","1","100 K"\n"RLDB-dev.exe","11","Console","1","100 K"\n'
+        self.assertEqual(export_all.running_legion(out), ["RLDB.exe", "RLDB-dev.exe"])
+
+    def test_running_legion_empty_when_nothing_matches(self):
+        self.assertEqual(export_all.running_legion('"svchost.exe","4","Services","0","1 K"\n'), [])
 
     def test_good_macos_zip_has_no_problems(self):
         make_zip(self.zip)
         self.assertEqual(export_all.check_macos_zip(self.zip), [])
 
     def test_missing_signature_is_reported(self):
-        sig = "RLDB.app/Contents/_CodeSignature/CodeResources"
+        sig = "Legion.app/Contents/_CodeSignature/CodeResources"
         make_zip(self.zip, drop=(sig,))
         self.assertIn("missing " + sig, export_all.check_macos_zip(self.zip))
 
@@ -121,23 +125,23 @@ class PublishMacosTest(unittest.TestCase):
             z.writestr("readme.txt", "x")
         result, out = self.run_asset()
         self.assertIsNone(result)
-        self.assertIn("missing RLDB.app/Contents/MacOS/RLDB", out)
+        self.assertIn("missing Legion.app/Contents/MacOS/Legion", out)
 
     def test_good_zip_is_returned_with_its_time(self):
         make_zip(self.zip)
         result, _ = self.run_asset()
         self.assertEqual(result[0], self.zip)
-        self.assertEqual(os.path.basename(result[0]), "RLDB-macos.zip")
+        self.assertEqual(os.path.basename(result[0]), "Legion-macos.zip")
 
     def test_release_notes_explain_macos_only_when_shipped(self):
         with_mac = publish_github.release_notes("1.2.3", "abc", "", "- fix", True)
         without = publish_github.release_notes("1.2.3", "abc", "", "- fix", False)
-        self.assertIn("RLDB-macos.zip", with_mac)
+        self.assertIn("Legion-macos.zip", with_mac)
         self.assertIn("right-click", with_mac)
         self.assertIn("xattr -cr", with_mac)
-        self.assertNotIn("RLDB-macos.zip", without)
-        self.assertIn("RLDB-friends.zip", without)
-        self.assertIn("RLDB 1.2.3", with_mac)
+        self.assertNotIn("Legion-macos.zip", without)
+        self.assertIn("Legion-friends.zip", without)
+        self.assertIn("Legion 1.2.3", with_mac)
 
     def test_release_notes_keep_extra_text_and_log(self):
         notes = publish_github.release_notes("1.2.3", "abc", "Owner text", "- a change", True)

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Offline procedural SFX generator for RLDB (F02-13).
+"""Offline procedural SFX generator for Legion (F02-13).
 
 Python 3 stdlib only. Deterministic (fixed seed). Writes 44.1 kHz 16-bit mono WAVs to
-rldb/assets/audio/sfx/. All audio is synthesised here: no third-party samples.
+legion/assets/audio/sfx/. All audio is synthesised here: no third-party samples.
 
 Usage: python tools/gen_sfx.py --out DIR
 
 RETIRED (L1, 2026-11-05): the game's sounds are now the ElevenLabs set, chosen and mastered by
 tools/sfx_master.py from design/audio/sfx-cues.json. This script is kept as the record of the old
 procedural cues (and to render them elsewhere for comparison), but it refuses to write into
-rldb/assets/audio/sfx/, where it would overwrite the ElevenLabs files.
+legion/assets/audio/sfx/, where it would overwrite the ElevenLabs files.
 """
 import math
 import os
@@ -1251,12 +1251,12 @@ def analyse(path):
 
 
 def main():
-    game_dir = os.path.normcase(os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "rldb", "assets", "audio", "sfx")))
+    game_dir = os.path.normcase(os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "legion", "assets", "audio", "sfx")))
     if "--out" not in sys.argv:
-        sys.exit("gen_sfx.py is retired (L1): pass --out DIR (outside rldb/assets/audio/sfx). The game's sounds come from tools/sfx_master.py.")
+        sys.exit("gen_sfx.py is retired (L1): pass --out DIR (outside legion/assets/audio/sfx). The game's sounds come from tools/sfx_master.py.")
     out = sys.argv[sys.argv.index("--out") + 1]
     if os.path.normcase(os.path.realpath(out)) == game_dir:
-        sys.exit("gen_sfx.py is retired (L1): it must not overwrite the ElevenLabs set in rldb/assets/audio/sfx.")
+        sys.exit("gen_sfx.py is retired (L1): it must not overwrite the ElevenLabs set in legion/assets/audio/sfx.")
     os.makedirs(out, exist_ok=True)
     print("%-10s %6s %3s %4s %8s %9s %9s %10s %5s" % ("name", "rate", "ch", "bits", "dur(ms)", "peak dB", "rms dB", "dc", "clip"))
     for name, fn in SOUNDS:

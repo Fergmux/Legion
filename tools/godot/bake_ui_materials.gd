@@ -1,11 +1,11 @@
 extends SceneTree
-## Bakes the UI surface detail textures (rldb/assets/art/materials/<name>.png) from CC0 PBR material
-## scans (ambientCG, see rldb/assets/CREDITS.md). Each output is a seamless grayscale relief map
+## Bakes the UI surface detail textures (legion/assets/art/materials/<name>.png) from CC0 PBR material
+## scans (ambientCG, see legion/assets/CREDITS.md). Each output is a seamless grayscale relief map
 ## averaging 0.5: the scan's fine colour variation (large blotches removed) plus its normal map lit
 ## from the upper left, so grain, creases and brush strokes read as raised. UiSurface tints it with a
 ## panel's own colour, which keeps the palette and adds only the texture.
 ##
-##   godot --headless --path rldb -s ../tools/godot/bake_ui_materials.gd -- <folder with the unzipped
+##   godot --headless --path legion -s ../tools/godot/bake_ui_materials.gd -- <folder with the unzipped
 ##       1K-JPG scans> <name>=<AssetId>[:<detail>:<relief>[:<smooth>]] ...
 ## e.g. leather=Leather030 wood=Wood066:1.0:0.6 metal=Metal009:1.0:0.25:3
 ## <smooth> (px, default 0) softens the relief into a satin finish: a wrap-around blur of that

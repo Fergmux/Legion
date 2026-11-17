@@ -11,10 +11,10 @@ Working rules for this batch:
 - If blocked (permissions etc.), work around it and report it at the end.
 - Delegate to the matching specialist subagents. Use a cheaper model (sonnet / haiku) for light
   tasks and opus for heavy ones.
-- Branch `build/rldb-game`. Commit per item, never push. Run the full suite before export. Never export
-  while RLDB is running (memory: no-export-while-running).
+- Branch `build/legion-game`. Commit per item, never push. Run the full suite before export. Never export
+  while Legion is running (memory: no-export-while-running).
 - UI items need retained screenshots in `production/qa/evidence/2026-10-20-release-batch/`.
-- Card data CSV: `C:\Users\fergm\Downloads\RLDB - Full Updated Card Database.csv` (wording only,
+- Card data CSV: `C:\Users\fergm\Downloads\Legion - Full Updated Card Database.csv` (wording only,
   no effect changes).
 
 Status key: `todo`, `wip`, `done` (with commit), `n/a` (already done / not needed).

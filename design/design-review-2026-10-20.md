@@ -44,7 +44,7 @@ the owning item so the two changes don't collide.
    log, prompt pane, phase pills, tooltips, settings controls, catalogue page header) is built from
    `UIStyle.flat()` boxes: a dark fill, a 1 px bronze line and a 6 px radius. Next to the painted table
    these read as debug UI.
-2. **Flat type.** Every Cinzel heading ("RLDB", "CHOOSE YOUR DECK", "DEFEAT", "CARD CATALOGUE",
+2. **Flat type.** Every Cinzel heading ("Legion", "CHOOSE YOUR DECK", "DEFEAT", "CARD CATALOGUE",
    panel headers) is a single flat fill with no shadow, outline or gradient. Against the busy
    backdrops it loses edge definition and looks pasted on (D3).
 3. **No spacing system.** Paddings run from 2 px (catalogue title to page edge, Close button to
@@ -100,7 +100,7 @@ Label cannot draw a gradient fill). Use the label path only where a gradient isn
 
 | Tier | Where | Size @1600x900 | Fill | Outline | Shadow | Glow / extra |
 |---|---|---|---|---|---|---|
-| **T1 Hero** | "RLDB" logo, VICTORY / DEFEAT, "YOU GO FIRST", "LESSON COMPLETE", "TUTORIAL COMPLETE" | 64-96 px (logo 88) | vertical gradient #fff1c4 (top) → #f0cf7a (45%) → #b8862e (55%, hard step for a "metal horizon") → #e2b75a (bottom). DEFEAT: #ffd0c4 → #e8605a → #8e2a22 → #c4473d | 2 px #2a1a08 | layer 1: offset (0, 3), blur 0, #000 85% (hard bevel); layer 2: offset (0, 8), blur 18, #000 60% | outer glow 14 px #d4a64a 30% (DEFEAT: #e8605a 30%); a specular sweep (a 30° white band, 18% alpha, additive) crosses the word every 6 s, 0.9 s per pass |
+| **T1 Hero** | "Legion" logo, VICTORY / DEFEAT, "YOU GO FIRST", "LESSON COMPLETE", "TUTORIAL COMPLETE" | 64-96 px (logo 88) | vertical gradient #fff1c4 (top) → #f0cf7a (45%) → #b8862e (55%, hard step for a "metal horizon") → #e2b75a (bottom). DEFEAT: #ffd0c4 → #e8605a → #8e2a22 → #c4473d | 2 px #2a1a08 | layer 1: offset (0, 3), blur 0, #000 85% (hard bevel); layer 2: offset (0, 8), blur 18, #000 60% | outer glow 14 px #d4a64a 30% (DEFEAT: #e8605a 30%); a specular sweep (a 30° white band, 18% alpha, additive) crosses the word every 6 s, 0.9 s per pass |
 | **T2 Screen title** | "CHOOSE YOUR DECK", "CARD CATALOGUE", "DECK BUILDER", "SETTINGS", "CREDITS", modal titles, "GAME 1 COMPLETE - REWARDS", "PASS TO ANA", prompt pane title | 30-40 px | gradient #f6dc96 → #d4a64a → #a97c34 (top to bottom) | 1 px #1a1208 | offset (0, 2), blur 0, #000 80% + offset (0, 4), blur 8, #000 50% | none; a 1-shot sweep when the panel opens |
 | **T3 Section header** | "GAME LOG", "CARD DETAILS", "SERIES", "ALL CARDS", "PREVIEW", "YOUR DECK", "STATUSES", "RULES", "GAME HISTORY" | 16-20 px, letter-spacing +1.5 px | flat `GOLD` #d4a64a | none | offset (0, 1), blur 0, #000 90% | a 1 px engraved underline (gold 45%) with a 1 px #000 50% line below it |
 
@@ -241,7 +241,7 @@ Apply the §1.4.1 tiers everywhere a Cinzel heading is drawn. The full inventory
 
 | Tier | Strings / places | Owner file |
 |---|---|---|
-| T1 | "RLDB" logo; VICTORY / DEFEAT; "BEN GOES FIRST" coin-flip banner; "TRAP ACTIVATED" and the other FX banners; "LESSON COMPLETE", "TUTORIAL COMPLETE"; the "YOUR TURN" banner | `menu/main_menu.gd`, `fx/fx_game_end.gd`, `fx/fx_banner.gd`, `fx/coin_flip.gd`, `tutorial/tutorial_overlay.gd` |
+| T1 | "Legion" logo; VICTORY / DEFEAT; "BEN GOES FIRST" coin-flip banner; "TRAP ACTIVATED" and the other FX banners; "LESSON COMPLETE", "TUTORIAL COMPLETE"; the "YOUR TURN" banner | `menu/main_menu.gd`, `fx/fx_game_end.gd`, `fx/fx_banner.gd`, `fx/coin_flip.gd`, `tutorial/tutorial_overlay.gd` |
 | T2 | "CHOOSE YOUR DECK", "DRAFT YOUR DECK", "NEXT GAME", "GAME 1 COMPLETE — REWARDS", "CARD CATALOGUE", "DECK BUILDER", "SETTINGS", "CREDITS", "YOUR STATISTICS", "TUTORIAL", "PASS TO ANA", "MATCH PAUSED", "CONCEDE THIS GAME?", "DELETE DECK", "INTERFACE SETTINGS", the prompt pane title, the inspector card name, the pile browser title "SPENT (8)", the main menu items (ivory variant) | `widgets/ornate_panel.gd` (`add_headline`), `widgets/house_panel.gd`, `menu/card_list_screen.gd`, `deck_builder.gd`, `game/prompt_plate.gd`, `inspect/card_inspector.gd`, `inspect/pile_browser.gd`, `menu/menu_item.gd` |
 | T3 | Every panel header (GAME LOG, CARD DETAILS, SERIES, YOUR DRAFT, YOUR EXTRA DECK, ALL CARDS, SELECTED CARD, PREVIEW, YOUR DECK, MAIN DECK, EXTRA DECK, STATUSES, RULES, GAME HISTORY, WHAT YOU LEARNED), "TURN 1 · BEN", the player plate names | `widgets/house_panel.gd`, `game/game_sidebar.gd`, `board/player_plate.gd`, `game/game_reward_panels.gd`, `game/game_series_overlay.gd` |
 
@@ -295,11 +295,11 @@ on each PanelContainer; a dev-only flag).
 
 Severity: **P1** blocks release quality, **P2** noticeable, **P3** polish. Pixel values are 1600x900
 layout px (preview values from the 3840 shots converted at x0.8). File paths are relative to
-`rldb/src/ui/` unless they start with `rldb/`.
+`legion/src/ui/` unless they start with `legion/`.
 
 | # | Screen | Screenshot | Problem | Sev | Fix | File(s) |
 |---|---|---|---|---|---|---|
-| 1 | Main menu | `cards/00b_credits_1600x1000.png`, `cards/00c_settings_surfaces_1600x1000.png` | **[D3]** "RLDB" logo is one flat gold fill (#d4a64a-ish), no outline, shadow or bevel; against the dark trees its left edge dissolves. It is the first impression and looks like a placeholder. | P1 | T1 hero treatment (§1.4.1) at 88 px: gradient fill, 2 px #2a1a08 outline, a two-layer shadow, a 14 px gold glow, a specular sweep every 6 s. Add a thin engraved rule plus a diamond under it (the house divider) at 24 px below. | `menu/main_menu.gd` |
+| 1 | Main menu | `cards/00b_credits_1600x1000.png`, `cards/00c_settings_surfaces_1600x1000.png` | **[D3]** "Legion" logo is one flat gold fill (#d4a64a-ish), no outline, shadow or bevel; against the dark trees its left edge dissolves. It is the first impression and looks like a placeholder. | P1 | T1 hero treatment (§1.4.1) at 88 px: gradient fill, 2 px #2a1a08 outline, a two-layer shadow, a 14 px gold glow, a specular sweep every 6 s. Add a thin engraved rule plus a diamond under it (the house divider) at 24 px below. | `menu/main_menu.gd` |
 | 2 | Main menu | same | Subtitle "A TWO-PLAYER ROGUELIKE DECK BATTLER" is about 11 px Cinzel in `TEXT_DIM` on dark foliage: the contrast is about 3:1 and it reads as small print. | P2 | 13 px Cinzel 600, letter-spacing +2 px, `MUTED` #c2b8a2, 1 px #000 80% shadow. Keep 16 px from the logo baseline. | `menu/main_menu.gd` |
 | 3 | Main menu | same | Menu items are flat ivory Cinzel with no shadow; the hovered item only gets a diamond and an underline. No glow, no motion, no hover sound. | P1 | Ivory T2 variant at rest; on hover a gold gradient, a 10 px gold glow, slide right 6 px (120 ms QUAD OUT), the diamond fades and scales in, and `ui_hover` plays. Press: 0.97 scale and `click_primary`. | `menu/menu_item.gd` |
 | 4 | Main menu | `stats/01_empty_1600x900.png` | Submenu "BACK" is about 70% of the size of the other items and much dimmer; it reads as disabled rather than as a navigation item. | P2 | Same size as the siblings minus 15% (not 30%), in `MUTED` with a "‹" glyph; the same hover treatment. Gap above it: 16 px (currently about 8). | `menu/main_menu.gd`, `menu/menu_item.gd` |

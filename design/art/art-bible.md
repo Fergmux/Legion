@@ -1,4 +1,4 @@
-# RLDB Art Bible (first pass)
+# Legion Art Bible (first pass)
 
 Status: Draft v1, 2026-10-15. Covers I-03. Layout lives in `design/ux/match-board.md`. Hex values are starting tokens; tune in `ui_style.gd`, not per widget. All art is original; no franchise frames, logos or assets.
 
@@ -150,7 +150,7 @@ Easing: `TRANS_BACK`/`EASE_OUT` for arrivals and lifts (springy), `TRANS_QUART`/
 | 6 | Soft particle + ember sprites | VFX (dust, embers, sparkle) | 64x64 | yes, white soft | round, additive-friendly | VFX |
 | 7 | Panel 9-slice + rivets | sidebar and plates | 128x128, margins 20 | yes | worn bronze trim on dark slate | UI panels |
 
-Card art itself: supplied (all 188 cards, 2026-10-18) and imported to `rldb/assets/art/cards/<id>.webp`; see §10. Items 2 (table texture) and 7 (panel surfaces) are now covered by the photographic table and the UiSurface material grain (§10).
+Card art itself: supplied (all 188 cards, 2026-10-18) and imported to `legion/assets/art/cards/<id>.webp`; see §10. Items 2 (table texture) and 7 (panel surfaces) are now covered by the photographic table and the UiSurface material grain (§10).
 
 ## 8. Naming (per project convention)
 
@@ -168,11 +168,11 @@ Card art itself: supplied (all 188 cards, 2026-10-18) and imported to `rldb/asse
 
 Full review and rationale: `design/card-redesign-2026-10-18.md`.
 
-- **Card art:** square 768 px WebP per card at `rldb/assets/art/cards/<id>.webp`, found by card id alone (`CardArt.path_for`). Imported from the accepted `<id> - <name>.png` files by `tools/godot/import_card_art.gd` (Lanczos to 768, WebP q0.9); Godot imports them VRAM-compressed (S3TC) with mipmaps. A card without art keeps the radial placeholder.
+- **Card art:** square 768 px WebP per card at `legion/assets/art/cards/<id>.webp`, found by card id alone (`CardArt.path_for`). Imported from the accepted `<id> - <name>.png` files by `tools/godot/import_card_art.gd` (Lanczos to 768, WebP q0.9); Godot imports them VRAM-compressed (S3TC) with mipmaps. A card without art keeps the radial placeholder.
 - **Square art window on every card**, as wide as the card allows: field 79x79 of 85x128, tall 112x112 of 120x180 (big = the tall layout at 224/120 scale).
 - **Field card** (85x128): art; name banner over the art's lower edge; ATK / DEF in the bottom strip. Field Power / Trap: art, banner, short rules text below.
 - **Tall card** (hand, mini, big / inspector): art with the ATK diamond and DEF shield on its lower corners, banner under them, race · Type line, then a full-width rules well (an empty well shows a faint kind emblem).
 - **Everywhere:** cost gem top-left and Type pip top-right on the art; statuses and Runes as icons in rows over the art's lower edge, above the banner.
 - **Status icons** (`CardStatusIcons`, glyphs from game-icons.net, CC BY 3.0): a white glyph on a dark token whose shape and rim say what it is: buff = round, green rim; debuff = rounded square, red rim; Rune = hexagon, blue rim. Stacks above 1 (and every Rune count) show as a number badge. Too many for the rows collapse into a "+N" token. Hovering an icon shows its name at once ("Poison ×2", `StatusTip`); the card details panel uses the same tokens.
 - **Material surfaces** (`UiSurface`, CC0 ambientCG scans baked to grayscale relief): leather on panels, plates and modals; pebbled leather on card bodies; brushed metal on buttons and card name plates; dark wood grain on the catalogue / deck builder backdrop. The relief averages 0.5 and is drawn tinted with twice the surface colour, so the palette is unchanged and only grain is added. Strengths: `UIStyle.PANEL_GRAIN`, `BUTTON_GRAIN`, `GOLD_GRAIN`, `BACKDROP_GRAIN`.
-- **Credits:** main menu > Credits (from `rldb/data/credits.json`); file-level detail in `rldb/assets/CREDITS.md`.
+- **Credits:** main menu > Credits (from `legion/data/credits.json`); file-level detail in `legion/assets/CREDITS.md`.

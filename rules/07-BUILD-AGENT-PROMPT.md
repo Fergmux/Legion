@@ -1,6 +1,6 @@
 # Build-agent prompt
 
-Copy the prompt below into an implementation agent opened at `C:/Users/fergm/Documents/code/RLDB`. The accompanying specification is in `rules/`. The existing Godot resource root is the nested `rldb/` folder containing `project.godot`; account for that in run/import commands and generated resources. The studio template's root `src/` is outside that Godot resource root. Do not silently create a second Godot project.
+Copy the prompt below into an implementation agent opened at `C:/Users/fergm/Documents/code/Legion`. The accompanying specification is in `rules/`. The existing Godot resource root is the nested `legion/` folder containing `project.godot`; account for that in run/import commands and generated resources. The studio template's root `src/` is outside that Godot resource root. Do not silently create a second Godot project.
 
 ---
 

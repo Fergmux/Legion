@@ -53,7 +53,7 @@ outside this repo.
 | Host may stop waiting; absent player forfeits (P-02/P-06) | Done | net_two_client |
 | Steam matchmaking and friend invites | Blocked | Implemented (`net_session.gd`, `main.gd`); needs two real Steam accounts — see README checklist |
 | Steam reconnect | Blocked | Same transport-independent logic as ENet (tested); Steam itself unverified |
-| Supplied artwork | Blocked | Waiting on the user; placeholders + `rldb/art/cards/` drop-in path |
+| Supplied artwork | Blocked | Waiting on the user; placeholders + `legion/art/cards/` drop-in path |
 
 ## Build plan, verification and process (05, 07, 08)
 
@@ -63,7 +63,7 @@ outside this repo.
 | Two-client tests: response suspension, illegal input, redaction, reconnect | Done | net_two_client (6 tests) |
 | Complete matches and series between two clients | Done | net_full_series (best of 3; best of 5 with draft), both with a mid-game reconnect |
 | Launch and inspect the real game; screenshots | Done | production/qa/evidence/2026-10-15-final (exported build + networked run) |
-| Runnable export + setup instructions | Done | build/windows/RLDB.exe (git-ignored), README |
+| Runnable export + setup instructions | Done | build/windows/Legion.exe (git-ignored), README |
 | Independent specialist reviews, fixes verified | Done | commit df7d450 + rules_review_regressions (each seen failing first) |
 
 ## Open items for the user
@@ -72,7 +72,7 @@ outside this repo.
 2. ~~Possible endless games~~ — resolved by C-04 fatigue damage (default 2 HP per missed draw; confirm the number).
 3. **Open decisions in `rules/06`** — prototype answers are listed as P-xx in
    `design/decision-register.md`; review and confirm or change them.
-4. **Artwork** — drop files into `rldb/art/cards/` using the source image filenames.
+4. **Artwork** — drop files into `legion/art/cards/` using the source image filenames.
 
 ## Production-quality pass (rules/09, 2026-10-15)
 

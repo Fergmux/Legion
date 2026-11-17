@@ -13,12 +13,12 @@ Then inspect the actual working tree (`git log`, `git status`, worktrees under `
 
 ## Current phase
 
-**COMPLETE (17 Oct 2026).** All three workstreams and every review are merged on `build/rldb-game`, and the final verification passed. The handoff is in `final-report.md`. Open items for the owner are in sections 5 and 6 there.
+**COMPLETE (17 Oct 2026).** All three workstreams and every review are merged on `build/legion-game`, and the final verification passed. The handoff is in `final-report.md`. Open items for the owner are in sections 5 and 6 there.
 
 ## Stage 0 findings
 
 ### Repository and tooling
-- Godot 4.6.1 (Forward+, D3D12). Branch `build/rldb-game`.
+- Godot 4.6.1 (Forward+, D3D12). Branch `build/legion-game`.
 - Tests: 614 GdUnit cases passing (as of `6b01b15`).
 - Node v24 is installed. Firebase CLI, gcloud and Java are not; the Firestore emulator needs Java.
 
@@ -36,7 +36,7 @@ Then inspect the actual working tree (`git log`, `git status`, worktrees under `
 - An unauthenticated REST read returned 404 NOT_FOUND, not PERMISSION_DENIED. **The database is open to anyone** (test rules).
 
 ### Art
-- There are no card art assets in the repo; `rldb/assets/art` holds only backgrounds.
+- There are no card art assets in the repo; `legion/assets/art` holds only backgrounds.
 - `card_img` values are references to the owner's art set, so there is nothing local to remap. They are kept as data.
 
 ### Decks

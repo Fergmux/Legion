@@ -1,6 +1,6 @@
 # Card game build specification
 
-Prepared 15 October 2026 from the design discussion and the two supplied RLDB CSVs. This is a reconciled specification, not a transcript. Later explicit corrections replace earlier statements.
+Prepared 15 October 2026 from the design discussion and the two supplied Legion CSVs. This is a reconciled specification, not a transcript. Later explicit corrections replace earlier statements.
 
 ## Files
 
@@ -22,7 +22,7 @@ Prepared 15 October 2026 from the design discussion and the two supplied RLDB CS
 
 This package is placed in the existing repository's `rules/` folder. Give the implementation agent the text in `07-BUILD-AGENT-PROMPT.md`. The studio template is optional tooling; this specification does not require starting a new repository or replacing `project.godot`.
 
-Verified handoff layout: repository/studio root is `C:/Users/fergm/Documents/code/RLDB`; the existing Godot project is in `rldb/project.godot` below that root. Start Claude Code at the repository root to load the studio tooling, and point engine run/import commands at `rldb/`. Ensure generated game code and resources are inside the actual Godot resource root, or deliberately reconcile the layout without silently creating a second project. The root `src/` folder from the template is outside the existing Godot resource root.
+Verified handoff layout: repository/studio root is `C:/Users/fergm/Documents/code/Legion`; the existing Godot project is in `legion/project.godot` below that root. Start Claude Code at the repository root to load the studio tooling, and point engine run/import commands at `legion/`. Ensure generated game code and resources are inside the actual Godot resource root, or deliberately reconcile the layout without silently creating a second project. The root `src/` folder from the template is outside the existing Godot resource root.
 
 ## Authority
 

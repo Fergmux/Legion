@@ -1,4 +1,4 @@
-# RLDB gameplay telemetry (Firebase Spark plan)
+# Legion gameplay telemetry (Firebase Spark plan)
 
 Implemented 17 Oct 2026 (production batch Stage 3, package A3); schema v2 (game and turn time) and cloud player
 statistics added 20 Oct 2026 (owner feedback C1, C2). Records: [schema-v1.md](schema-v1.md).
@@ -9,8 +9,8 @@ retention, default-on setting, environment labels).
 ## Architecture
 
 ```
-Godot client (rldb/src/telemetry)                     Firestore rldb-b5593 (default)       Owner PC (firebase/tools)
- Series / MatchEngine --note()--> TelemetryCollector   users/{uid}/submissions/{doc}  <---  rldb-admin.js (Admin SDK, ADC)
+Godot client (legion/src/telemetry)                     Firestore rldb-b5593 (default)       Owner PC (firebase/tools)
+ Series / MatchEngine --note()--> TelemetryCollector   users/{uid}/submissions/{doc}  <---  legion-admin.js (Admin SDK, ADC)
       (read-only observer)            | records          create-once, rules-validated          reconcile -> canonical_games/
                                  TelemetryOutbox  --->  TelemetryUploader (REST commit) ---->           -> aggregates/
                                  user://telemetry/outbox   TelemetryAuth (anonymous)                    metrics JSON (tools/out)
@@ -19,7 +19,7 @@ Godot client (rldb/src/telemetry)                     Firestore rldb-b5593 (defa
 - **No backend.** Spark has no Cloud Functions, so the game writes directly. The rules allow one thing only:
   the signed-in owner creates an immutable, schema-checked document in their own folder.
 - **Trust.** Classification as verified, provisional, conflicted, local or abandoned, and all aggregation, run
-  only in the owner's admin tool (`firebase/tools/rldb-admin.js`) with Google IAM credentials. A client cannot
+  only in the owner's admin tool (`firebase/tools/legion-admin.js`) with Google IAM credentials. A client cannot
   write canonical games or aggregates, or declare anything verified.
 - **Who reports.** The process that runs the `Series` (hot-seat, bot, network host) reports both seats: drafts,
   rewards, starting decks, events, results. A network client sends only a `gclient` corroboration report per duel,
@@ -105,11 +105,11 @@ Records already uploaded stay until the owner runs `delete-uid`.
 |---|---|---|
 | Editor (`OS.has_feature("editor")`) | `dev` | live |
 | Exported build | `playtest` | live |
-| Exported `RLDB-dev.exe` (any executable named `*-dev`), written to `build/windows-dev/` by `addons/rldb_export` beside every Windows export | `dev` | live |
-| Public release | set `"environment": "production"` in `rldb/data/telemetry_config.json` for that build | live |
+| Exported `Legion-dev.exe` (any executable named `*-dev`), written to `build/windows-dev/` by `addons/legion_export` beside every Windows export | `dev` | live |
+| Public release | set `"environment": "production"` in `legion/data/telemetry_config.json` for that build | live |
 | GdUnit, every `-s` script run (dev drivers, tools), user args with `shots` / `driver`, `--telemetry-env=test` | `test` | none (add `--telemetry-emulator` or `--telemetry-live`) |
 
-- Every Windows export (editor or `--export-release`) writes two builds from the same files: `build/windows/RLDB.exe` (`playtest`) and `build/windows-dev/RLDB-dev.exe` (`dev`). The name check beats the shipped `environment` value, so the dev copy stays `dev` in a production build; `dev.cfg` and `--telemetry-env=` still override it. `RLDB.exe --telemetry-status` prints the label a build uses and quits.
+- Every Windows export (editor or `--export-release`) writes two builds from the same files: `build/windows/Legion.exe` (`playtest`) and `build/windows-dev/Legion-dev.exe` (`dev`). The name check beats the shipped `environment` value, so the dev copy stays `dev` in a production build; `dev.cfg` and `--telemetry-env=` still override it. `Legion.exe --telemetry-status` prints the label a build uses and quits.
 - The environment is stamped on every record when it is queued, so a later build never relabels old records.
 - The admin tool partitions by environment and defaults to `production`. Labels are not a security boundary, and
   they share one database and one quota. Separate Firebase projects would be the stronger option and are not
@@ -119,11 +119,11 @@ Records already uploaded stay until the owner runs `delete-uid`.
   - `user://telemetry/dev.cfg` `[dev] enabled=false` (developer override, which can also set `environment` or
     `target`);
   - the `--telemetry-off` argument;
-  - the environment variable `RLDB_TELEMETRY=off`.
+  - the environment variable `LEGION_TELEMETRY=off`.
 
 ## Developer tool (no player UI)
 
-Run it from `rldb/` with the editor console binary:
+Run it from `legion/` with the editor console binary:
 
 ```
 godot --headless --path . -s res://src/dev/telemetry_tool.gd -- --inspect
@@ -164,7 +164,7 @@ Install once with `cd firebase && npm install`. Java 21 must be on PATH for the 
   reconciled, with turn times) and `tests/e2e_stats.js` (two simulated computers sync one Steam account's statistics
   through the real client: 2 + 1 duels give 3 on both).
 - Fixture metric tests (no emulator): `node --test tools/test/*.test.js` (`timing.test.js` covers schema v2).
-- Players' cloud statistics: `node tools/rldb-admin.js player-stats` (one summary line per player: duels, W-L, average
+- Players' cloud statistics: `node tools/legion-admin.js player-stats` (one summary line per player: duels, W-L, average
   duel and turn; one read per player document) or `player-stats <hash>` (the decoded record). These are
   self-reported under an unverified link. `delete-stats <hash> [--confirm]` erases one record and every link to it;
   `delete-uid --confirm` now also erases the record that uid's link names.
@@ -176,7 +176,7 @@ Install once with `cd firebase && npm install`. Java 21 must be on PATH for the 
   password account would have to open read-everything rules to one client identity, and anyone holding that
   password could read or overwrite all data. IAM keeps the rules closed to every client.
 - Reconcile and metrics:
-  `node tools/rldb-admin.js reconcile --env=production [--modes=lan,steam] [--statuses=verified,provisional] [--player=u:<uid>] [--from=2026-11-01] [--content-hash=<hex>] [--write]`.
+  `node tools/legion-admin.js reconcile --env=production [--modes=lan,steam] [--statuses=verified,provisional] [--player=u:<uid>] [--from=2026-11-01] [--content-hash=<hex>] [--write]`.
   - The output goes to `tools/out/metrics-<env>.json` (ignored by git).
   - `--write` stores only changed `canonical_games/{env}__{game_id}`, deletes canonical games whose submissions
     are gone, and writes `aggregates/{env}__default`.
@@ -184,10 +184,10 @@ Install once with `cd firebase && npm install`. Java 21 must be on PATH for the 
   - Defaults are human network duels, verified plus provisional (provisional is flagged and filterable), with
     conflicted, abandoned, bot and hot-seat duels excluded. Pass `--modes=bot,local --statuses=local` for local
     play.
-- Deletion: `node tools/rldb-admin.js delete-uid <uid>` lists the documents; add `--confirm` to erase the uid:
+- Deletion: `node tools/legion-admin.js delete-uid <uid>` lists the documents; add `--confirm` to erase the uid:
   its submissions, its anonymous Auth account, every filtered aggregate naming it, then a rebuild of every
   environment's canonical games and default aggregate. Delete local `tools/out/*.json` copies by hand.
-- Health: `node tools/rldb-admin.js health --env=production` reports accepted and rejected counts by reason, each
+- Health: `node tools/legion-admin.js health --env=production` reports accepted and rejected counts by reason, each
   classification count, and network duels missing a client report.
 
 ## Cost and quota (Spark: 20,000 writes/day, 50,000 reads/day, 20,000 deletes/day, 1 GiB stored)
@@ -249,7 +249,7 @@ The player's own statistics (Decks > Statistics, `PlayerStats`) follow their Ste
   client reports. It is never the raw Steam ID. Any modified client can claim any hash (`stats_links/{uid}`) and so
   read or overwrite that player's statistics; the owner accepted this for statistics only. Nothing in these
   documents is used for match authority, the competitive metrics or the website's duel statistics.
-- **Client** (`rldb/src/stats/stats_sync.gd`, ticked by the Telemetry node, one request at a time): link the uid to
+- **Client** (`legion/src/stats/stats_sync.gd`, ticked by the Telemetry node, one request at a time): link the uid to
   the hash once (remembered in `user://telemetry/stats_sync.cfg`), read `player_stats/{hash}` at start-up and when
   the dialog opens (at most once a minute), merge it into the local record, and write back whenever the shared part
   differs, with an `updateTime` precondition (`exists=false` for the first write). A lost race (another computer

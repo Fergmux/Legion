@@ -15,7 +15,7 @@ Statuses: Implemented — verified (tests and live run), unless a row says other
   `85bb97c947df5459ea68d0246a05a3cac643dbab975c6c1e9bbe8b007e73c5bc`, 188 cards (5 new IDs, none removed).
 - Previous: `rules/sources/RLDB Master - Card Database (2026-10-17).csv` (kept as history, never imported).
 - `tools/import_cards.py` now imports the 18 October file only (pinned hash); `python -I tools/import_cards.py --check`
-  proves `rldb/data/cards.json` is current. Every cell the importer changes is kept under `source.raw`.
+  proves `legion/data/cards.json` is current. Every cell the importer changes is kept under `source.raw`.
 
 ## The owner's list, item by item
 
@@ -146,7 +146,7 @@ no intended effect changes. It is now the imported source.
   turn, when it returns. That is the implemented behaviour.
 - The active source is now pinned in `rules/sources/active-card-source.json`. To take a new export:
   `python -I tools/import_cards.py --adopt "<path to the exported csv>"`. It validates the export
-  (no ID may disappear), keeps a dated copy, pins it, regenerates `rldb/data/cards.json` and lists
+  (no ID may disappear), keeps a dated copy, pins it, regenerates `legion/data/cards.json` and lists
   stat changes, effect-text changes (behaviour is scripted per ID and is not changed by the CSV) and
   new IDs (which need scripting). Then run the test suite and commit.
 

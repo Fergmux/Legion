@@ -1,19 +1,19 @@
-"""Publish RLDB to GitHub (github.com/Fergmux/RLDB, PUBLIC).
+"""Publish Legion to GitHub (github.com/Fergmux/Legion, PUBLIC).
 
     python -I tools/publish_github.py sync               # upload the source (history without QA evidence)
     python -I tools/publish_github.py release            # sync, then release the current builds as v<version>
     python -I tools/publish_github.py release --clobber  # replace the assets of an existing v<version>
 
-sync: makes a throwaway hardlinked bare clone of this repo with only `main` and `build/rldb-game`,
+sync: makes a throwaway hardlinked bare clone of this repo with only `main` and `build/legion-game`,
 strips `production/qa/evidence/` from all history with git-filter-repo (5.9 GB of screenshots; GitHub
 takes at most 2 GB per push), and pushes both branches. The filter is deterministic, so every sync
 re-creates the same commits and the push is a fast-forward; it is never forced. Commit hashes on
 GitHub therefore differ from local ones.
 
-release: zips the playtest build (build/windows -> build/RLDB-friends.zip) and the dev build
-(build/windows-dev -> build/RLDB-dev.zip), adds the macOS build (build/macos/RLDB-macos.zip, already a
+release: zips the playtest build (build/windows -> build/Legion-friends.zip) and the dev build
+(build/windows-dev -> build/Legion-dev.zip), adds the macOS build (build/macos/Legion-macos.zip, already a
 zip, exported by tools/export_all.py) as a third asset, and creates the GitHub release
-v<config/version> at the tip of build/rldb-game. Builds must have been exported first; this never
+v<config/version> at the tip of build/legion-game. Builds must have been exported first; this never
 exports. A missing or unreadable macOS zip is a warning (the release goes out without it); a
 missing Windows build is an error.
 
@@ -29,29 +29,29 @@ import sys
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = "Fergmux/RLDB"
+REPO = "Fergmux/Legion"
 REMOTE = "https://github.com/%s.git" % REPO
-BRANCHES = ["main", "build/rldb-game"]
-RELEASE_BRANCH = "build/rldb-game"
+BRANCHES = ["main", "build/legion-game"]
+RELEASE_BRANCH = "build/legion-game"
 STRIP_PATHS = ["production/qa/evidence/"]
-MIRROR = os.path.join(os.path.dirname(ROOT), ".rldb-github-mirror")
+MIRROR = os.path.join(os.path.dirname(ROOT), ".legion-github-mirror")
 GH_CANDIDATES = [shutil.which("gh") or "", r"C:\Program Files\GitHub CLI\gh.exe"]
 SHARED_FILES = ["libgodotsteam.windows.template_release.x86_64.dll", "steam_api64.dll", "steam_appid.txt"]
 BUILDS = {
     # asset name: (folder, exe, pck)
-    "RLDB-friends.zip": ("build/windows", "RLDB.exe", "RLDB.pck"),
-    "RLDB-dev.zip": ("build/windows-dev", "RLDB-dev.exe", "RLDB-dev.pck"),
+    "Legion-friends.zip": ("build/windows", "Legion.exe", "Legion.pck"),
+    "Legion-dev.zip": ("build/windows-dev", "Legion-dev.exe", "Legion-dev.pck"),
 }
-MACOS_ASSET = "RLDB-macos.zip"
+MACOS_ASSET = "Legion-macos.zip"
 MACOS_ZIP = "build/macos/" + MACOS_ASSET   # written by `--export-release "macOS"`; uploaded as it is
-MACOS_REQUIRED = ["RLDB.app/Contents/MacOS/RLDB", "RLDB.app/Contents/Info.plist",
-                  "RLDB.app/Contents/Resources/RLDB.pck"]
+MACOS_REQUIRED = ["Legion.app/Contents/MacOS/Legion", "Legion.app/Contents/Info.plist",
+                  "Legion.app/Contents/Resources/Legion.pck"]
 MACOS_NOTE = (
-    "- **RLDB-macos.zip**: the macOS build (RLDB.app, universal: runs on Apple Silicon and Intel Macs; a recent macOS is "
+    "- **Legion-macos.zip**: the macOS build (Legion.app, universal: runs on Apple Silicon and Intel Macs; a recent macOS is "
     "recommended). It is ad-hoc signed but **not notarized** (there is no Apple developer "
-    "account), so macOS blocks the first launch. Unzip it, move RLDB.app to Applications, then **right-click it and "
+    "account), so macOS blocks the first launch. Unzip it, move Legion.app to Applications, then **right-click it and "
     "choose Open, then Open again**. If macOS says the app is damaged (the download quarantine flag), run "
-    "`xattr -cr /Applications/RLDB.app` in Terminal and open it again. Steam must be running for online play.\n")
+    "`xattr -cr /Applications/Legion.app` in Terminal and open it again. Steam must be running for online play.\n")
 
 
 def gh_exe():
@@ -76,10 +76,10 @@ def git(*args, cwd=ROOT, capture=True, check=True):
 
 
 def version():
-    with open(os.path.join(ROOT, "rldb", "project.godot"), encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "legion", "project.godot"), encoding="utf-8") as f:
         m = re.search(r'^config/version="([^"]+)"', f.read(), re.M)
     if not m:
-        sys.exit("No config/version in rldb/project.godot.")
+        sys.exit("No config/version in legion/project.godot.")
     return m.group(1)
 
 
@@ -136,7 +136,7 @@ def zip_build(asset, folder, exe, pck):
 
 
 def macos_asset():
-    """Checks build/macos/RLDB-macos.zip. Returns (path, exported-time), or None after printing why not.
+    """Checks build/macos/Legion-macos.zip. Returns (path, exported-time), or None after printing why not.
 
     Missing, not a valid zip, or without the .app files is a warning, never an error: the Windows
     release can still go out. The result is always printed, so a skipped asset is not silent."""
@@ -163,8 +163,8 @@ def macos_asset():
 
 def release_notes(ver, local, notes_extra, log, with_macos):
     """The release body: what each asset is, then the owner's extra text and the recent commits."""
-    notes = ("RLDB %s\n\n- **RLDB-friends.zip**: the playtest build (RLDB.exe). Unzip and run RLDB.exe; Steam must be running for online play.\n"
-             "- **RLDB-dev.zip**: the dev build (RLDB-dev.exe); records telemetry as `dev`.\n" % ver)
+    notes = ("Legion %s\n\n- **Legion-friends.zip**: the playtest build (Legion.exe). Unzip and run Legion.exe; Steam must be running for online play.\n"
+             "- **Legion-dev.zip**: the dev build (Legion-dev.exe); records telemetry as `dev`.\n" % ver)
     if with_macos:
         notes += MACOS_NOTE
     return notes + "\nBuilt from local commit %s.\n\n%sRecent changes:\n%s" % (
@@ -175,16 +175,16 @@ def release(clobber, notes_extra):
     gh = gh_exe()
     ver = version()
     tag = "v" + ver
-    if git("status", "--porcelain", "--untracked-files=no", "--", "rldb").stdout.strip():
-        print("WARNING: rldb/ has uncommitted changes; the builds may not match the uploaded source.")
+    if git("status", "--porcelain", "--untracked-files=no", "--", "legion").stdout.strip():
+        print("WARNING: legion/ has uncommitted changes; the builds may not match the uploaded source.")
     assets = [zip_build(a, *spec) for a, spec in BUILDS.items()]
     mac = macos_asset()
     if mac:
         assets.append(mac)
-    head_time = datetime.datetime.fromtimestamp(int(git("log", "-1", "--format=%ct", "--", "rldb", ":!*.uid").stdout.strip()))
+    head_time = datetime.datetime.fromtimestamp(int(git("log", "-1", "--format=%ct", "--", "legion", ":!*.uid").stdout.strip()))
     for path, built in assets:
         if built < head_time:
-            print("WARNING: %s was exported before the last commit to rldb/ (%s); it may be stale."
+            print("WARNING: %s was exported before the last commit to legion/ (%s); it may be stale."
                   % (os.path.basename(path), head_time.strftime("%Y-%m-%d %H:%M")))
     sync()
     local = git("rev-parse", "--short", "HEAD").stdout.strip()
@@ -199,7 +199,7 @@ def release(clobber, notes_extra):
         run([gh, "release", "edit", tag, "--repo", REPO, "--notes", notes])
     else:
         run([gh, "release", "create", tag, *files, "--repo", REPO, "--target", RELEASE_BRANCH,
-             "--title", "RLDB " + ver, "--notes", notes, "--latest"])
+             "--title", "Legion " + ver, "--notes", notes, "--latest"])
     url = run([gh, "release", "view", tag, "--repo", REPO, "--json", "url", "-q", ".url"], capture=True).stdout.strip()
     print("Released: " + url)
 

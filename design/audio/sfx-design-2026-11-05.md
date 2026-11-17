@@ -1,4 +1,4 @@
-# RLDB sound effects: the ElevenLabs set (L1, 5 Nov 2026)
+# Legion sound effects: the ElevenLabs set (L1, 5 Nov 2026)
 
 The owner asked for this in `design/owner-feedback-2026-11-05.md`, item 1: "replace all sound effects ... use the
 elevenlabs mcp ... fit the fantasy vibe and be reminiscent of the existing effects but better quality.
@@ -38,7 +38,7 @@ gold button is still a brass tick on a wooden knock, the Arcane climax still blo
    - The takes are in `production/audio-staging/<cue>/` (gitignored). `index.md` there lists every take.
    - **Cost:** about 3,130 credits in all (round 1 about 2,890, round 2 about 244). Per take, cost scales with
      length: about 1.7 credits at 0.5 s, 8.3 at 2.5 s and 16.7 at 5 s.
-   - The ElevenLabs flows are named "RLDB SFX L1 batch 1-5", "RLDB SFX L1 round 2" and "RLDB SFX L1 (Nov 2026)",
+   - The ElevenLabs flows are named "Legion SFX L1 batch 1-5", "Legion SFX L1 round 2" and "Legion SFX L1 (Nov 2026)",
      the pilot.
 3. **Analysis.** `tools/sfx_master.py analyse` measured every take:
    - trimmed length and lead-in;

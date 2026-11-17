@@ -1,6 +1,6 @@
 # Production batch 2026-10-17: final report
 
-Branch `build/rldb-game` (not pushed). Every package and review is merged. The detailed records sit in this folder:
+Branch `build/legion-game` (not pushed). Every package and review is merged. The detailed records sit in this folder:
 - `coverage.md`
 - `decisions.md`
 - `verification.md`
@@ -69,7 +69,7 @@ Branch `build/rldb-game` (not pushed). Every package and review is merged. The d
 | Bot driver | 4 / 4 |
 | Firebase emulator rules and admin tests | 18 / 18 |
 | Firebase metrics fixtures | 19 / 19 |
-| Exported `build/windows/RLDB.exe` launch | no script errors |
+| Exported `build/windows/Legion.exe` launch | no script errors |
 | Killing-blow slow motion, quiet machine, 4x MSAA | direct lethal never below about 150 fps (1600x900 and 4K); unit lethal dips to 82 fps for one 0.5 s window |
 
 **Independent reviews:**
@@ -92,7 +92,7 @@ Branch `build/rldb-game` (not pushed). Every package and review is merged. The d
 ### Architecture
 - No backend; this is the Spark plan.
 - Clients create immutable records only in `users/{uid}/submissions/{kind}_{id}`.
-- Canonical games and aggregates are written only by the owner-run admin tool (`firebase/tools/rldb-admin.js`), using Google IAM credentials.
+- Canonical games and aggregates are written only by the owner-run admin tool (`firebase/tools/legion-admin.js`), using Google IAM credentials.
 
 ### Exact rules
 The rules are in `firebase/firestore.rules`, deployed 17 Oct:
@@ -113,7 +113,7 @@ The rules are in `firebase/firestore.rules`, deployed 17 Oct:
 ### Retry and retention
 - **Retry:** backoff with jitter. 401 refreshes the token; 409 or a 403 that reads back counts as a duplicate; other 4xx are quarantined with a redacted diagnostic.
 - **Local outbox:** at most 400 items or 8 MiB; completed games are kept longest.
-- **Server data:** kept indefinitely, as the owner asked. Deletion: `node tools/rldb-admin.js delete-uid <uid> --confirm`.
+- **Server data:** kept indefinitely, as the owner asked. Deletion: `node tools/legion-admin.js delete-uid <uid> --confirm`.
 
 ### Identity and privacy limits
 - One anonymous UID per install.
@@ -124,7 +124,7 @@ The rules are in `firebase/firestore.rules`, deployed 17 Oct:
 ### Owner steps
 1. Install the Google Cloud CLI and run `gcloud auth application-default login`, or keep a service-account key outside the repo. The admin tool needs one of these to read live data.
 2. In the Google Cloud console, restrict the Web API key to the Identity Toolkit, Token Service and Firestore APIs.
-3. Before a public release, set `production` in `rldb/data/telemetry_config.json` and review `docs/telemetry/privacy.md`.
+3. Before a public release, set `production` in `legion/data/telemetry_config.json` and review `docs/telemetry/privacy.md`.
 
 **Cost:** £0 on Spark. Measured on a real best-of-3 draft series: 11 records, about 88 KB. That allows about 1,800 series a day, and the 1 GiB limit holds about 10,000 series kept indefinitely. Full detail is in `docs/telemetry/README.md`.
 
@@ -182,15 +182,15 @@ The full list is in `decisions.md`. The ones most worth the owner's attention:
 - **Window budget:** the FX/audio agent used 7 windowed runs against the 5 allowed.
 - **Incident: lost decks.** The owner's saved custom decks (`user://decks.json`) were lost. Tests and drivers in several worktrees shared the real file through backup and restore. Fixed in `DeckStore`: automated runs now use `user://test_decks.json`, with a regression test. "Deck 3 - Spirit Bomb" was recreated from the structure deck. The 4-card "test" deck could not be recovered.
 - **Cleanup:**
-  - No task-owned Godot or RLDB process is left running.
+  - No task-owned Godot or Legion process is left running.
   - Agent worktrees remain under `.claude/worktrees/`. All are merged and safe to delete with `git worktree remove`.
   - An untracked `tools/__pycache__/` is left behind.
 
 ## 7. How to verify and run
 
-Run from `rldb/`. `<godot>` is `/c/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe`.
+Run from `legion/`. `<godot>` is `/c/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe`.
 - **Full suite:** `<godot> --headless --path . -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode -c`
 - **One card's tests:** `<godot> --headless --path . -s res://tests/cards/run_card.gd -- --id=61`
 - **Live drivers:** see `verification.md`.
-- **Game:** `build/windows/RLDB.exe`. Add `--telemetry-off` to disable stats for a session.
+- **Game:** `build/windows/Legion.exe`. Add `--telemetry-off` to disable stats for a session.
 - **Firebase:** see `docs/telemetry/README.md`, "Owner operations".

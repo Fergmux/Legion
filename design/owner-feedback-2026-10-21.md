@@ -69,5 +69,5 @@ and have a few more things for you to change". Standing instructions from the 20
 - Agents' 20-turn limits: resumed repeatedly; no lost work.
 - No in-duel "before" shots for the card face (no stash allowed); the card gallery covers every kind before/after.
 - The perf baseline (18 Oct) played duel is not like-for-like (older rules and lighter screens).
-- RLDB-dev was running at export time: the new dev build is in build/windows-next-dev/ (build/windows-dev untouched). build/windows and build/RLDB-friends.zip are updated.
+- Legion-dev was running at export time: the new dev build is in build/windows-next-dev/ (build/windows-dev untouched). build/windows and build/Legion-friends.zip are updated.
 - The card-shots driver now opens at 3840x2160 on this machine and its synthetic hover misses one status icon ("Defense unit's icon tip"). The same failure reproduces on e6d12db, where it passed earlier, so it is the environment (display), not the code.

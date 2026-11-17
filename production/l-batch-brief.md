@@ -10,18 +10,18 @@ You work **unsupervised**: never stop to ask. Take the best decision and list it
 report (the integrator copies them to the owner).
 
 ## Project facts
-- Godot 4.6.1, GDScript, static typing. The Godot root is `rldb/`, in your worktree too. Doc comments (`##`) on public
+- Godot 4.6.1, GDScript, static typing. The Godot root is `legion/`, in your worktree too. Doc comments (`##`) on public
   functions.
 - Godot exe: `/c/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe` (call it
   `$G`).
-- **First command in a fresh worktree:** `cd rldb && $G --headless --path . --import`. It builds the `.godot` cache and
+- **First command in a fresh worktree:** `cd legion && $G --headless --path . --import`. It builds the `.godot` cache and
   registers new `class_name`s; rerun it after adding one.
-- Tests: gdUnit4 under `rldb/tests/`. Full suite (from `rldb/`):
+- Tests: gdUnit4 under `legion/tests/`. Full suite (from `legion/`):
   `$G --headless --path . -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode -c`.
   Never use `-d` (the debugger hangs on script errors). For one suite, use `-a res://tests/unit/rules/xyz_test.gd`.
   **Check the process exit code, not only the summary line.**
 - **Baseline:** about 50 older tests fail on HEAD because they pin pre-3-Nov card values. The list is in the MAIN tree at
-  `C:/Users/fergm/Documents/code/RLDB/production/l-batch-baseline-failures.txt` (absolute path; it appears a few
+  `C:/Users/fergm/Documents/code/Legion/production/l-batch-baseline-failures.txt` (absolute path; it appears a few
   minutes after you start, so read it before your final suite run), and a dedicated tests agent is fixing them. Do not "fix" those yourself
   unless your item changes the same behaviour. Your rule: **add no new failures**. A failing test outside the baseline
   list is yours to explain or fix.
@@ -30,8 +30,8 @@ report (the integrator copies them to the owner).
   see green.
 - **Never use `git stash`.** The stash stack is shared by every worktree and agent.
 - Two agents running net tests at once clash on ENet port 24721. If a net test flakes, rerun it alone.
-- Card behaviour is scripted per card ID in `rldb/src/core/card_scripts.gd`. Card text comes from
-  `rldb/data/cards.json`, which `tools/import_cards.py` generates from the pinned CSV. Never hand-edit `cards.json`:
+- Card behaviour is scripted per card ID in `legion/src/core/card_scripts.gd`. Card text comes from
+  `legion/data/cards.json`, which `tools/import_cards.py` generates from the pinned CSV. Never hand-edit `cards.json`:
   change the importer (`TEXT_CORRECTIONS` etc.), rerun it, and run the importer's tests:
   `python -I -X utf8 -m unittest discover -s tools/tests -p "test_import_cards.py"`.
 - The engine is deterministic and host-authoritative. `MatchEngine`, `GameCore` and `EffectEngine` live in `src/core`.
@@ -48,7 +48,7 @@ report (the integrator copies them to the owner).
   name with no file yet is silent, which is fine. If you need a cue that is not in the list, use the closest one and
   report it under "Sounds wanted". Do not edit the `NAMES` list yourself (it would conflict).
   `tests/unit/ui/sfx_test.gd::test_all_named_sounds_have_assets` is red until the audio merge.
-- Windowed screenshot drivers live in `rldb/src/dev/`. They open a real window, so run them without `--headless`. For
+- Windowed screenshot drivers live in `legion/src/dev/`. They open a real window, so run them without `--headless`. For
   example: `$G --path . -- --f04-series-shots=<outdir> --no-steam`, `$G --path . -- --f02-shots=<outdir>`,
   `-- --bot-shots=<outdir>`, `-s res://src/dev/card_redesign_shots.gd -- <outdir> 1600x1000`. Extend one, or write your
   own driver for your screens. Hover checks can flake when the real mouse is over the window; rerun them.
@@ -65,7 +65,7 @@ report (the integrator copies them to the owner).
   `await process_frame` on nodes that can be freed (that once crashed the suite at exit).
 
 ## Hard rules
-- **Never push. Never export a build** (the integrator exports). Never run or kill the owner's RLDB.exe.
+- **Never push. Never export a build** (the integrator exports). Never run or kill the owner's Legion.exe.
 - Commit on your branch, one commit per feedback item (or tight group), in Conventional Commits: `feat(ui): ...`,
   `fix(rules): ...`. The body references `Story: design/owner-feedback-2026-11-05.md L<n>`. End every commit message
   with the line `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Commit only your own files

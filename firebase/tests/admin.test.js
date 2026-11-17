@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 process.env.FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8180';
 const admin = require('firebase-admin');
-const { runReconcile, deleteUid, purgeUid, loadSubmissions, playerStats, deleteStats } = require('../tools/rldb-admin');
+const { runReconcile, deleteUid, purgeUid, loadSubmissions, playerStats, deleteStats } = require('../tools/legion-admin');
 const zlib = require('node:zlib');
 const fx = require('../tools/fixtures/basic');
 

@@ -1,4 +1,4 @@
-# RLDB gameplay statistics: privacy note (draft for the release)
+# Legion gameplay statistics: privacy note (draft for the release)
 
 Status: an accurate description of what the current build does. It is NOT legal advice. The owner's
 view that the data is non-personal is recorded as an intent to minimise data, not as a legal
@@ -9,7 +9,7 @@ listed at the end.
 ## Player-facing text (Settings, under "Share anonymous gameplay statistics", on by default)
 
 > Sends anonymous match statistics (draft picks, decks, cards played, game times and results) to
-> help balance RLDB, and keeps your own statistics with a one-way code made from your Steam account
+> help balance Legion, and keeps your own statistics with a one-way code made from your Steam account
 > so they follow you to other computers. No names, chat or Steam profile details are sent. Turning
 > this off stops collection and syncing and deletes statistics not yet sent.
 
@@ -29,7 +29,7 @@ listed at the end.
 
 Not collected: names, Steam persona names, raw Steam IDs, chat, email, friends or contacts, device
 fingerprints, IP addresses (Firebase may still see them as part of any HTTPS request), pointer
-movement or anything outside RLDB matches.
+movement or anything outside Legion matches.
 
 In network games the host's report includes both seats' gameplay, including cards the opponent
 held. This goes only to the developer's database, never to the other player and never into the

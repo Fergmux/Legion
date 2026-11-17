@@ -1,6 +1,6 @@
 # Implement playtest feedback 03
 
-Copy this prompt into the existing implementation agent's conversation at the RLDB repository root.
+Copy this prompt into the existing implementation agent's conversation at the Legion repository root.
 
 ---
 
@@ -17,7 +17,7 @@ Read the complete feedback file, including acceptance checks and the confirmed O
 
 The latest explicit feedback overrides older rules only where it changes them. In particular, Arcane materials now require an exact total of current modified costs, with no overpayment. Overextend now chooses any opposing unit, retaining its opponent-summons/three-or-more-units trigger and 20-ATK reduction. Update conflicting live card text, rules, selection/availability logic and tests as part of implementation; preserve historical decision records by marking old decisions superseded rather than erasing them.
 
-Verify the actual repository and Godot resource root before editing. The established layout is repository root `RLDB/` and Godot project `rldb/project.godot`. Preserve the existing engine version and project; do not restart setup or create another project.
+Verify the actual repository and Godot resource root before editing. The established layout is repository root `Legion/` and Godot project `legion/project.godot`. Preserve the existing engine version and project; do not restart setup or create another project.
 
 ## Use skills and specialist subagents
 

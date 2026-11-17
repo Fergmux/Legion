@@ -11,10 +11,10 @@ ElevenLabs (Sound Effects, model `eleven_text_to_sound_v2`).
 2. Save the ones you like as `production/audio-staging/<cue>/<anything>.mp3` (this folder is gitignored and is
    not on this PC yet; just create it). For example `production/audio-staging/defeat/mine1.mp3`.
 3. Tell me which file is the keeper. I master it to the cue's loudness tier (`tools/sfx_master.py`: trim, fade,
-   true-peak -1 dB, loudness target) and replace `rldb/assets/audio/sfx/<cue>.wav`.
+   true-peak -1 dB, loudness target) and replace `legion/assets/audio/sfx/<cue>.wav`.
    - Mastering needs ffmpeg and uv (numpy/scipy), and neither is installed on this PC yet. I can install them
      when you have takes ready.
-4. To listen to the current file, open `rldb/assets/audio/sfx/<cue>.wav` in any player.
+4. To listen to the current file, open `legion/assets/audio/sfx/<cue>.wav` in any player.
 
 General tips for this generator: describe the physical sources (instrument, material, room), give one event and
 say "single" or "one", say "no voice, no melody" when you want an effect rather than music, and say "dry" or
@@ -25,7 +25,7 @@ name the instruments and the shape ("rises then resolves on a held chord").
 
 - **Cue:** none until now. Choosing an item in a dropdown (Settings: window mode, anti-aliasing; main menu: series
   length, deck mode) made no sound.
-- **Fix in this batch:** dropdowns now play the existing `select` cue (`rldb/assets/audio/sfx/select.wav`, a
+- **Fix in this batch:** dropdowns now play the existing `select` cue (`legion/assets/audio/sfx/select.wav`, a
   small wooden tick, 0.10 s) when an option is picked. If you want a sound of its own, I will add a
   `dropdown_select` cue for your take.
 - **Target:** UI tier (about -24 LUFS), 0.08-0.25 s, instant attack, one event. It should feel like something
@@ -37,9 +37,9 @@ name the instruments and the shape ("rises then resolves on a held chord").
 
 ## 2. Draft hover (new option wanted)
 
-- **Cue:** `card_hover`, file `rldb/assets/audio/sfx/card_hover.wav` (0.18 s, hover tier -32 LUFS). It is shared
+- **Cue:** `card_hover`, file `legion/assets/audio/sfx/card_hover.wav` (0.18 s, hover tier -32 LUFS). It is shared
   by every card hover: hand, draft, rewards, catalogue. The draft turns it on in
-  `rldb/src/ui/game/deck_select_view.gd` (`cw.hover_sound = true`).
+  `legion/src/ui/game/deck_select_view.gd` (`cw.hover_sound = true`).
 - **Current sound:** a playing card sliding a few centimetres on felt.
 - **Target:** quiet, under 0.2 s, played many times in a row, so no pitch, no sparkle tail, nothing tiring. The
   draft offer cards lift and tilt on hover, so a tiny lift or whoosh fits better than a slide.
@@ -52,8 +52,8 @@ name the instruments and the shape ("rises then resolves on a held chord").
 
 ## 3. Draft card picked, and the next cards dealt (new options wanted)
 
-Two cues play here, in `rldb/src/ui/game/deck_select_view.gd`:
-- **`draft_pick`** plays when you click a card to take it. File `rldb/assets/audio/sfx/draft_pick.wav`, 0.70 s,
+Two cues play here, in `legion/src/ui/game/deck_select_view.gd`:
+- **`draft_pick`** plays when you click a card to take it. File `legion/assets/audio/sfx/draft_pick.wav`, 0.70 s,
   ui_major tier -18 LUFS. Current sound: card snapped up with a soft magical chime.
 - **`draft_reveal`** plays when the next three cards fan in, and **`card_flip`** plays as each card flips. Files:
   `draft_reveal.wav` (0.62 s, card tier -16) and `card_flip.wav` (shared with every face-down reveal in a match).
@@ -75,8 +75,8 @@ flourish. It must not be louder than `confirm`.
 
 ## 4. Game start (replace: "absolutely awful")
 
-- **Cue:** `game_start`, file `rldb/assets/audio/sfx/game_start.wav` (3.0 s, stinger tier -12 LUFS). It plays when
-  the coin flip lands (`rldb/src/ui/fx/coin_flip.gd`), right before the opening deal.
+- **Cue:** `game_start`, file `legion/assets/audio/sfx/game_start.wav` (3.0 s, stinger tier -12 LUFS). It plays when
+  the coin flip lands (`legion/src/ui/fx/coin_flip.gd`), right before the opening deal.
 - **Current sound:** a generated brass horn fanfare over war drums. Generated horns come out thin and
   out-of-tune, so the new prompts avoid horns entirely.
 - **Target:** 1.5-3.0 s, "the duel begins": weight and anticipation rather than a melody. It sits just before
@@ -89,8 +89,8 @@ flourish. It must not be louder than `confirm`.
 
 ## 5. Defeat (replace: "god awful")
 
-- **Cue:** `defeat`, file `rldb/assets/audio/sfx/defeat.wav` (3.0 s, stinger -12 LUFS). It plays on the game-end
-  screen when you lose (`rldb/src/ui/fx/fx_game_end.gd`); the tutorial's fail state uses it too.
+- **Cue:** `defeat`, file `legion/assets/audio/sfx/defeat.wav` (3.0 s, stinger -12 LUFS). It plays on the game-end
+  screen when you lose (`legion/src/ui/fx/fx_game_end.gd`); the tutorial's fail state uses it too.
 - **Current sound:** a sad descending horn phrase. Again, generated horns are the problem.
 - **Target:** 2-3 s, a soft fall rather than comic or melodramatic: the light going out. It should not punish
   you, because players hear it after every lost game in a series.
@@ -103,10 +103,10 @@ flourish. It must not be louder than `confirm`.
 ## 6. Victory (make it "way more epic and fun")
 
 Two cues:
-- **`victory`** plays when you win a game. File `rldb/assets/audio/sfx/victory.wav`, 2.3 s.
+- **`victory`** plays when you win a game. File `legion/assets/audio/sfx/victory.wav`, 2.3 s.
 - **`victory_big`** plays when you win the series. File `victory_big.wav`, 4.2 s.
 
-Both are stinger tier (-12 LUFS) and play from `rldb/src/ui/fx/fx_game_end.gd` and the tutorial's last lesson.
+Both are stinger tier (-12 LUFS) and play from `legion/src/ui/fx/fx_game_end.gd` and the tutorial's last lesson.
 
 **Target:** joyful, big and a little playful, with a clear resolving chord at the end. Strings, choir-like pads,
 bells, timpani and cymbals generate far better than brass solos. I can widen the length window to 4 s for

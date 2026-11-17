@@ -8,12 +8,12 @@ const { execFileSync } = require('node:child_process');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const admin = require('firebase-admin');
-const { runReconcile, loadSubmissions } = require('../tools/rldb-admin');
+const { runReconcile, loadSubmissions } = require('../tools/legion-admin');
 
 const GODOT = process.env.GODOT || 'C:/Users/fergm/Downloads/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64_console.exe';
 
 (async () => {
-  const out = execFileSync(GODOT, ['--headless', '--path', path.join(__dirname, '..', '..', 'rldb'), '-s', 'res://src/dev/telemetry_tool.gd',
+  const out = execFileSync(GODOT, ['--headless', '--path', path.join(__dirname, '..', '..', 'legion'), '-s', 'res://src/dev/telemetry_tool.gd',
     '--', '--sim-series', '--telemetry-emulator'], { encoding: 'utf8', timeout: 300000 });
   const lines = out.split(/\r?\n/).filter((l) => /Simulated|uploader:|queue:|quarantined|SCRIPT ERROR/.test(l));
   console.log(lines.join('\n'));

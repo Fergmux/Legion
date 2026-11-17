@@ -7,13 +7,13 @@ build/
 .claude/scheduled_tasks.lock
 .claude/agent-memory/
 **/session-logs/
-rldb/production/
+legion/production/
 production/remote/
 __pycache__/
 *.TMP
-/rldb/*.png
-/rldb/*.png.import
-/rldb/assets/art/backup/
-/rldb/assets/art/background[0-9]*
-# L1 (2026-11-05): ElevenLabs SFX takes (staging; the chosen, mastered takes are in rldb/assets/audio/sfx/).
+/legion/*.png
+/legion/*.png.import
+/legion/assets/art/backup/
+/legion/assets/art/background[0-9]*
+# L1 (2026-11-05): ElevenLabs SFX takes (staging; the chosen, mastered takes are in legion/assets/audio/sfx/).
 production/audio-staging/

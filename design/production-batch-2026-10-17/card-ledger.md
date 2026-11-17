@@ -1,8 +1,8 @@
 # Card ledger: 17 October 2026 database migration
 
-Generated from the two CSVs (`rules/sources/RLDB Master - Card Database.csv` baseline, `rules/sources/RLDB Master - Card Database (2026-10-17).csv` active, SHA-256 `8ac4a39a...6d693da3`) and the regenerated `rldb/data/cards.json`. One row per changed source cell. Cards are matched by stable ID only.
+Generated from the two CSVs (`rules/sources/RLDB Master - Card Database.csv` baseline, `rules/sources/RLDB Master - Card Database (2026-10-17).csv` active, SHA-256 `8ac4a39a...6d693da3`) and the regenerated `legion/data/cards.json`. One row per changed source cell. Cards are matched by stable ID only.
 
-Classes: **behaviour** (handler added, changed or removed in `rldb/src/core`), **balance** (stat, cost, Type or name data), **wording-only** (punctuation, possessives, display text; no rule change), **reference-only** (index, art references, editorial `temp`), **already-correct** (the runtime already did what the new text says, or a confirmed correction is kept), **pending** (needs a decision or asset).
+Classes: **behaviour** (handler added, changed or removed in `legion/src/core`), **balance** (stat, cost, Type or name data), **wording-only** (punctuation, possessives, display text; no rule change), **reference-only** (index, art references, editorial `temp`), **already-correct** (the runtime already did what the new text says, or a confirmed correction is kept), **pending** (needs a decision or asset).
 
 ## Summary
 
@@ -42,7 +42,7 @@ Classes: **behaviour** (handler added, changed or removed in `rldb/src/core`), *
 
 ## Card art
 
-No card art exists in the repo (`rldb/assets/art` holds only backgrounds). The 20 changed `card_img` values are kept as data references and nothing was fabricated or substituted. `image` values are unchanged. The Illusionist's `type_icon` changes to `Card/types/unknown.png` with its typeless Type; the runtime Type icon follows `type` (typeless) rather than the file name.
+No card art exists in the repo (`legion/assets/art` holds only backgrounds). The 20 changed `card_img` values are kept as data references and nothing was fabricated or substituted. `image` values are unchanged. The Illusionist's `type_icon` changes to `Card/types/unknown.png` with its typeless Type; the runtime Type icon follows `type` (typeless) rather than the file name.
 
 ## Per-cell ledger
 

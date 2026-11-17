@@ -1,8 +1,8 @@
-# RLDB telemetry schema v1 and v2: records and field dictionary
+# Legion telemetry schema v1 and v2: records and field dictionary
 
 Status: v1 implemented 17 Oct 2026 (production batch, Stage 3); v2 added 20 Oct 2026 (owner
 feedback C2: game and turn time). Source of truth for
-`rldb/src/telemetry/telemetry_collector.gd` (producer), `firebase/firestore.rules` (envelope
+`legion/src/telemetry/telemetry_collector.gd` (producer), `firebase/firestore.rules` (envelope
 validation) and `firebase/tools/lib/reconcile.js` / `metrics.js` (consumer). Any change to a field
 meaning bumps `schema_version`. The rules accept `schema_version` 1 and 2 (deployed 20 Oct 2026),
 and reconcile and metrics read both.
@@ -24,7 +24,7 @@ Path: `users/{uid}/submissions/{docId}`. Created once, never updated or deleted 
 | `kind` | string | `profile`, `session`, `draft`, `reward`, `game`, `gclient` or `series`. `docId` must start with `<kind>_` |
 | `env` | string | `dev`, `playtest`, `production` or `test`, stamped when the record is queued (never re-labelled later) |
 | `build` | string ≤ 48 | `telemetry_config.json` build, plus `-editor` in editor runs |
-| `content_hash` | 64 hex | SHA-256 of `rldb/data/cards.json` (card data and rules content version) |
+| `content_hash` | 64 hex | SHA-256 of `legion/data/cards.json` (card data and rules content version) |
 | `mode` | string | `local` (hot-seat), `bot`, `lan`, `steam`, or `none` (session/profile). The tutorial is not collected |
 | `uid` | string | Firebase anonymous uid; must equal the path uid and the auth uid |
 | `created_at` | int | Client time (ms) when the record was first queued; kept across retries and restarts |

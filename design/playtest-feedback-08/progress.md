@@ -30,6 +30,6 @@ Read this first after a context compaction. The items are in `design/playtest-fe
 
 ## Final verification (17 Oct)
 - Suite 994/994. f02 76/76. Series 56/56. Tutorial 207/207. Network series 19/19 (client wins) and 19/19 (client loses). Bot 4/4. fb08 shots 4/4. G10 driver 8/8.
-- Both exes rebuilt (`RLDB.exe` playtest, `RLDB-dev.exe` dev); the exe launch shows no script errors; no Godot processes left.
+- Both exes rebuilt (`Legion.exe` playtest, `Legion-dev.exe` dev); the exe launch shows no script errors; no Godot processes left.
 - Evidence: `production/qa/evidence/2026-10-17-fb08/` (`agent-a`, `agent-b`, `agent-c`, `final`).
 

@@ -1,4 +1,4 @@
-# RLDB production-quality implementation prompt
+# Legion production-quality implementation prompt
 
 Paste the prompt below into the existing Claude Code conversation. It is a continuation of the current game, not authorization to restart it. Prepared after reviewing Claude Code Game Studios' README, configuration effects map, team UI/polish/QA skills, and Claude Code's subagent model-selection documentation on 15 October 2026.
 
@@ -8,7 +8,7 @@ Continue this existing Godot game toward a production-quality playable build. Re
 
 ## 1. Read the latest user requirements first
 
-Start at the repository root. The Godot project/resource root is `rldb/`, with `rldb/project.godot`; account for this in tools, assets and tests.
+Start at the repository root. The Godot project/resource root is `legion/`, with `legion/project.godot`; account for this in tools, assets and tests.
 
 Read these before planning or changing gameplay:
 

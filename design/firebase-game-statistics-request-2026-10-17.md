@@ -5,7 +5,7 @@ Status: requested; implement collection only, without player-facing statistics o
 
 ## Outcome and scope
 
-Add reliable background telemetry to the existing RLDB Godot game so future in-game statistics and private analytics dashboards can compute the measures below globally and for each player. Implement collection, authenticated ingestion, durable retry, canonical completed-game records, and repeatable aggregation. Do not build a statistics screen or dashboard in this pass. Continue the existing project at `rldb/project.godot`; preserve gameplay, rules, networking and hidden-information protections.
+Add reliable background telemetry to the existing Legion Godot game so future in-game statistics and private analytics dashboards can compute the measures below globally and for each player. Implement collection, authenticated ingestion, durable retry, canonical completed-game records, and repeatable aggregation. Do not build a statistics screen or dashboard in this pass. Continue the existing project at `legion/project.godot`; preserve gameplay, rules, networking and hidden-information protections.
 
 Read repository instructions, the latest rules, `design/decision-register-answers.md`, playtest feedback, and the card database update documents before implementation. Use stable card definition IDs and instance IDs, never display names or CSV row positions. Inspect current match authority, saves, deck builder, draft/reward flow and Steam networking before choosing hooks.
 

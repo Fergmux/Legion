@@ -1,5 +1,5 @@
 rules_version = '2';
-// RLDB gameplay telemetry, schema v1 and v2 (docs/telemetry/schema-v1.md). Spark plan: no
+// Legion gameplay telemetry, schema v1 and v2 (docs/telemetry/schema-v1.md). Spark plan: no
 // backend, so game clients write directly, but ONLY to these paths:
 //
 //   users/{uid}/submissions/{docId}   create-once by the signed-in owner `uid`; schema and size

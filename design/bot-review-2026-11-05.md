@@ -4,10 +4,10 @@ Owner request (L27): "Improve the bot: give it a few more things to reach toward
 and other smarter logic around positioning, stance and attack targets. I want it to be smarter and play better.
 Please do a review and improve it as much as you can."
 
-Code: `rldb/src/ai/bot_brain.gd` (decisions), `bot_forecast.gd` (new battle model), `bot_cards.gd` (new card
+Code: `legion/src/ai/bot_brain.gd` (decisions), `bot_forecast.gd` (new battle model), `bot_cards.gd` (new card
 ratings), `bot_stance.gd` (stance breakdown, now used for debug text), `bot_player.gd` (pacing, thread).
-Measured with `rldb/tests/perf/bot_arena.gd` against a frozen copy of the old brain in
-`rldb/tests/perf/bot_baseline/` (test-only, never exported).
+Measured with `legion/tests/perf/bot_arena.gd` against a frozen copy of the old brain in
+`legion/tests/perf/bot_baseline/` (test-only, never exported).
 
 ## 1. How the old bot decided
 
@@ -106,8 +106,8 @@ Measured with `rldb/tests/perf/bot_arena.gd` against a frozen copy of the old br
 
 ## 4. Results
 
-Harness: `rldb/tests/perf/bot_arena.gd`, run as
-`godot --headless --path rldb -s res://tests/perf/bot_arena.gd -- --pairs=60 --seed=S`.
+Harness: `legion/tests/perf/bot_arena.gd`, run as
+`godot --headless --path legion -s res://tests/perf/bot_arena.gd -- --pairs=60 --seed=S`.
 - Each deck pairing (Structure decks, plus 25% random drafts) is played 4 times. The new bot plays each deck,
   once going first and once going second.
 - The old bot is the frozen pre-L27 copy. It still thinks on the full match: it knows the RNG state and its own

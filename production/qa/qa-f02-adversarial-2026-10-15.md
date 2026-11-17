@@ -1,13 +1,13 @@
 # Adversarial QA — playtest feedback 02 (commit ace0329)
 
-Date: 2026-10-15 · Reporter: qa-lead (agent) · Build: `build/rldb-game` @ ace0329 plus the uncommitted working tree at run time (including the coordinator's `game_screen.gd` patch)
-Scope: F02-01..15 changes in `rldb/src/core/*`, `rldb/src/ui/game_screen.gd`, `rldb/src/net/net_session.gd`. Confirmed rules (`design/decision-register-answers.md`) are the oracle.
+Date: 2026-10-15 · Reporter: qa-lead (agent) · Build: `build/legion-game` @ ace0329 plus the uncommitted working tree at run time (including the coordinator's `game_screen.gd` patch)
+Scope: F02-01..15 changes in `legion/src/core/*`, `legion/src/ui/game_screen.gd`, `legion/src/net/net_session.gd`. Confirmed rules (`design/decision-register-answers.md`) are the oracle.
 
 ## New test files (tests/ only; no src/ edits)
 
-- `rldb/tests/integration/qa/qa_f02_test.gd`: rules and engine (14 tests)
-- `rldb/tests/integration/qa/qa_f02_ui_test.gd`: headless GameScreen + LocalHost (5 tests)
-- `rldb/tests/integration/qa/qa_net_f02_test.gd`: two NetSessions over real ENet (4 tests)
+- `legion/tests/integration/qa/qa_f02_test.gd`: rules and engine (14 tests)
+- `legion/tests/integration/qa/qa_f02_ui_test.gd`: headless GameScreen + LocalHost (5 tests)
+- `legion/tests/integration/qa/qa_net_f02_test.gd`: two NetSessions over real ENet (4 tests)
 
 Full suite (`-a res://tests`): **392 test cases, 0 errors, 6 failures, 0 orphans.** Every failure is a defect-exposing test listed below. No existing test regressed.
 

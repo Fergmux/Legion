@@ -1,15 +1,15 @@
 extends SceneTree
 ## Imports accepted card art into the game: every "<id> - <name>.png" in the source folder becomes
-## rldb/assets/art/cards/<id>.webp, resized to ART_PX square (Lanczos) and saved as lossy WebP.
+## legion/assets/art/cards/<id>.webp, resized to ART_PX square (Lanczos) and saved as lossy WebP.
 ## The card id is the only link between an image and its card (CardArt.path_for), so renaming a
 ## card never breaks its art. Ids missing from the card database, duplicate ids and non-square
 ## sources are reported and fail the run; cards without art are listed (they keep the placeholder).
 ##
 ## Run from the repo root (headless is fine):
-##   godot --headless --path rldb -s ../tools/godot/import_card_art.gd -- "<source folder>" [--force]
+##   godot --headless --path legion -s ../tools/godot/import_card_art.gd -- "<source folder>" [--force]
 ## Without --force an existing .webp newer than its source is kept. Then run
-##   godot --headless --path rldb --import
-## so Godot generates the .import files (mipmaps on, see rldb/assets/art/cards/*.import).
+##   godot --headless --path legion --import
+## so Godot generates the .import files (mipmaps on, see legion/assets/art/cards/*.import).
 
 ## Edge length (px) of the imported square art: sharp on the 4K inspector card, ~85 KB a file.
 const ART_PX := 768

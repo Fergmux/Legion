@@ -1,4 +1,4 @@
-// Firestore security-rules tests for RLDB telemetry (schema v1). Run through the emulators:
+// Firestore security-rules tests for Legion telemetry (schema v1). Run through the emulators:
 //   cd firebase && npx firebase emulators:exec --only firestore,auth --project rldb-b5593 "node --test tests/"
 // Covers: unauthenticated access, cross-user reads/writes, spoofed owner UIDs, schema and size
 // violations, updates/deletes, canonical/aggregate writes, client-declared verification, and

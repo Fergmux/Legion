@@ -378,7 +378,7 @@ class ImportRegressionTest(unittest.TestCase):
         b = ic.serialise(ic.build())
         self.assertEqual(a, b)
         with open(os.path.join(ic.OUT, "cards.json"), encoding="utf-8", newline="") as f:
-            self.assertEqual(f.read(), a, "rldb/data/cards.json is stale; run tools/import_cards.py")
+            self.assertEqual(f.read(), a, "legion/data/cards.json is stale; run tools/import_cards.py")
         json.loads(a)
 
 

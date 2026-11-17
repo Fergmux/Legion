@@ -1,6 +1,6 @@
 # Sound effects for review (L1, 5 Nov 2026)
 
-All 108 cues were generated with ElevenLabs (`eleven_text_to_sound_v2`) and replace every earlier sound. 59 replace existing cues; 49 are new (marked NEW). Files: `rldb/assets/audio/sfx/<cue>.wav`. Alternate takes: `production/audio-staging/` (not in git). How each take was chosen: `design/audio/sfx-design-2026-11-05.md`.
+All 108 cues were generated with ElevenLabs (`eleven_text_to_sound_v2`) and replace every earlier sound. 59 replace existing cues; 49 are new (marked NEW). Files: `legion/assets/audio/sfx/<cue>.wav`. Alternate takes: `production/audio-staging/` (not in git). How each take was chosen: `design/audio/sfx-design-2026-11-05.md`.
 
 **Listen to these first** (least confident): ritual_choir, fusion_vortex, hp_low_heartbeat, boom, card_play, card_set, toggle_on, toggle_off, slider_tick, ap_gain, charge, victory_big, game_start, victory, defeat.
 

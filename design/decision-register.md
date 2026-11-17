@@ -2,7 +2,7 @@
 
 Authority: `rules/` files 01, 02, 04 and 06 are confirmed design. Entries here are either
 **CONFIRMED** (stated by the user after the spec was written) or **PROPOSAL** (prototype
-default chosen to keep the build moving — not canon; change in `rldb/data/mode_config.json`
+default chosen to keep the build moving — not canon; change in `legion/data/mode_config.json`
 or by updating this file).
 
 ## Confirmed after the spec (2026-10-15)

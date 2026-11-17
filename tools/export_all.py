@@ -1,4 +1,4 @@
-"""Export every RLDB build in one go: Windows playtest + dev, and macOS.
+"""Export every Legion build in one go: Windows playtest + dev, and macOS.
 
     python -I -X utf8 tools/export_all.py                 # import, then Windows (playtest + dev) and macOS
     python -I -X utf8 tools/export_all.py --only macos    # or: --only windows
@@ -6,12 +6,13 @@
     python -I -X utf8 tools/export_all.py --build-dir D:/somewhere/build   # default: <repo>/build
 
 Outputs (what tools/publish_github.py uploads):
-    build/windows/RLDB.exe + RLDB.pck (+ the GodotSteam dll, steam_api64.dll, steam_appid.txt)
-    build/windows-dev/RLDB-dev.exe + RLDB-dev.pck (written by the rldb_export editor plugin)
-    build/macos/RLDB-macos.zip (RLDB.app, universal, ad-hoc signed)
+    build/windows/Legion.exe + Legion.pck (+ the GodotSteam dll, steam_api64.dll, steam_appid.txt)
+    build/windows-dev/Legion-dev.exe + Legion-dev.pck (written by the legion_export editor plugin)
+    build/macos/Legion-macos.zip (Legion.app, universal, ad-hoc signed)
 
 Safety:
-- Refuses to run while any process named RLDB* is running (the game or the dev build): overwriting the
+- After a Windows export, rebuilds build/Legion-friends.zip and build/Legion-dev.zip (owner, 17 Nov).
+- Refuses to run while any process named Legion* is running (the game or the dev build): overwriting the
   pck under a live game breaks its art loading. It never kills anything.
 - The macOS zip is exported to a scratch folder, checked, and only then moved into build/macos, so a failed
   export never replaces a good zip with a half-written one.
@@ -31,45 +32,47 @@ import time
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT = os.path.join(ROOT, "rldb")
+PROJECT = os.path.join(ROOT, "legion")
 DEFAULT_GODOT = os.path.join(os.path.expanduser("~"), "Downloads", "Godot_v4.7.2-stable_win64.exe", "Godot_v4.7.2-stable_win64_console.exe")
 WINDOWS_PRESET = "Windows Desktop"
 MACOS_PRESET = "macOS"
-WINDOWS_FILES = ["RLDB.exe", "RLDB.pck", "libgodotsteam.windows.template_release.x86_64.dll", "steam_api64.dll",
+WINDOWS_FILES = ["Legion.exe", "Legion.pck", "libgodotsteam.windows.template_release.x86_64.dll", "steam_api64.dll",
                  "steam_appid.txt"]
-DEV_FILES = ["RLDB-dev.exe", "RLDB-dev.pck"]
-MACOS_REQUIRED = ["RLDB.app/Contents/MacOS/RLDB", "RLDB.app/Contents/Info.plist",
-                  "RLDB.app/Contents/Resources/RLDB.pck", "RLDB.app/Contents/_CodeSignature/CodeResources",
-                  "RLDB.app/Contents/Frameworks/libgodotsteam.macos.template_release.universal.dylib",
-                  "RLDB.app/Contents/Frameworks/libsteam_api.dylib"]
-FORBIDDEN_IN_PCK = ("tests/", "addons/gdUnit4", "addons/rldb_export", "reports/")
+DEV_FILES = ["Legion-dev.exe", "Legion-dev.pck"]
+MACOS_REQUIRED = ["Legion.app/Contents/MacOS/Legion", "Legion.app/Contents/Info.plist",
+                  "Legion.app/Contents/Resources/Legion.pck", "Legion.app/Contents/_CodeSignature/CodeResources",
+                  "Legion.app/Contents/Frameworks/libgodotsteam.macos.template_release.universal.dylib",
+                  "Legion.app/Contents/Frameworks/libsteam_api.dylib"]
+FORBIDDEN_IN_PCK = ("tests/", "addons/gdUnit4", "addons/legion_export", "reports/")
 
 
-def running_rldb(tasklist_csv):
-    """Names of the RLDB* processes in `tasklist /FO CSV /NH` output (one quoted image name per line)."""
+def running_legion(tasklist_csv):
+    """Names of the Legion* processes in `tasklist /FO CSV /NH` output (one quoted image name per line)."""
     found = []
     for line in tasklist_csv.splitlines():
         line = line.strip()
         if not line.startswith('"'):
             continue
         name = line.split('","')[0].strip('"')
-        if name.lower().startswith("rldb"):
+        # 2026-11-17: also the game's old name (RLDB.exe, RLDB-dev.exe): a build exported before the rename
+        # still runs from these build folders, and the export rewrites or removes files it reads lazily.
+        if name.lower().startswith(("legion", "rldb")):
             found.append(name)
     return found
 
 
-def rldb_processes():
-    """The running RLDB* processes. Raises RuntimeError if the process list cannot be read: an export must
+def legion_processes():
+    """The running Legion* processes. Raises RuntimeError if the process list cannot be read: an export must
     not go ahead on a guess."""
     if os.name == "nt":
         r = subprocess.run(["tasklist", "/FO", "CSV", "/NH"], capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError("tasklist failed: " + (r.stderr or r.stdout).strip())
-        return running_rldb(r.stdout)
+        return running_legion(r.stdout)
     r = subprocess.run(["ps", "-A", "-o", "comm="], capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError("ps failed: " + (r.stderr or r.stdout).strip())
-    return [os.path.basename(n) for n in r.stdout.split("\n") if os.path.basename(n).lower().startswith("rldb")]
+    return [os.path.basename(n) for n in r.stdout.split("\n") if os.path.basename(n).lower().startswith("legion")]
 
 
 def pck_paths(data):
@@ -100,10 +103,10 @@ def check_macos_zip(path):
                 if n not in names:
                     problems.append("missing " + n)
             if not problems:
-                head = z.read("RLDB.app/Contents/MacOS/RLDB")[:8]
+                head = z.read("Legion.app/Contents/MacOS/Legion")[:8]
                 if head[:4] != b"\xca\xfe\xba\xbe" or head[4:8] != b"\x00\x00\x00\x02":
-                    problems.append("RLDB.app/Contents/MacOS/RLDB is not a 2-architecture universal binary")
-                pck = pck_paths(z.read("RLDB.app/Contents/Resources/RLDB.pck"))
+                    problems.append("Legion.app/Contents/MacOS/Legion is not a 2-architecture universal binary")
+                pck = pck_paths(z.read("Legion.app/Contents/Resources/Legion.pck"))
                 leaked = [n for n in pck if any(f in n for f in FORBIDDEN_IN_PCK)]
                 if leaked:
                     problems.append("pck holds excluded paths, e.g. " + leaked[0])
@@ -129,7 +132,7 @@ def check_windows(build_dir, since):
 
 
 def godot(godot_exe, *args):
-    """Runs Godot in rldb/. Returns (exit code, output)."""
+    """Runs Godot in legion/. Returns (exit code, output)."""
     print("+ godot " + " ".join(args), flush=True)
     r = subprocess.run([godot_exe, "--headless", "--path", PROJECT, *args], capture_output=True, text=True,
                        encoding="utf-8", errors="replace")
@@ -142,7 +145,7 @@ def tail(text, n=25):
 
 def export_windows(godot_exe, build_dir):
     since = time.time() - 2
-    out = os.path.join(build_dir, "windows", "RLDB.exe")
+    out = os.path.join(build_dir, "windows", "Legion.exe")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     appid = os.path.join(os.path.dirname(out), "steam_appid.txt")
     if not os.path.exists(appid):   # hand-placed once in build/windows; the exporter does not create it
@@ -152,8 +155,8 @@ def export_windows(godot_exe, build_dir):
     code, text = godot(godot_exe, "--export-release", WINDOWS_PRESET, out)
     if code != 0:
         return ["godot exited %d:\n%s" % (code, tail(text))]
-    # The rldb_export plugin writes the dev copy; if its pck is older, copy it (as the handoff says).
-    dev_pck = os.path.join(build_dir, "windows-dev", "RLDB-dev.pck")
+    # The legion_export plugin writes the dev copy; if its pck is older, copy it (as the handoff says).
+    dev_pck = os.path.join(build_dir, "windows-dev", "Legion-dev.pck")
     if os.path.exists(dev_pck) and os.path.getmtime(dev_pck) < os.path.getmtime(out.replace(".exe", ".pck")):
         shutil.copyfile(out.replace(".exe", ".pck"), dev_pck)
     return check_windows(build_dir, since)
@@ -163,7 +166,7 @@ def export_macos(godot_exe, build_dir):
     scratch = os.path.join(build_dir, "macos", ".export-tmp")
     shutil.rmtree(scratch, ignore_errors=True)
     os.makedirs(scratch)
-    tmp_zip = os.path.join(scratch, "RLDB-macos.zip")
+    tmp_zip = os.path.join(scratch, "Legion-macos.zip")
     code, text = godot(godot_exe, "--export-release", MACOS_PRESET, tmp_zip)
     if code != 0:
         shutil.rmtree(scratch, ignore_errors=True)
@@ -173,7 +176,7 @@ def export_macos(godot_exe, build_dir):
         return ["godot reported success but wrote no zip:\n" + tail(text)]
     problems = check_macos_zip(tmp_zip)
     if not problems:
-        os.replace(tmp_zip, os.path.join(build_dir, "macos", "RLDB-macos.zip"))
+        os.replace(tmp_zip, os.path.join(build_dir, "macos", "Legion-macos.zip"))
     shutil.rmtree(scratch, ignore_errors=True)
     return problems
 
@@ -188,15 +191,15 @@ def main():
     a = ap.parse_args()
 
     try:
-        busy = rldb_processes()
+        busy = legion_processes()
     except RuntimeError as e:
-        sys.exit("REFUSED: cannot tell whether RLDB is running (%s). Not exporting." % e)
+        sys.exit("REFUSED: cannot tell whether Legion is running (%s). Not exporting." % e)
     if busy:
         sys.exit("REFUSED: %s is running. Close it first (overwriting the pck under a live game breaks its art). "
                  "Nothing was exported." % ", ".join(sorted(set(busy))))
     if not os.path.exists(a.godot):
         sys.exit("Godot not found at %s. Pass --godot or set GODOT." % a.godot)
-    print("No RLDB process is running; export allowed.")
+    print("No Legion process is running; export allowed.")
     if a.check:
         return
     build_dir = os.path.abspath(a.build_dir)
@@ -224,6 +227,15 @@ def main():
             print("NOT RUN %s (--only %s)" % (label, a.only))
     if failed:
         sys.exit(1)
+    # Owner, 17 Nov: the friends zip (and the dev zip) are rebuilt on every Windows export, so the file to send
+    # to testers is never older than the build. Same packaging as tools/publish_github.py (its zip_build).
+    if a.only in (None, "windows") and os.path.normcase(build_dir) == os.path.normcase(os.path.join(ROOT, "build")):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import publish_github
+        for asset, spec in publish_github.BUILDS.items():
+            publish_github.zip_build(asset, *spec)
+    elif a.only in (None, "windows"):
+        print("NOT RUN zips: --build-dir is not the repo's build/, so build/Legion-friends.zip was NOT rebuilt.")
     print("All requested exports done. Next: python -I -X utf8 tools/publish_github.py release")
 
 

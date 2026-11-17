@@ -1,6 +1,6 @@
 # Implement the 17 October card database update
 
-Copy the prompt below into the existing implementation agent's conversation at the RLDB repository root.
+Copy the prompt below into the existing implementation agent's conversation at the Legion repository root.
 
 ---
 
@@ -11,7 +11,7 @@ Integrate the new card database into the existing Godot game, including actual b
 - Full exact comparison: `design/card-database-diff-2026-10-17.md`.
 - New export, preserved unchanged: `rules/sources/RLDB Master - Card Database (2026-10-17).csv`.
 - Original comparison baseline: `rules/sources/RLDB Master - Card Database.csv`.
-- Current importer: `tools/import_cards.py`; runtime definitions: `rldb/data/cards.json`.
+- Current importer: `tools/import_cards.py`; runtime definitions: `legion/data/cards.json`.
 - Confirmed rules/corrections: `design/decision-register-answers.md`, the latest playtest-feedback files (especially exact Arcane payment and chosen-target Overextend), and the reconciled `rules/` specification.
 - Studio quality instructions: `rules/09-PRODUCTION-QUALITY-PASS.md`.
 

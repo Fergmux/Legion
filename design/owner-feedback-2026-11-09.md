@@ -84,7 +84,7 @@ Follow-ups (verbatim):
 | - | Violet Sigil v4 (no thin lines) | done | Owner: "still too detailed... no super thin lines". ElevenLabs ran out of credits, so this round used the owner's OpenAI key (gpt-image-2.5-sunburst, references: the current Gilded Sun, Abyssal Tide and Arcane Starfield). Owner pick: option 2. |
 | - | Violet Sigil v3 | done | Owner pick 2 of the "rich but crisp" set (reference: Gilded Sun, Tide, Starfield). |
 
-All sound takes: ElevenLabs flow "RLDB sound options 9 Nov"; selections in `design/audio/sfx-selection.json`, mastered by
+All sound takes: ElevenLabs flow "Legion sound options 9 Nov"; selections in `design/audio/sfx-selection.json`, mastered by
 `tools/sfx_master.py` (staging in `production/audio-staging/`, gitignored).
 
 ## Decisions taken for the owner (review welcome)
@@ -98,5 +98,5 @@ All sound takes: ElevenLabs flow "RLDB sound options 9 Nov"; selections in `desi
 
 ## Not done / open
 
-- Credits files (`rldb/assets/CREDITS.md`, `rldb/data/credits.json`) should mention the 10 Nov card back regeneration.
+- Credits files (`legion/assets/CREDITS.md`, `legion/data/credits.json`) should mention the 10 Nov card back regeneration.
 - About 11,800 ElevenLabs credits were wasted on a first card-back batch rendered 16:9 by mistake (re-run in 2:3).

@@ -129,4 +129,4 @@ matches except where a "can" is new (66 Nyxthral's Eternal becomes optional).
   in Hand, so it is left out).
 - Yamata's On Destruction: the opponent chooses (optional) a Power from their own Draw or Spent.
 - The Lone Warrior's "Unaffected by Trap Effects": a Trap's effect never selects or reaches it.
-- Disabled cards: `CardDB.DISABLED` in `rldb/src/core/card_db.gd` (one list; add or remove an id).
+- Disabled cards: `CardDB.DISABLED` in `legion/src/core/card_db.gd` (one list; add or remove an id).

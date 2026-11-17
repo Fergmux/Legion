@@ -1,4 +1,4 @@
-"""L1 (2026-11-05): the mastered ElevenLabs sound set in rldb/assets/audio/sfx.
+"""L1 (2026-11-05): the mastered ElevenLabs sound set in legion/assets/audio/sfx.
 
 Replaces the per-cue tests of the retired procedural generator (test_gen_sfx_*.py, H28 / H29 / K1) and keeps
 their intent for the new files: every cue exists and is clean (44.1 kHz 16-bit, peak headroom, no DC, a
@@ -19,9 +19,9 @@ import unittest
 import wave
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-SFX = os.path.join(ROOT, "rldb", "assets", "audio", "sfx")
+SFX = os.path.join(ROOT, "legion", "assets", "audio", "sfx")
 CUES = os.path.join(ROOT, "design", "audio", "sfx-cues.json")
-SFX_GD = os.path.join(ROOT, "rldb", "src", "ui", "audio", "sfx.gd")
+SFX_GD = os.path.join(ROOT, "legion", "src", "ui", "audio", "sfx.gd")
 
 MAX_PEAK_DBFS = -1.0     # true-peak ceiling of the master is -1 dBTP, so samples stay under it
 MAX_DC = 0.002

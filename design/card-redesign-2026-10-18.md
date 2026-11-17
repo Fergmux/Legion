@@ -8,8 +8,8 @@ gem texture to the flat UI without overdoing it.
 
 ## 1. Card art
 
-- 188 accepted images (`C:\Users\fergm\Documents\rldb\tools\card-art-review\accepted-art`, 1024x1024
-  PNG, 323 MB) were imported by `tools/godot/import_card_art.gd` to `rldb/assets/art/cards/<id>.webp`:
+- 188 accepted images (`C:\Users\fergm\Documents\legion\tools\card-art-review\accepted-art`, 1024x1024
+  PNG, 323 MB) were imported by `tools/godot/import_card_art.gd` to `legion/assets/art/cards/<id>.webp`:
   Lanczos to 768 px, lossy WebP q0.9, 30 MB in all. 768 px is sharp on the 4K inspector card. The
   originals are left where they were (copied, not moved; they are the masters).
 - Art is found **by card id only** (`CardArt.path_for(id)`), the number at the start of each file
@@ -18,8 +18,8 @@ gem texture to the flat UI without overdoing it.
   74 MB with every card loaded (the catalogue). Lossless import would be about 590 MB. Mipmaps keep the
   art smooth at field size. Cards draw with linear-mipmap filtering.
 - New art later: drop `<id> - <name>.png` files in a folder and run
-  `godot --headless --path rldb -s ../tools/godot/import_card_art.gd -- "<folder>"`, then
-  `godot --headless --path rldb --import`, then copy the import settings from any existing
+  `godot --headless --path legion -s ../tools/godot/import_card_art.gd -- "<folder>"`, then
+  `godot --headless --path legion --import`, then copy the import settings from any existing
   `assets/art/cards/*.webp.import` file (`compress/mode=2`, `mipmaps/generate=true`). The tool rejects
   ids not in the database, duplicate ids and non-square images, and lists cards without art. Cards
   without art keep the old placeholder.
@@ -69,8 +69,8 @@ Rationale:
   rim colour say what it is, so it never relies on colour alone: buff round with a green rim, debuff
   rounded-square with a red rim, Rune hexagon with a blue rim. Stacks above 1 (and every Rune count)
   get a number badge.
-- Glyphs: game-icons.net (CC BY 3.0), one SVG per status in `rldb/assets/icons/status/`. The
-  authors are credited in-game (main menu > Credits) and in `rldb/assets/CREDITS.md`. Choices: Rune
+- Glyphs: game-icons.net (CC BY 3.0), one SVG per status in `legion/assets/icons/status/`. The
+  authors are credited in-game (main menu > Credits) and in `legion/assets/CREDITS.md`. Choices: Rune
   rune-stone, Retain anchor, Eternal ankh, Pierce broadhead arrow, Cleanse sparkles, Medic heart-plus,
   Infiltrate hood, Nimble sprint, Reveal eye, Burn flame, Paralyse crossed chains, Curse pentacle,
   Poison skull-and-drop, Blind crossed-out eye, Debilitate cracked shield.
@@ -116,7 +116,7 @@ danger buttons in the confirm dialog use it.
 ## 5. Evidence and checks
 
 - `production/qa/evidence/2026-10-18-card-redesign/`, from the windowed driver
-  `rldb/src/dev/card_redesign_shots.gd` at 1600x1000 and 3840x2160 (14 checks: art on every visible
+  `legion/src/dev/card_redesign_shots.gd` at 1600x1000 and 3840x2160 (14 checks: art on every visible
   card, icons over the art, instant tips on field / Defense / overflow / inspector, Runes first, tip
   hides on leave, credits list the licences). Plus series, rewards and prompt screens from
   `f04_series_driver`.
