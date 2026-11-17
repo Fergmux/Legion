@@ -17,7 +17,7 @@ v<config/version> at the tip of build/rldb-game. Builds must have been exported 
 exports. A missing or unreadable macOS zip is a warning (the release goes out without it); a
 missing Windows build is an error.
 
-Needs: git, gh (logged in), uvx (for git-filter-repo). Credentials stay in gh's keyring.
+Needs: git, gh (logged in), uv (runs git-filter-repo as a Python module). Credentials stay in gh's keyring.
 """
 import argparse
 import datetime
@@ -95,7 +95,10 @@ def sync():
     for ref in git("for-each-ref", "--format=%(refname)", "refs/heads", cwd=MIRROR).stdout.split():
         if ref not in keep:
             git("update-ref", "-d", ref, cwd=MIRROR)
-    filt = ["uvx", "git-filter-repo", "--force", "--invert-paths"]
+    # Run as a Python module under this interpreter (2026-11-17): Windows Smart App Control blocks the
+    # unsigned git-filter-repo.exe launcher that `uvx git-filter-repo` creates.
+    filt = ["uv", "run", "--no-project", "--python", sys.executable, "--with", "git-filter-repo",
+            "python", "-m", "git_filter_repo", "--force", "--invert-paths"]
     for p in STRIP_PATHS:
         filt += ["--path", p]
     run(filt, cwd=MIRROR)
