@@ -110,10 +110,10 @@ func _backdrop() -> ColorRect:
 
 func _shoot_seq(wid: int) -> void:
 	var bg := _backdrop()
-	var unit := _longest(["unit", "fusion", "ritual"])
+	var unit := _longest(["unit", "fusion", "arcane"])
 	var spell := _longest(["spell"])
 	var board := _longest(["unit"])
-	var draft := _longest(["arcane", "trap", "spell"])
+	var draft := _longest(["spirit", "trap", "spell"])
 	for i in KS.size():
 		var x := 30.0 + i * COL
 		_card(bg, _view(unit, "hand"), "hand", Vector2(x + 15, 30), KS[i])

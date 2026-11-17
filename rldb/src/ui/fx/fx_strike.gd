@@ -245,7 +245,7 @@ func _lethal_begin(tw: Tween, ctx: Dictionary) -> void:
 	tv.tween_property(vig, "modulate:a", 0.0, UIStyle.dur(0.9))
 	tv.tween_callback(_fx.free_node.bind(vig))
 	var ring := FxSigil.new()
-	ring.kind = "arcane"
+	ring.kind = "spirit"
 	ring.col = ctx["col"]
 	ring.radius = 110.0
 	ring.position = _fx.fx_pos(ctx["c"])

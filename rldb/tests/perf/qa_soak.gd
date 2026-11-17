@@ -1,10 +1,10 @@
 extends SceneTree
 ## L batch final QA soak (headless, not a unit test): full bot-vs-bot best-of-3 series with "spiced"
-## custom decks built around the L-batch systems (Symbiote Evolve, Hypnotise, Sneaky Snunday,
+## custom decks built around the L-batch systems (Symbiote Transform, Hypnotise, Sneaky Snunday,
 ## Shapeshifter Loak / Mimic, Fusion Ceremony, Cleanse / Curse and the status cards), checking
 ## engine invariants after EVERY command:
 ##   - zone integrity: every card is in exactly one place and its zone / slot / controller agree;
-##   - Evolve: a card's id only ever changes along its Evolve chain; an Evolve prompt only goes to
+##   - Transform: a card's id only ever changes along its Transform chain; a Transform prompt only goes to
 ##     the active player about a unit they control; every game of a series starts with base cards;
 ##   - hidden information: no seat's view (or a spectator's) carries the uid of a card that seat has
 ##     never been allowed to see; no presentation event of the new kinds names a hidden card;
@@ -19,13 +19,13 @@ const STEP_LIMIT := 30000
 
 ## Main-deck spice: three Spawns, Hypnotise, Snunday, Loak, the status / Cleanse / Curse cards.
 const SPICE_MAIN := [155, 155, 155, 180, 154, 154, 19, 36, 78, 102, 164, 81, 182, 82, 76, 32, 86, 69, 71, 14]
-## Extra-deck spice: status Fusions, Mimic, a Curse Ritual, Typhoon Simorgh, Ultimate Dragon.
+## Extra-deck spice: status Fusions, Mimic, a Curse Arcane, Typhoon Simorgh, Ultimate Dragon.
 const SPICE_EXTRA := [60, 145, 95, 62, 143, 151, 61]
-const EVOLUTION_ONLY := [156, 157]
+const TRANSFORMATION_ONLY := [156, 157]
 
 var opts := {"series": 6, "seed": 1, "verbose": false}
 var violations: Array = []
-var stats := {"series": 0, "games": 0, "commands": 0, "evolves": 0, "evolve_prompts": 0, "hypnotise": 0,
+var stats := {"series": 0, "games": 0, "commands": 0, "transforms": 0, "transform_prompts": 0, "hypnotise": 0,
 	"snunday": 0, "copy_form": 0, "status_fx": 0, "to_hand": 0, "miss": 0, "refused": 0}
 
 
@@ -126,8 +126,8 @@ func _new_game_ctx(m: MatchEngine, seed_value: int) -> Dictionary:
 	var ids := {}
 	for u in m.cards:
 		ids[u] = int(m.cards[u]["id"])
-		if int(m.cards[u]["id"]) in EVOLUTION_ONLY:
-			_fail("series %d: game starts with an evolved form (uid %d id %d)" % [seed_value, u, int(m.cards[u]["id"])])
+		if int(m.cards[u]["id"]) in TRANSFORMATION_ONLY:
+			_fail("series %d: game starts with a transformed form (uid %d id %d)" % [seed_value, u, int(m.cards[u]["id"])])
 	var seen := [{}, {}, {}]
 	return {"ids": ids, "seen": seen, "log_n": 0}
 
@@ -140,20 +140,20 @@ func _fail(msg: String) -> void:
 
 func _check(ctx: Dictionary, m: MatchEngine, where: String) -> void:
 	_check_zones(m, where)
-	# Evolve: ids change only along the chain.
+	# Transform: ids change only along the chain.
 	for u in m.cards:
 		var was: int = int(ctx["ids"].get(u, -1))
 		var now: int = int(m.cards[u]["id"])
 		if was != now:
-			if CardDB.evolves_into(was) != now:
-				_fail("%s: uid %d changed id %d -> %d (not its Evolve)" % [where, u, was, now])
+			if CardDB.transforms_into(was) != now:
+				_fail("%s: uid %d changed id %d -> %d (not its Transform)" % [where, u, was, now])
 			ctx["ids"][u] = now
 	var pd: Dictionary = m.pending
-	if not pd.is_empty() and String(pd["kind"]) == "evolve":
-		stats["evolve_prompts"] += 1
+	if not pd.is_empty() and String(pd["kind"]) == "transform":
+		stats["transform_prompts"] += 1
 		var src := int(pd.get("source", -1))
 		if int(pd["player"]) != m.active or not m.cards.has(src) or int(m.cards[src]["ctl"]) != int(pd["player"]):
-			_fail("%s: Evolve prompt for a unit the asked player does not control" % where)
+			_fail("%s: Transform prompt for a unit the asked player does not control" % where)
 	# Visibility bookkeeping: a card counts as seen by a seat once that seat could see it.
 	for v in 3:
 		var viewer := v if v < 2 else -1
@@ -181,7 +181,7 @@ func _check(ctx: Dictionary, m: MatchEngine, where: String) -> void:
 		for e in fxs.slice(done):
 			var k := String(e.get("k", ""))
 			match k:
-				"evolve": stats["evolves"] += 1
+				"transform": stats["transforms"] += 1
 				"copy_form": stats["copy_form"] += 1
 				"status", "status_tick", "status_expire", "status_blocked": stats["status_fx"] += 1
 				"to_hand": stats["to_hand"] += 1

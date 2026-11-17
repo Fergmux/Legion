@@ -1,7 +1,7 @@
 extends SceneTree
 ## L batch final QA, windowed (design/qa-final-2026-11-05.md): a long bot-vs-bot series on the real
-## GameScreen with the "spiced" decks of qa_soak.gd (Evolve, Hypnotise, Snunday, Loak / Mimic, Cleanse /
-## Curse and many status cards), so status looks, ticks, expiries, Evolve set pieces and queued
+## GameScreen with the "spiced" decks of qa_soak.gd (Transform, Hypnotise, Snunday, Loak / Mimic, Cleanse /
+## Curse and many status cards), so status looks, ticks, expiries, Transform set pieces and queued
 ## animations (L4) all play. It records frame times, and the scene-tree node count and the orphan node
 ## count at every new turn once the animation queue has drained, then checks that neither grows.
 ##

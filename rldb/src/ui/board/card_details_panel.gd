@@ -177,7 +177,7 @@ func show_card(c: Dictionary, _notes: Array = []) -> void:
 	_build_statuses(c)
 
 
-## L23 follow-up: names of the shown sections (timing captions such as "Evolve", "On Field", and
+## L23 follow-up: names of the shown sections (timing captions such as "Transform", "On Field", and
 ## headed sections such as "Statuses") whose caption does not show above `fold_y` (px from this
 ## panel's top, e.g. the scroll offset plus the visible height), in display order.
 func sections_below(fold_y: float) -> PackedStringArray:
@@ -281,7 +281,7 @@ func _build_identity(c: Dictionary) -> void:
 func _cost_chip(c: Dictionary) -> Control:
 	var kind: String = c.get("cost_kind", "ap")
 	var col: Color = UIStyle.COST_COLORS.get(kind, UIStyle.COST_COLORS["ap"])
-	var shape: String = {"ap": "circle", "fusion": "diamond", "ritual": "square", "arcane": "hex"}.get(kind, "circle")
+	var shape: String = {"ap": "circle", "fusion": "diamond", "arcane": "square", "spirit": "hex"}.get(kind, "circle")
 	var txt: String
 	if kind == "ap":
 		var cost = c.get("cost")
@@ -292,8 +292,8 @@ func _cost_chip(c: Dictionary) -> Control:
 			col = UIStyle.BAD if cost > printed else UIStyle.GOOD
 			return _chip(txt, col, "up" if cost > printed else "down")
 		return _chip(txt, col, shape)
-	# Ritual / Arcane costs change too (Shimmer Serum, 2026-10-18): same base marker.
-	if kind in ["ritual", "arcane"] and int(c.get("uid", -1)) >= 0:
+	# Arcane / Spirit costs change too (Shimmer Serum, 2026-10-18): same base marker.
+	if kind in ["arcane", "spirit"] and int(c.get("uid", -1)) >= 0:
 		var rc = c.get("cost")
 		var rp = c.get("printed_cost")
 		if rc != null and rp != null and rc != rp:
@@ -498,10 +498,10 @@ func _build_rules(c: Dictionary) -> void:
 	sections.append("rules")
 	add_child(_heading("Rules"))
 	for p0 in parts:
-		var p := split_once_per_turn(p0)
-		var k: String = String(p.get("k", ""))
-		var col := _timing_color(k)
-		add_child(_rule_block(k, String(p.get("t", "")), col))
+		for p in split_timings(p0):
+			var k: String = String(p.get("k", ""))
+			var col := _timing_color(k)
+			add_child(_rule_block(k, String(p.get("t", "")), col))
 
 
 ## One timing block: coloured caption (e.g. ON SUMMON, ONCE PER TURN) over the effect text.
@@ -516,6 +516,38 @@ func _rule_block(caption: String, body: String, col: Color) -> PanelContainer:
 	if caption != "":
 		_marks.append([caption.get_slice(" · ", 0), pc])
 	return pc
+
+
+## N batch (16 Nov, Dante): a rules part as its timing blocks. A part that states a "Once per turn:"
+## effect among other sentences splits into one block per Once-per-turn sentence and one block (the
+## part's own caption) per run of the other sentences, in reading order, so an On Field passive never
+## reads under a Once per turn caption (Dante: "ONCE PER TURN" apply Cleanse or Burn, then "ON FIELD"
+## +2 ATK for each Burn). Any other part is [split_once_per_turn(part)].
+static func split_timings(part: Dictionary) -> Array:
+	var t := String(part.get("t", "")).strip_edges()
+	var k := String(part.get("k", ""))
+	if not t.to_lower().contains("once per turn"):
+		return [split_once_per_turn(part)]
+	var out: Array = []
+	var run := PackedStringArray()
+	for sentence in _SENTENCE_RE.sub(t, "$1\n", true).split("\n", false):
+		var s := String(sentence).strip_edges()
+		if s == "":
+			continue
+		if s.to_lower().begins_with("once per turn"):
+			if not run.is_empty():
+				out.append({"k": k, "t": " ".join(run)})
+				run.clear()
+			out.append(split_once_per_turn({"k": k, "t": s}))
+		else:
+			run.append(s)
+	if not run.is_empty():
+		out.append({"k": k, "t": " ".join(run)})
+	return out if not out.is_empty() else [split_once_per_turn(part)]
+
+
+## Sentence ends inside a rules part (a full stop followed by space): split_timings' cut points.
+static var _SENTENCE_RE: RegEx = RegEx.create_from_string("(\\.)\\s+")
 
 
 ## A rules part whose text starts with "Once per turn" gets that as its caption (user feedback:
@@ -637,16 +669,16 @@ static func block_style(col: Color, bar_a: float, pad: int) -> StyleBoxFlat:
 
 
 ## L23: a rules caption label `cap` for section `k`, led by the section's icon when it has one (the
-## Evolve section's blossom, EvolveGlyph, `px` tall); `cap` itself otherwise. Shared with the card
+## Transform section's blossom, TransformGlyph, `px` tall); `cap` itself otherwise. Shared with the card
 ## tooltip (StatusHelp.card_tooltip).
 static func caption_icon(cap: Label, k: String, px: float) -> Control:
-	if k.to_lower() != MatchView.EVOLVE_PART.to_lower():
+	if k.to_lower() != MatchView.TRANSFORM_PART.to_lower():
 		return cap
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 5)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.set_meta(&"evolve_caption", true)
-	row.add_child(EvolveGlyph.new(maxf(12.0, px), EvolveGlyph.COLOR))
+	row.set_meta(&"transform_caption", true)
+	row.add_child(TransformGlyph.new(maxf(12.0, px), TransformGlyph.COLOR))
 	cap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(cap)
 	return row
@@ -654,7 +686,7 @@ static func caption_icon(cap: Label, k: String, px: float) -> Control:
 
 static func _timing_color(k: String) -> Color:
 	match k:
-		"Evolve": return EvolveGlyph.COLOR   # L23: its own colour (and icon, caption_icon)
+		"Transform": return TransformGlyph.COLOR   # L23: its own colour (and icon, caption_icon)
 		"Condition", "Materials", "Activates": return UIStyle.RUNE_BLUE
 		"On Summon": return UIStyle.GOOD
 		"On Field": return UIStyle.GOLD

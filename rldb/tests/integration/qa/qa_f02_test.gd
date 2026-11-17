@@ -8,10 +8,10 @@ const LONE_WARRIOR := 38       # Warrior, flag no_buffs
 const STEADFAST := 39          # Warrior, battle_immune_30atk
 const MBF := 73                # Man's Best Friend: warrior_guard
 const ELEMENTAL_MASTERY := 88
-const RAGING_INFERNO := 98     # Ritual, 1 Rune
+const RAGING_INFERNO := 98     # Arcane, 1 Rune
 const BAHATIA := 141           # type_summon_lock (Physical)
 const MUMENS_BOUNTY := 150     # no_defense
-const KAYA := 170              # Arcane, cost 2 (1 before 2026-11-03)
+const KAYA := 170              # Spirit, cost 1 (2026-11-17; it was 2 from 2026-11-03)
 const ILLUSIONIST := 177       # no_battle_damage, +20 ATK on own turn
 
 
@@ -113,16 +113,16 @@ func test_stance_summon_still_obeys_ap_and_bahatia_type_lock() -> void:
 	assert_str(m.cards[w]["zone"]).is_equal("hand")
 
 
-func test_ritual_needs_runes_and_places_in_attack_once() -> void:
+func test_arcane_needs_runes_and_places_in_attack_once() -> void:
 	# Arrange
 	var m := TB.make()
 	var r := TB.card(m, 0, RAGING_INFERNO, "extra")
 	# Act / Assert: no material
-	assert_str(m.submit(0, {"t": "ritual", "uid": r})).contains("Rune")
+	assert_str(m.submit(0, {"t": "arcane", "uid": r})).contains("Rune")
 	var mat := TB.unit(m, 0, TB.WATER, 0)
 	m.apply_status(mat, "rune", 1)
 	var ap0: int = m.players[0]["ap"]
-	assert_str(m.submit(0, {"t": "ritual", "uid": r})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": r})).is_empty()
 	TB.choose_uids(m, [mat])
 	TB.choose(m, [TB.slot_label(0)])
 	while TB.pend_kind(m) != "":
@@ -135,20 +135,20 @@ func test_ritual_needs_runes_and_places_in_attack_once() -> void:
 	assert_int(m.players[0]["ap"]).is_equal(ap0)
 
 
-func test_arcane_exhausts_materials_and_cancel_keeps_everything() -> void:
+func test_spirit_exhausts_materials_and_cancel_keeps_everything() -> void:
 	# Arrange
 	var m := TB.make()
 	var k := TB.card(m, 0, KAYA, "extra")
-	var s := TB.card(m, 0, 28, "spent")                       # Guardian of the Forest, cost 2: Kaya is 2A since 2026-11-03
+	var s := TB.card(m, 0, TB.WATER, "spent")                 # Basic Mage, cost 1: Kaya is 1S since 2026-11-17
 	var before := _state(m)
 	# Act: cancel at the material choice changes nothing
-	assert_str(m.submit(0, {"t": "arcane", "uid": k})).is_empty()
+	assert_str(m.submit(0, {"t": "spirit", "uid": k})).is_empty()
 	assert_str(m.submit(0, {"t": "cancel", "id": m.pending["id"]})).is_empty()
 	assert_str(m.cards[k]["zone"]).is_equal("extra")
 	assert_str(m.cards[s]["zone"]).is_equal("spent")
 	assert_int(m.players[0]["ap"]).is_equal(str_to_var(before)[1][0]["ap"])
-	# Act: full Arcane summon
-	assert_str(m.submit(0, {"t": "arcane", "uid": k})).is_empty()
+	# Act: full Spirit summon
+	assert_str(m.submit(0, {"t": "spirit", "uid": k})).is_empty()
 	TB.choose_uids(m, [s])
 	TB.choose(m, [TB.slot_label(1)])
 	# Assert (B3: Attack stance, no prompt)

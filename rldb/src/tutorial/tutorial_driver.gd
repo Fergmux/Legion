@@ -4,7 +4,7 @@ extends SceneTree
 ## Opens the real main scene, enters Play > Tutorial from the menu, and plays every
 ## lesson by clicking (pushed mouse events) the rect the overlay highlights, so the highlights are
 ## proven to point at working controls. Also tries an off-script Esc (cancel), Restart lesson,
-## the Arcane over-pay (F05-01), and finally Back to menu. Writes PNGs and tutorial_report.json into the directory, then quits.
+## the Spirit over-pay (F05-01), and finally Back to menu. Writes PNGs and tutorial_report.json into the directory, then quits.
 
 var main: Control
 ## The whole run is abandoned (and the window closed) after this many seconds.
@@ -54,8 +54,8 @@ func _run() -> void:
 	TutorialProgress.reset_cache()
 	var b := _lesson_row(main.menu, 0)
 	_check("menu offers the tutorial lessons", b != null)
-	_check("F05-01 menu lists Ritual and Arcane lessons", _lesson_row(main.menu, 5) != null and _lesson_row(main.menu, 5).title_label.text == "Extra Deck: Ritual" \
-		and _lesson_row(main.menu, 6) != null and _lesson_row(main.menu, 6).title_label.text == "Extra Deck: Arcane")
+	_check("F05-01 menu lists Arcane and Spirit lessons", _lesson_row(main.menu, 5) != null and _lesson_row(main.menu, 5).title_label.text == "Extra Deck: Arcane" \
+		and _lesson_row(main.menu, 6) != null and _lesson_row(main.menu, 6).title_label.text == "Extra Deck: Spirit")
 	_check("review #97: a fresh profile recommends lesson 1 and shows no ticks", b != null and b.recommended and not b.done \
 		and main.menu.find_children("DoneTick", "", true, false).is_empty())
 	_check("review #97: lesson rows are 52 px secondaries", b != null and b.custom_minimum_size.y >= TutorialMenu.ROW_H and String(b.get_meta(Sfx.FAMILY_META, "")) == "secondary")
@@ -178,9 +178,9 @@ func _play_lesson(li: int) -> void:
 					await _wait(0.3)
 					_check("Esc (cancel) during a forced zone pick is refused", h.refused == before + 1 and h.step_index == si)
 					await _shot("L2_offscript_hint")
-				if String(h.lesson["id"]) == "arcane" and h.game().pending.get("total_exact", false) and not overpay_tried:
+				if String(h.lesson["id"]) == "spirit" and h.game().pending.get("total_exact", false) and not overpay_tried:
 					overpay_tried = true
-					await _check_arcane_overpay(h)
+					await _check_spirit_overpay(h)
 				var rs := _overlay().target_rects()
 				_check("L%d step %d has a highlight" % [li + 1, si + 1], not rs.is_empty())
 				if rs.is_empty():
@@ -213,22 +213,22 @@ func _play_lesson(li: int) -> void:
 	await _shot("L%d_complete" % (li + 1))
 
 
-## F05-01 / F08: the Arcane picker offers no 0-cost unit; after one Dragon (2 of 3) the other is
+## F05-01 / F08: the Spirit picker offers no 0-cost unit; after one Dragon (2 of 3) the other is
 ## disabled (it would over-pay); an over-pay command is still refused by the authority with the
 ## total hint; deselecting restores an empty pick.
-func _check_arcane_overpay(h: TutorialHost) -> void:
+func _check_spirit_overpay(h: TutorialHost) -> void:
 	var gs: GameScreen = main.screen
 	var o := _overlay()
 	var pd := gs.pending()
 	var offered := []
 	for x in pd.get("options", []):
 		offered.append(int(x.get("card", {}).get("uid", -1)))
-	_check("Arcane picker does not offer the 0-cost Drake", not (int(h.keys["s_drake"]) in offered) and offered.size() == 3)
+	_check("Spirit picker does not offer the 0-cost Drake", not (int(h.keys["s_drake"]) in offered) and offered.size() == 3)
 	# G04: the headline and the three empty circles ask for the cost; no status line above the circles.
-	# QA final: Boom's requirement is 4 since the 2026-11-03 card values (TutorialLessons._arcane):
+	# QA final: Boom's requirement is 4 since the 2026-11-03 card values (TutorialLessons._spirit):
 	# both Dragons (2 + 2) are exact, and the Mage on top (5) would over-pay.
-	_check("Arcane banner asks for exactly 4", gs.prompt.banner_title.text.contains("exactly 4") and gs.prompt.cost_pips.visible 		and gs.prompt.cost_pips.need == 4 and gs.prompt.cost_pips.paid() == 0 and not gs.prompt.banner_sub.visible)
-	await _shot("L7_arcane_picker")
+	_check("Spirit banner asks for exactly 4", gs.prompt.banner_title.text.contains("exactly 4") and gs.prompt.cost_pips.visible 		and gs.prompt.cost_pips.need == 4 and gs.prompt.cost_pips.paid() == 0 and not gs.prompt.banner_sub.visible)
+	await _shot("L7_spirit_picker")
 	# F08: with both Dragons (4 of 4) the Mage would over-pay, so it is disabled.
 	await _click(o._card_rect(int(h.keys["s_wyvern"])).get_center())
 	await _wait(0.3)
@@ -239,7 +239,7 @@ func _check_arcane_overpay(h: TutorialHost) -> void:
 	var confirm := _find_button(gs.prompt.banner_btns, "Confirm")
 	_check("over-pay option is disabled (Cannot overpay); Confirm is on for the exact pair", gs.multi.size() == 2 and confirm != null and not confirm.disabled)
 	_check("over-pay banner shows 4 of 4 circles paid", gs.prompt.cost_pips.paid() == 4 and gs.prompt.cost_pips.need == 4 		and gs.prompt.cost_pips.tooltip_text.contains("4 of 4") and not gs.prompt.banner_sub.visible)
-	await _shot("L7_arcane_overpay")
+	await _shot("L7_spirit_overpay")
 	var before := h.refused
 	var all3 := []
 	for x in gs.pending().get("options", []):
@@ -248,7 +248,7 @@ func _check_arcane_overpay(h: TutorialHost) -> void:
 	h.handle(TutorialLessons.PLAYER, {"t": "choose", "id": int(h.game().pending["id"]), "indices": all3})
 	await _wait(0.3)
 	_check("an over-pay command is refused", h.refused == before + 1 and h.game().pending.get("total_exact", false))
-	await _shot("L7_arcane_overpay_hint")
+	await _shot("L7_spirit_overpay_hint")
 	for k in ["s_wyvern", "s_hydra"]:
 		await _click(o._card_rect(int(h.keys[k])).get_center())
 		await _wait(0.3)

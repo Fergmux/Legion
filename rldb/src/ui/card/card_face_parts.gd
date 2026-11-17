@@ -18,7 +18,7 @@ const PLATE_TILE := 150.0
 ## H17: depth (base units) of the gilded setting round the cost gem, and the round gem's table size.
 const GEM_SETTING := 2.5
 ## Reach of each cost gem shape past its radius (see gem_reach).
-const GEM_REACH := {"ritual": 1.24, "arcane": 1.1}
+const GEM_REACH := {"arcane": 1.24, "spirit": 1.1}
 const GEM_TABLE_K := 0.6
 ## Dark gap (base units) between the cost gem's setting and its stone.
 const GEM_GAP := 0.5
@@ -125,7 +125,7 @@ static func name_plate(pt: CardPainter, rect: Rect2, fs_max: float, reserve_l: f
 
 
 ## Cost gem centred on `c` (radius `r` px, text size `fs` px), upright on a rotated card: circle (AP),
-## ringed circle (Fusion), diamond (Ritual) or hexagon (Arcane).
+## ringed circle (Fusion), diamond (Arcane) or hexagon (Spirit).
 static func gem(pt: CardPainter, c: Vector2, r: float, fs: int) -> void:
 	var ci := pt.ci
 	pt.upright_begin(c)
@@ -135,10 +135,10 @@ static func gem(pt: CardPainter, c: Vector2, r: float, fs: int) -> void:
 	var band := maxf(1.4, GEM_SETTING * s)
 	# H17: a faceted gem in a gilded setting, the AP gems' look. The shape still says the cost kind:
 	# a round brilliant (AP: topaz, Fusion: sapphire with a ring engraved round its table), a lozenge
-	# (Ritual) or a hexagon (Arcane).
+	# (Arcane) or a hexagon (Spirit).
 	var outer := gem_outer(c, r, kind)
 	var girdle_n := outer.size() if outer.size() < 8 else 8
-	var rot := PI / 2.0 if kind == "ritual" else (0.0 if kind == "arcane" else PI / 8.0)
+	var rot := PI / 2.0 if kind == "arcane" else (0.0 if kind == "spirit" else PI / 8.0)
 	CardJewel.drop_shadow(ci, outer, c, s)
 	var inner := CardJewel.setting(ci, outer, c, band, s)
 	# A dark ink gap between the metal and the stone (as in the AP sockets) so the gem reads apart.
@@ -158,30 +158,30 @@ static func gem(pt: CardPainter, c: Vector2, r: float, fs: int) -> void:
 
 
 ## How far the outline of a cost gem of kind `kind` reaches from its centre, as a multiple of the gem
-## radius: the Ritual lozenge's points and the Arcane hexagon's corners stand out past the round AP and
+## radius: the Arcane lozenge's points and the Spirit hexagon's corners stand out past the round AP and
 ## Fusion gems. L17: the layouts place each gem by this reach, so every shape keeps the same clearance
 ## from the card edge.
 static func gem_reach(kind: String) -> float:
 	return float(GEM_REACH.get(kind, 1.0))
 
 
-## Outline of the cost gem of kind `kind` (radius `r`) centred on `c`: a lozenge (Ritual), a hexagon
-## (Arcane) or a circle (AP, Fusion).
+## Outline of the cost gem of kind `kind` (radius `r`) centred on `c`: a lozenge (Arcane), a hexagon
+## (Spirit) or a circle (AP, Fusion).
 static func gem_outer(c: Vector2, r: float, kind: String) -> PackedVector2Array:
 	match kind:
-		"ritual":
-			return CardGeometry.poly(c, r * gem_reach(kind), 4, PI / 2.0)
 		"arcane":
+			return CardGeometry.poly(c, r * gem_reach(kind), 4, PI / 2.0)
+		"spirit":
 			return CardGeometry.poly(c, r * gem_reach(kind), 6, 0.0)
 	return CardGeometry.poly(c, r, 24, 0.0)
 
 
-## Text on the cost gem: "F" (Fusion), else the current cost (Ritual Runes / Arcane total / AP);
-## a Ritual / Arcane view without a current cost (summaries) shows the printed cost.
+## Text on the cost gem: "F" (Fusion), else the current cost (Arcane Runes / Spirit total / AP);
+## an Arcane / Spirit view without a current cost (summaries) shows the printed cost.
 static func cost_text(view: Dictionary) -> String:
 	match String(view.get("cost_kind", "ap")):
 		"fusion": return "F"
-		"ritual", "arcane":
+		"arcane", "spirit":
 			var cur = view.get("cost")
 			var pc = view.get("printed_cost")
 			if cur != null and view.has("uid") and int(view["uid"]) >= 0:
@@ -191,10 +191,10 @@ static func cost_text(view: Dictionary) -> String:
 	return "?" if c == null else str(c)
 
 
-## Gem text colour: green / red when a cost is below / above the printed cost (Ritual / Arcane
+## Gem text colour: green / red when a cost is below / above the printed cost (Arcane / Spirit
 ## gems are white at their printed cost).
 static func cost_color(view: Dictionary) -> Color:
-	if String(view.get("cost_kind", "ap")) in ["ritual", "arcane"] and view.has("uid") and int(view["uid"]) >= 0:
+	if String(view.get("cost_kind", "ap")) in ["arcane", "spirit"] and view.has("uid") and int(view["uid"]) >= 0:
 		var rc = view.get("cost")
 		var rp = view.get("printed_cost")
 		if rc != null and rp != null and rc != rp:

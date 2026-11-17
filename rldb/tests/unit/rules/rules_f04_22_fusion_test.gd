@@ -27,6 +27,7 @@ const ALEISTER := 40
 const NETHER_PORTAL := 89
 const POLY := 82
 const TAG_TEAM_S := 8
+const TAG_TEAM_FUSION := 57 # Geolock Colossus: Tag Team - S (Earth) plus a 20+ unit in its column
 const UNSTABLE := 137
 const TRAP := 85            # any Trap: a face-down card opens hidden response windows
 
@@ -68,8 +69,7 @@ func _setup(method: String) -> Dictionary:
 			var b := TB.card(m, 0, BEAST, "spent")
 			var dr := TB.card(m, 0, DRAGON, "spent")
 			d.merge({"src": vb, "mats": [b, dr], "cmd": {"t": "ability", "uid": vb, "idx": 0},
-				"answers": [wyrm, b, dr, 1], "cost": "activates Void Basilisk",
-				"after": "Void Basilisk moves from Unit to Exhaust"})
+				"answers": [wyrm, b, dr, 1], "cost": "Void Basilisk moves from Unit to Exhaust"})   # 2026-11-16: exhausted first
 		"magentric":
 			var mg := TB.unit(m, 0, MAGENTRIC, 0)
 			var dr := TB.unit(m, 0, DRAGON, 1)
@@ -194,16 +194,19 @@ func test_f04_22_sepukku_destroyed_after_the_summon_and_its_zone_is_not_offered(
 	assert_int(TB.log_index(m, "Zeph, Monk of Ancient Wisdom is destroyed")).is_greater(TB.log_index(m, "summons " + WYRM_NAME))
 
 
+## 2026-11-17: Tag Team - S fuses only the units in its own column, itself included, so the flow uses
+## Geolock Colossus (20+ ATK-or-DEF unit + Earth unit, no On Summon): a 20-ATK Beast behind it plus
+## Tag Team - S (Earth). A Physical Dragon in another column is not a material.
 func test_f04_22_tag_team_trigger_cancel_and_stance() -> void:
 	for k in 6:
 		var m := TB.make()
-		var b := TB.unit(m, 0, BEAST, 3)
-		var dr := TB.unit(m, 0, DRAGON, 1)
-		var wyrm := TB.card(m, 0, WYRM, "extra")
+		var b := TB.unit(m, 0, BEAST, 3, "atk", 20, 8)
+		TB.unit(m, 0, DRAGON, 1)
+		var wyrm := TB.card(m, 0, TAG_TEAM_FUSION, "extra")
 		var tt := TB.summon(m, 0, TAG_TEAM_S, 0)
-		assert_str(TB.pend_kind(m)).is_equal("confirm")    # "Fusion Summon using units from your Field?"
+		assert_str(TB.pend_kind(m)).is_equal("confirm")    # "Fusion Summon using units in this column?"
 		var before := _state(m)
-		var answers := [1, wyrm, b, dr, 1]
+		var answers := [1, wyrm, b, tt, 0]              # zone 0: Tag Team - S's own, freed by the Tribute
 		for i in k:
 			assert_int(int(m.pending["source"])).is_equal(tt)
 			assert_str(_answer(m, answers[i])).is_empty()
@@ -215,15 +218,20 @@ func test_f04_22_tag_team_trigger_cancel_and_stance() -> void:
 			assert_dict(after["cards"]).override_failure_message("Tag Team cancel at %d" % k).is_equal(before["cards"])
 			assert_array(after["players"]).is_equal(before["players"])
 	var m2 := TB.make()
-	var b2 := TB.unit(m2, 0, BEAST, 3)
+	var b2 := TB.unit(m2, 0, BEAST, 3, "atk", 20, 8)
 	var dr2 := TB.unit(m2, 0, DRAGON, 1)
-	var wyrm2 := TB.card(m2, 0, WYRM, "extra")
-	TB.summon(m2, 0, TAG_TEAM_S, 0)
-	for v in [1, wyrm2, b2, dr2, 1]:
+	var wyrm2 := TB.card(m2, 0, TAG_TEAM_FUSION, "extra")
+	var tt2 := TB.summon(m2, 0, TAG_TEAM_S, 0)
+	assert_str(_answer(m2, 1)).is_empty()
+	assert_str(_answer(m2, wyrm2)).is_empty()
+	assert_str(_answer(m2, b2)).is_empty()
+	assert_str(_answer(m2, dr2)).is_equal("Invalid option.")     # another column: not a material
+	for v in [tt2, 0]:
 		assert_str(_answer(m2, v)).is_empty()
 	assert_str(m2.cards[wyrm2]["zone"]).is_equal("unit")
 	assert_str(m2.cards[b2]["zone"]).is_equal("spent")
-	assert_str(m2.cards[dr2]["zone"]).is_equal("spent")
+	assert_str(m2.cards[tt2]["zone"]).is_equal("spent")
+	assert_str(m2.cards[dr2]["zone"]).is_equal("unit")
 
 
 func test_f04_22_illegal_and_stale_selections_are_rejected() -> void:
@@ -272,7 +280,7 @@ func test_f04_22_material_lost_in_response_window_fails_cleanly() -> void:
 ## Summon ("Fusion Summon ..., then Exhaust/Destroy this Unit"). The source is still on the Field in
 ## the response window, and pays only once the Fusion unit has landed.
 func test_f04_22_self_destruction_follows_the_summon_after_the_response_window() -> void:
-	for method in ["sepukku", "basilisk"]:
+	for method in ["sepukku"]:     # 2026-11-16: Void Basilisk now pays before the window (test below)
 		var d := _setup(method)
 		var m: MatchEngine = d["m"]
 		TB.set_card(m, 1, TRAP, 0)
@@ -291,9 +299,9 @@ func test_f04_22_self_destruction_follows_the_summon_after_the_response_window()
 		assert_str(m.cards[src]["zone"]).override_failure_message(method).is_equal(paid_zone)
 
 
-## The hazard the 2026-10-17 review guarded against, kept under the 3 Nov order: if Void Basilisk is
-## destroyed during the response window, its "then Exhaust this Unit" must not pull it from Spent.
-func test_f04_22_basilisk_destroyed_in_the_window_is_not_exhausted_from_spent() -> void:
+## Owner, 16 Nov: Void Basilisk is exhausted before the Fusion Summon: it has already left the Field
+## when the response window opens, and the Fusion unit lands after it.
+func test_f04_22_basilisk_is_exhausted_before_the_response_window() -> void:
 	var d := _setup("basilisk")
 	var m: MatchEngine = d["m"]
 	TB.set_card(m, 1, TRAP, 0)
@@ -303,11 +311,11 @@ func test_f04_22_basilisk_destroyed_in_the_window_is_not_exhausted_from_spent() 
 	for v in d["answers"]:
 		assert_str(_answer(m, v)).is_empty()
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")
-	m.destroy(vb, "effect", -1, 1)                        # stands in for an opponent's response
+	assert_str(m.cards[vb]["zone"]).is_equal("exhaust")
+	assert_str(m.cards[d["wyrm"]]["zone"]).is_equal("extra")
 	while not m.pending.is_empty() and TB.pend_kind(m) == "trap_response":
 		TB.choose(m, ["Skip"])
-	assert_str(m.cards[vb]["zone"]).is_equal("spent")
-	assert_int(TB.log_index(m, "Void Basilisk moves from Spent to Exhaust")).is_equal(-1)
+	assert_str(m.cards[d["wyrm"]]["zone"]).is_equal("unit")
 
 
 ## 2026-11-03 (changed on purpose; it used to end the Fusion before the window): a Seppuku saved by

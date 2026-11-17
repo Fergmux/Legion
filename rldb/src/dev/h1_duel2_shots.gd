@@ -4,7 +4,7 @@ extends SceneTree
 ##   godot --path . -s res://src/dev/h1_duel2_shots.gd -- --no-steam --out=<abs dir> [--size=1600x900] [--calm]
 ## Stages one board through the real engine and LocalHost and saves one PNG per state:
 ## board at rest (empty details), hovered unit and long card details, an effect's target pick, a zone pick,
-## the waiting notice and the opponent's trap response, the Arcane picker, then the game end and the log's
+## the waiting notice and the opponent's trap response, the Spirit picker, then the game end and the log's
 ## winner line. `--calm` runs with reduced motion (the static states).
 
 var main: Node
@@ -130,11 +130,11 @@ func _states() -> void:
 		_answer_text("Skip")
 		_show(a)
 		await _wait(1.2)
-	# The Arcane picker (Tyde from Extra, paid from Spent).
-	m.submit(a, {"t": "arcane", "uid": uids["tyde"]})
+	# The Spirit picker (Tyde from Extra, paid from Spent).
+	m.submit(a, {"t": "spirit", "uid": uids["tyde"]})
 	host.broadcast()
 	await _wait(0.8)
-	await _snap("09_arcane_picker")
+	await _snap("09_spirit_picker")
 	_auto_answer()
 	await _wait(1.6)
 	_show(a)
@@ -230,6 +230,6 @@ func _auto_answer() -> void:
 		else:
 			_answer_first()
 		if not m.pending.is_empty() and m.pending.get("id") == id0:
-			# An exact-total pick (Arcane): take the first two.
+			# An exact-total pick (Spirit): take the first two.
 			host.handle(int(m.pending["player"]), {"t": "choose", "id": id0, "indices": [0, 1]})
 			host.broadcast()

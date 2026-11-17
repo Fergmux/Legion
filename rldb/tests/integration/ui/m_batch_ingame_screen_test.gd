@@ -111,7 +111,9 @@ func test_m4_the_series_score_is_in_the_menu_not_the_top_strip() -> void:
 	# It fits the menu's series width and sits inside the menu panel.
 	assert_float(sb.size.x * sb.scale.x).is_less_equal(GameMenu.SERIES_W + 0.5)
 	assert_bool(gs.menu.game_menu.get_global_rect().encloses(sb.get_global_rect())).is_true()
-	assert_str(gs.menu.series_status.text).is_equal("Game 1 · first to 2 wins")
+	# N batch (owner, 16 Nov): no "Game 1 · first to 2 wins" line while the series is played.
+	assert_str(gs.menu.series_status.text).is_equal("")
+	assert_bool(gs.menu.series_status.visible).is_false()
 
 
 func test_m4_a_single_game_shows_no_series_section() -> void:
@@ -123,7 +125,7 @@ func test_m4_a_single_game_shows_no_series_section() -> void:
 
 func test_m4_series_status_text() -> void:
 	var md := {"over": false, "winner": -1, "current": 1, "need": 2, "names": ["Ann", "Bea"]}
-	assert_str(GameMenu.series_status_text(md)).is_equal("Game 2 · first to 2 wins")
+	assert_str(GameMenu.series_status_text(md)).is_equal("")   # N batch: nothing while it is played
 	md["over"] = true
 	md["winner"] = 1
 	assert_str(GameMenu.series_status_text(md)).is_equal("Bea wins the series")

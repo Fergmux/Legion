@@ -221,7 +221,7 @@ func test_lessons_reference_existing_cards_only() -> void:
 			assert_bool(CardScripts.is_implemented(int(c["id"])) or CardDB.get_def(int(c["id"]))["category"] == "basic_unit").is_true()
 
 
-# ---------------------------------------------------------------- F05-01 Ritual and Arcane lessons
+# ---------------------------------------------------------------- F05-01 Arcane and Spirit lessons
 
 ## Plays steps until the current one is titled `title` (it is not played).
 func _play_to(h: TutorialHost, title: String) -> void:
@@ -237,9 +237,9 @@ func _opt(h: TutorialHost, key: String) -> int:
 	return TutorialScript.option_index(h.game(), h.keys, {"card": key})
 
 
-func test_lesson_list_has_ritual_and_arcane_after_fusion() -> void:
+func test_lesson_list_has_arcane_and_spirit_after_fusion() -> void:
 	var ids := TutorialLessons.all().map(func(l): return String(l["id"]))
-	assert_array(ids).is_equal(["turn_flow", "summoning", "battle", "spells_traps", "extra_deck", "ritual", "arcane"])
+	assert_array(ids).is_equal(["turn_flow", "summoning", "battle", "spells_traps", "extra_deck", "arcane", "spirit"])
 	for i in ids.size():
 		assert_bool(String(TutorialLessons.get_lesson(i)["title"]).begins_with("Lesson %d ·" % (i + 1))).is_true()
 	# Only the very last step of the very last lesson says "Tutorial complete".
@@ -247,22 +247,22 @@ func test_lesson_list_has_ritual_and_arcane_after_fusion() -> void:
 		var steps: Array = TutorialLessons.get_lesson(i)["steps"]
 		var last := i == ids.size() - 1
 		assert_bool(String(steps[-1]["title"]) == "Tutorial complete").is_equal(last)
-	# The Fusion lesson no longer carries the Ritual/Arcane explanation step.
+	# The Fusion lesson no longer carries the Arcane/Spirit explanation step.
 	for st in TutorialLessons.get_lesson(TutorialLessons.index_of("extra_deck"))["steps"]:
-		assert_str(String(st["title"])).is_not_equal("Ritual and Arcane")
-	var h := _host(TutorialLessons.index_of("ritual"))
+		assert_str(String(st["title"])).is_not_equal("Arcane and Spirit")
+	var h := _host(TutorialLessons.index_of("arcane"))
 	assert_bool(h.has_next_lesson()).is_true()
-	h.load_lesson(TutorialLessons.index_of("arcane"))
+	h.load_lesson(TutorialLessons.index_of("spirit"))
 	assert_bool(h.has_next_lesson()).is_false()
 
 
-func test_ritual_lesson_runes_tribute_and_payoff() -> void:
-	var h := _host(TutorialLessons.index_of("ritual"))
+func test_arcane_lesson_runes_tribute_and_payoff() -> void:
+	var h := _host(TutorialLessons.index_of("arcane"))
 	var m := h.game()
 	var zealot: int = h.keys["p_zealot"]
-	assert_int(m.status_count(zealot, "rune")).is_equal(2)          # premade 1 + its own start-of-turn Rune
-	_play_to(h, "Open the Ritual summon")
-	assert_int(m.status_count(zealot, "rune")).is_equal(3)          # Sacred Offerings
+	assert_int(m.status_count(zealot, "rune")).is_equal(2)          # premade 2 (2026-11-17: a Basic Warrior)
+	_play_to(h, "Open the Arcane summon")
+	assert_int(m.status_count(zealot, "rune")).is_equal(3)          # Rune Stone
 	assert_int(m.players[ME]["ap"]).is_equal(1)
 	_play_all(h)
 	assert_bool(h.is_complete()).is_true()
@@ -272,22 +272,22 @@ func test_ritual_lesson_runes_tribute_and_payoff() -> void:
 	var null_u: Dictionary = m.cards[h.keys["p_null"]]
 	assert_str(null_u["zone"]).is_equal("unit")
 	assert_int(null_u["slot"]).is_equal(1)
-	assert_int(m.players[ME]["ap"]).is_equal(1)                     # the Ritual summon paid no AP
+	assert_int(m.players[ME]["ap"]).is_equal(1)                     # the Arcane summon paid no AP
 	assert_str(m.cards[h.keys["o_warrior"]]["zone"]).is_equal("spent")
 	assert_int(m.players[RIVAL]["hp"]).is_equal(32)                 # 36 against 8 in Attack stance (2026-11-03 Null 36/12)
 	assert_int(int(null_u["runes"])).is_equal(0)                    # its optional On Summon Rune was skipped
 
 
-func test_ritual_lesson_refuses_off_script_commands() -> void:
-	var h := _host(TutorialLessons.index_of("ritual"))
-	_play_to(h, "Open the Ritual summon")
+func test_arcane_lesson_refuses_off_script_commands() -> void:
+	var h := _host(TutorialLessons.index_of("arcane"))
+	_play_to(h, "Open the Arcane summon")
 	var before := _snap(h)
-	h.handle(ME, {"t": "ritual", "uid": h.keys["p_null"], "stance": "def"})   # Defense: off script (B3)
+	h.handle(ME, {"t": "arcane", "uid": h.keys["p_null"], "stance": "def"})   # Defense: off script (B3)
 	h.handle(ME, {"t": "next_phase"})
 	h.handle(ME, {"t": "summon", "uid": h.keys["p_hand0"], "stance": "atk"})
 	assert_array(_snap(h)).is_equal(before)
 	assert_int(h.refused).is_equal(3)
-	_play_step(h)                                                    # the expected Ritual summon
+	_play_step(h)                                                    # the expected Arcane summon
 	assert_str(String(h.current_step()["title"])).is_equal("Choose the material")
 	var pd := h.game().pending
 	var snap := _snap(h)
@@ -295,28 +295,28 @@ func test_ritual_lesson_refuses_off_script_commands() -> void:
 	assert_array(_snap(h)).is_equal(snap)
 
 
-func test_arcane_lesson_exact_total_exhausts_materials() -> void:
-	var h := _host(TutorialLessons.index_of("arcane"))
+func test_spirit_lesson_exact_total_exhausts_materials() -> void:
+	var h := _host(TutorialLessons.index_of("spirit"))
 	_play_all(h)
 	var m := h.game()
 	assert_bool(h.is_complete()).is_true()
 	assert_int(h.refused).is_equal(0)
-	# 2026-11-03: Boom costs 4 (both Dragons) and is 20/20.
+	# 2026-11-17: Neva the Divine Mother (Spirit, requirement 4, 16/30 Earth) replaces Boom (now an Arcane unit).
 	assert_str(m.cards[h.keys["s_mage"]]["zone"]).is_equal("spent")
 	assert_str(m.cards[h.keys["s_wyvern"]]["zone"]).is_equal("exhaust")
 	assert_str(m.cards[h.keys["s_hydra"]]["zone"]).is_equal("exhaust")
 	assert_str(m.cards[h.keys["s_drake"]]["zone"]).is_equal("spent")
 	assert_str(m.cards[h.keys["p_boom"]]["zone"]).is_equal("unit")
-	assert_int(m.players[ME]["ap"]).is_equal(2)                     # no AP paid for the Arcane summon
-	assert_int(m.players[RIVAL]["hp"]).is_equal(42)                 # flipped to Attack: 26 (20 ATK + 6) against 8
+	assert_int(m.players[ME]["ap"]).is_equal(2)                     # no AP paid for the Spirit summon
+	assert_int(m.players[RIVAL]["hp"]).is_equal(46)                 # Attack stance: 22 (16 ATK + 6 Earth) against 8
 
 
-func test_arcane_lesson_offers_no_zero_cost_unit_and_refuses_wrong_totals() -> void:
-	var h := _host(TutorialLessons.index_of("arcane"))
+func test_spirit_lesson_offers_no_zero_cost_unit_and_refuses_wrong_totals() -> void:
+	var h := _host(TutorialLessons.index_of("spirit"))
 	_play_to(h, "Choose the materials")
 	var pd := h.game().pending
 	assert_bool(pd.get("total_exact", false)).is_true()
-	assert_int(int(pd["total_required"])).is_equal(4)               # Boom's 2026-11-03 cost
+	assert_int(int(pd["total_required"])).is_equal(4)               # Neva's requirement
 	assert_int(_opt(h, "s_drake")).is_equal(-1)                      # 0-cost: not offered (F03-05)
 	var before := _snap(h)
 	var hints := []

@@ -331,7 +331,7 @@ func _gallery() -> Control:
 	pb.value = 40
 	b.add_child(pb)
 	var title := Label.new()
-	title.text = "Cinzel title · Ritual → Arcane ← ‹ Back"
+	title.text = "Cinzel title · Arcane → Spirit ← ‹ Back"
 	title.add_theme_font_override("font", UIStyle.font_title())
 	title.add_theme_font_size_override("font_size", 26)
 	b.add_child(title)

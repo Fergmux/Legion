@@ -70,12 +70,14 @@ func test_attack_does_not_resolve_if_target_became_protected() -> void:
 	assert_str(m2.cards[back2]["zone"]).is_equal("unit")
 
 
-func test_debilitated_flying_sandworm_goes_to_spent_not_exhaust() -> void:
+## 2026-11-17: every Spirit Unit is Exhausted whenever it leaves the Field. That is a rule of the card type,
+## not an effect, so Debilitate no longer sends a Debilitated Flying Sandworm to Spent (it did before).
+func test_debilitated_flying_sandworm_is_still_exhausted_as_a_spirit() -> void:
 	var m := TB.make()
 	var fs := TB.unit(m, 0, 171, 0)
 	m.apply_status(fs, "debilitate", 1)
 	TB.kill(m, fs)
-	assert_str(m.cards[fs]["zone"]).is_equal("spent")
+	assert_str(m.cards[fs]["zone"]).is_equal("exhaust")
 
 
 func test_magic_cylinder_uses_attacker_last_known_atk_after_mirror_force() -> void:
@@ -131,8 +133,10 @@ func test_choice_from_draw_is_not_presented_in_draw_order() -> void:
 	var m := TB.make(7, 0)
 	var ids := []
 	for i in 6:
-		ids.append(TB.card(m, 0, 122, "draw"))
-	TB.summon(m, 0, 73, 0)                                  # Man's Best Friend: Warrior from Draw
+		ids.append(TB.card(m, 0, 3, "draw"))               # Basic Warrior (Water)
+	# 2026-11-17: Man's Best Friend (the old fixture) lost its Warrior search; Tritu adds a Water unit.
+	var tritu := TB.unit(m, 0, 176, 0)
+	assert_str(TB.ability(m, tritu, 0)).is_empty()
 	var shown: Array = m.pending["options"].map(func(o): return o["v"])
 	var sorted := shown.duplicate()
 	sorted.sort()
@@ -150,19 +154,19 @@ func test_no_legal_choice_message_is_private() -> void:
 ## (the effect's source) instead of naming the Fusion unit being summoned; the zone prompt too.
 func test_fusion_zone_prompt_names_the_fusion_unit() -> void:
 	var m := TB.make()
-	# 2026-11-03 Bastion Wyrm: a unit with 20 or more ATK or DEF + a Physical unit.
+	# 2026-11-17: Tag Team - S fuses only units in its column (itself included): Geolock Colossus takes a
+	# unit with 20 or more ATK or DEF (Guardian of the Forest behind it) + an Earth unit (Tag Team - S).
 	var beast := TB.unit(m, 0, 28, 3)                    # Guardian of the Forest, 22 DEF
-	var dragon := TB.unit(m, 0, 116, 1)                  # Basic Dragon (Physical)
-	var wyrm := TB.card(m, 0, 93, "extra")
-	TB.summon(m, 0, 8, 0)                                # Tag Team - S: On Summon may Fusion Summon
+	var wyrm := TB.card(m, 0, 57, "extra")               # Geolock Colossus
+	var tts := TB.summon(m, 0, 8, 0)                     # Tag Team - S: On Summon may Fusion Summon
 	TB.choose(m, ["Yes"])
 	TB.choose_uids(m, [wyrm])
 	assert_str(String(m.pending["prompt"])).contains(m.name_of(wyrm))   # material prompts too
 	TB.choose_uids(m, [beast])
-	TB.choose_uids(m, [dragon])
+	TB.choose_uids(m, [tts])
 	assert_str(TB.pend_kind(m)).is_equal("slot")
 	assert_str(String(m.pending["prompt"])).contains(m.name_of(wyrm))
-	TB.choose(m, ["Front row, column 2"])                # the Dragon material's own zone
+	TB.choose(m, ["Front row, column 1"])                # Tag Team - S's own zone
 	assert_str(TB.pend_kind(m)).is_not_equal("stance")   # B3: own Setup Phase, Attack stance
 	assert_str(m.cards[wyrm]["zone"]).is_equal("unit")
 	assert_str(m.cards[wyrm]["stance"]).is_equal("atk")
@@ -333,7 +337,8 @@ func test_column_summon_ability_refused_without_a_free_zone() -> void:
 	assert_int(m.players[0]["ap"]).is_equal(2)
 
 
-## Seppuku with its "then Destroy this Unit" prevented (Man's Best Friend).
+## Seppuku with its "then Destroy this Unit" prevented (Man's Best Friend; Exhausted instead of destroyed
+## since 2026-11-17).
 ## 2026-11-03 (owner, changed on purpose): Seppuku Fusion Summons first, then is destroyed, and it may
 ## be one of its own materials. So a prevented destruction no longer cancels the Fusion (it used to:
 ## the destruction was a cost paid first); Man's Best Friend still saves Seppuku, at its own expense.
@@ -353,8 +358,9 @@ func test_sepukku_prevented_self_destroy_still_fuses_and_stays() -> void:
 	assert_bool(m.pending.is_empty()).override_failure_message(str(m.pending)).is_true()
 	assert_str(m.cards[sol]["zone"]).is_equal("unit")
 	assert_str(m.cards[sep]["zone"]).is_equal("unit")          # saved by Man's Best Friend
-	assert_str(m.cards[mbf]["zone"]).is_equal("spent")         # which is destroyed instead
-	assert_int(TB.log_index(m, "summons Dante")).is_less(TB.log_index(m, "Man's Best Friend is destroyed"))
+	assert_str(m.cards[mbf]["zone"]).is_equal("exhaust")       # which is Exhausted instead
+	assert_int(TB.log_index(m, "summons Dante")).is_less(TB.log_index(m, "Man's Best Friend is exhausted"))
+	assert_int(TB.log_index(m, "summons Dante")).is_greater(-1)
 
 
 ## Ambush: a Bahatia-blocked Basic Unit does not use up a free zone.

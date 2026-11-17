@@ -35,8 +35,8 @@ func setup(decks: Array, first_player: int, seed_value: int, cfg: Dictionary = {
 	for p in 2:
 		if cfg.has("names"):
 			players[p]["name"] = cfg["names"][p]
-		# L23: an evolution-only form never starts a game as its own card (an older saved deck or
-		# series may list one): it is its base card, which can evolve into it.
+		# L23: a transformation-only form never starts a game as its own card (an older saved deck or
+		# series may list one): it is its base card, which can transform into it.
 		# 2026-11-10: a disabled card (CardDB.DISABLED) is left out: the deck plays without it.
 		for id in CardDB.playable_deck(CardDB.sanitize_deck(decks[p])):
 			var uid := _create_instance(int(id), p)
@@ -97,74 +97,74 @@ func _start_turn(p: int) -> void:
 		if cards[du]["zone"] == "spent":
 			push_frame(make_frame(du, p, [{"op": "summon", "target": du, "place": "orig", "stance": "choose"}], "%s returns" % name_of(du)))
 	players[p]["delayed"] = []
-	# L23: Evolve prompts come first among the start-of-turn effects, one per evolvable unit in Field
+	# L23: Transform prompts come first among the start-of-turn effects, one per transformable unit in Field
 	# order; the "at the start of your turn" effects follow (start_turn_effects), and a unit that just
-	# evolved skips them this turn (its new form's first fire next turn). 2026-11-10: only the cards
-	# whose Evolve condition is "at the start of your turn" are asked here (`evolve_at_start`); the
-	# others Evolve through their on-card Evolve action while their condition holds.
-	var evolvers := field_units(p).filter(func(u): return can_evolve(u) and script_of(u).get("evolve_at_start", false))
-	if evolvers.is_empty():
+	# transformed skips them this turn (its new form's first fire next turn). 2026-11-10: only the cards
+	# whose Transform condition is "at the start of your turn" are asked here (`transform_at_start`); the
+	# others Transform through their on-card Transform action while their condition holds.
+	var transformers := field_units(p).filter(func(u): return can_transform(u) and script_of(u).get("transform_at_start", false))
+	if transformers.is_empty():
 		emit("start_turn", {"player": p})
 	else:
 		push_frame(make_frame(-1, p, [{"op": "start_turn_effects"}], "start of turn"))
-		for i in range(evolvers.size() - 1, -1, -1):
-			push_frame(make_frame(evolvers[i], p, [{"op": "evolve_offer"}], "Evolve %s" % name_of(evolvers[i])))
+		for i in range(transformers.size() - 1, -1, -1):
+			push_frame(make_frame(transformers[i], p, [{"op": "transform_offer"}], "Transform %s" % name_of(transformers[i])))
 	run()
 
 
-## 2026-11-10: why an Evolve action is refused outside the Setup and Recovery Phases.
-const EVOLVE_MAIN_ONLY := "Evolving is a Summon: only in your Setup or Recovery Phase."
+## 2026-11-10: why a Transform action is refused outside the Setup and Recovery Phases.
+const TRANSFORM_MAIN_ONLY := "Transforming is a Summon: only in your Setup or Recovery Phase."
 
 
-## L23: the two answers of an Evolve prompt (the bot always takes EVOLVE_YES).
-const EVOLVE_YES := "Evolve"
-const EVOLVE_SKIP := "Skip"
+## L23: the two answers of a Transform prompt (the bot always takes TRANSFORM_YES).
+const TRANSFORM_YES := "Transform"
+const TRANSFORM_SKIP := "Skip"
 
 
-## L23 (owner feedback 2026-11-05, confirmed rules): "Evolve <card> into <next>?" for the frame's unit,
-## at the start of its controller's turn: free (no AP), Evolve or Skip. Asked only while the unit can
-## still evolve. 2026-11-10 (owner): an evolution is a Summon: the new form's On Summon effects fire,
+## L23 (owner feedback 2026-11-05, confirmed rules): "Transform <card> into <next>?" for the frame's unit,
+## at the start of its controller's turn: free (no AP), Transform or Skip. Asked only while the unit can
+## still transform. 2026-11-10 (owner): a transformation is a Summon: the new form's On Summon effects fire,
 ## then the summon-response window opens (SpecialOps.summon_tail). It is not an effect activation.
-func _op_evolve_offer(f: Dictionary, op: Dictionary) -> int:
+func _op_transform_offer(f: Dictionary, op: Dictionary) -> int:
 	var uid: int = f["src"]
 	var ans: Variant = take_answer(f)
-	var ok: bool = cards.has(uid) and can_evolve(uid) and int(cards[uid]["ctl"]) == int(f["ctl"])
+	var ok: bool = cards.has(uid) and can_transform(uid) and int(cards[uid]["ctl"]) == int(f["ctl"])
 	if ans != null:
 		if int(ans[0]) == 1 and ok:
-			evolve_unit(uid)
+			transform_unit(uid)
 			_splice(f, summon_tail(uid, int(f["ctl"])))
 		elif ok:
-			add_log("%s does not evolve %s." % [pname(f["ctl"]), name_of(uid)])
+			add_log("%s does not transform %s." % [pname(f["ctl"]), name_of(uid)])
 		return R.CONT
 	if not ok:
 		return R.CONT
-	var to := CardDB.evolves_into(int(cards[uid]["id"]))
-	return ask(f, f["ctl"], "evolve", "Evolve %s into %s?" % [name_of(uid), String(CardDB.get_def(to)["name"])],
-		[{"v": 1, "label": EVOLVE_YES}, {"v": 0, "label": EVOLVE_SKIP}], 1, 1, false, {"evolve_to": to})
+	var to := CardDB.transforms_into(int(cards[uid]["id"]))
+	return ask(f, f["ctl"], "transform", "Transform %s into %s?" % [name_of(uid), String(CardDB.get_def(to)["name"])],
+		[{"v": 1, "label": TRANSFORM_YES}, {"v": 0, "label": TRANSFORM_SKIP}], 1, 1, false, {"transform_to": to})
 
 
-## 2026-11-10 (owner): the on-card Evolve action of a unit whose Evolve condition is a state ("If this
+## 2026-11-10 (owner): the on-card Transform action of a unit whose Transform condition is a state ("If this
 ## Unit has Burn applied and ATK is more than Base", "If you Control ..."), usable whenever it holds in
-## its controller's Setup or Recovery Phase (an evolution is a Summon, and nothing is summoned in the
+## its controller's Setup or Recovery Phase (a transformation is a Summon, and nothing is summoned in the
 ## Battle Phase or the opponent's turn). Free, not once per turn, no activation window. `then`: what
-## the Evolve text does after evolving (Divine Serpent - Soul exhausts the other three), before the
+## the Transform text does after transforming (Divine Serpent - Soul exhausts the other three), before the
 ## new form's On Summon effects and the summon-response window.
-func _op_evolve(f: Dictionary, op: Dictionary) -> int:
+func _op_transform(f: Dictionary, op: Dictionary) -> int:
 	f["committed"] = true
 	var uid: int = f["src"]
-	if not cards.has(uid) or not can_evolve(uid) or int(cards[uid]["ctl"]) != int(f["ctl"]):
+	if not cards.has(uid) or not can_transform(uid) or int(cards[uid]["ctl"]) != int(f["ctl"]):
 		return R.END
-	evolve_unit(uid)
+	transform_unit(uid)
 	_splice(f, op.get("then", []) + summon_tail(uid, int(f["ctl"])))
 	return R.CONT
 
 
-## L23: the start-of-turn triggers after the Evolve prompts. A unit that evolved this turn does not
+## L23: the start-of-turn triggers after the Transform prompts. A unit that transformed this turn does not
 ## fire its new form's "at the start of your turn" effects until its controller's next turn.
 func _op_start_turn_effects(f: Dictionary, op: Dictionary) -> int:
 	emit("start_turn", {"player": f["ctl"]})
 	trigger_queue = trigger_queue.filter(func(t): return not (String(t["event"].get("name", "")) == "start_turn" \
-			and cards.has(int(t["uid"])) and int(cards[int(t["uid"])].get("evolved_turn", -1)) == turn))
+			and cards.has(int(t["uid"])) and int(cards[int(t["uid"])].get("transformed_turn", -1)) == turn))
 	return R.CONT
 
 
@@ -362,7 +362,7 @@ func validate(p: int, cmd: Dictionary) -> String:
 	# stance afterwards. An explicit "atk" is still accepted from older clients; "def" is refused
 	# whatever the card, so the reply reveals nothing about it (QA-F02-03).
 	if cmd.has("stance"):
-		if not (t in ["summon", "ritual", "arcane"]) or not (cmd["stance"] in ["atk", "def"]):
+		if not (t in ["summon", "arcane", "spirit"]) or not (cmd["stance"] in ["atk", "def"]):
 			return "Invalid stance."
 		if cmd["stance"] == "def":
 			return SUMMON_ATTACK_ONLY
@@ -412,9 +412,9 @@ func validate(p: int, cmd: Dictionary) -> String:
 			var abs: Array = script_of(uid).get("abilities", [])
 			var idx: int = int(cmd.get("idx", 0))
 			if idx < 0 or idx >= abs.size(): return "No such ability."
-			if abs[idx].get("evolve", false):
-				if not main: return EVOLVE_MAIN_ONLY
-				if not can_evolve(uid): return "This unit cannot Evolve."
+			if abs[idx].get("transform", false):
+				if not main: return TRANSFORM_MAIN_ONLY
+				if not can_transform(uid): return "This unit cannot Transform."
 			return _ability_check(p, uid, idx, abs[idx])
 		"stance":
 			if inst["ctl"] != p or inst["zone"] != "unit": return "Not your unit."
@@ -436,37 +436,37 @@ func validate(p: int, cmd: Dictionary) -> String:
 			if inst["moved_turn"] == turn: return "Nimble: already moved this turn."
 			if _adjacent_free(uid).is_empty(): return "No adjacent empty zone."
 			return ""
-		"ritual", "arcane":
+		"arcane", "spirit":
 			if inst["owner"] != p or inst["zone"] != "extra": return "Card is not in your Extra Deck."
 			if df["category"] != t: return "Not a %s unit." % t.capitalize()
 			var why_x := _extra_timing_check(p, uid)
 			if why_x != "": return why_x
-			if t == "ritual" and _ritual_materials(p, uid).is_empty(): return "No unit with enough Runes."
+			if t == "arcane" and _arcane_materials(p, uid).is_empty(): return "No unit with enough Runes."
 			# F03-04: some Spent units' current costs must total exactly the requirement.
-			if t == "arcane" and not arcane_payable(p, int(extra_cost(uid))): return "No Spent units' current costs total exactly %d." % int(extra_cost(uid))
+			if t == "spirit" and not spirit_payable(p, int(extra_cost(uid))): return "No Spent units' current costs total exactly %d." % int(extra_cost(uid))
 			return ""
-		"ritual_tribute":
-			# Owner feedback 2026-10-18: the Ritual summon started from the unit with the Runes;
-			# "target" is the Ritual unit in the Extra Deck it is tributed for. J14 (2026-10-22):
-			# without a target the player then picks the Ritual unit (ritual_pick).
+		"arcane_tribute":
+			# Owner feedback 2026-10-18: the Arcane summon started from the unit with the Runes;
+			# "target" is the Arcane unit in the Extra Deck it is tributed for. J14 (2026-10-22):
+			# without a target the player then picks the Arcane unit (arcane_pick).
 			if inst["ctl"] != p or inst["zone"] != "unit": return "Not your unit."
 			if int(cmd.get("target", -1)) == -1:
-				if not ritual_tribute_targets(p, uid).is_empty(): return ""
+				if not arcane_tribute_targets(p, uid).is_empty(): return ""
 				for rr in players[p]["extra"]:
-					if category(rr) == "ritual" and _extra_timing_check(p, rr) != "": return _extra_timing_check(p, rr)
-				return "This unit does not have enough Runes for a Ritual unit in your Extra Deck."
+					if category(rr) == "arcane" and _extra_timing_check(p, rr) != "": return _extra_timing_check(p, rr)
+				return "This unit does not have enough Runes for an Arcane unit in your Extra Deck."
 			var r: int = int(cmd.get("target", -1))
-			if not cards.has(r) or not (r in players[p]["extra"]) or category(r) != "ritual": return "Not a Ritual unit in your Extra Deck."
-			var why := validate(p, {"t": "ritual", "uid": r})
+			if not cards.has(r) or not (r in players[p]["extra"]) or category(r) != "arcane": return "Not an Arcane unit in your Extra Deck."
+			var why := validate(p, {"t": "arcane", "uid": r})
 			if why != "": return why
-			if not (uid in _ritual_materials(p, r)): return "This unit does not have enough Runes."
+			if not (uid in _arcane_materials(p, r)): return "This unit does not have enough Runes."
 			return ""
 	return "Unknown command."
 
 
 ## Timing and lock reasons an Extra Deck unit `uid` of player p cannot be special summoned now
 ## ("" when it may): no Extra Deck summons in the Battle Phase, Setup / Recovery Phase only, and
-## an opposing Bahatia's Type lock. Shared by the summon commands and the Ritual Tribute pick.
+## an opposing Bahatia's Type lock. Shared by the summon commands and the Arcane Tribute pick.
 func _extra_timing_check(p: int, uid: int) -> String:
 	if extra_summons_locked(): return NO_EXTRA_IN_BATTLE
 	if not (phase in [PHASE_MAIN1, PHASE_MAIN2]): return "Special summons from the Extra Deck follow normal summon timing (Setup or Recovery Phase)."
@@ -474,14 +474,14 @@ func _extra_timing_check(p: int, uid: int) -> String:
 	return ""
 
 
-## J14 (owner feedback 2026-10-22): the Ritual units in player p's Extra Deck that unit `mat` could be
+## J14 (owner feedback 2026-10-22): the Arcane units in player p's Extra Deck that unit `mat` could be
 ## tributed for right now (enough Runes, summon timing and Type locks allow), in Extra Deck order.
-func ritual_tribute_targets(p: int, mat: int) -> Array:
+func arcane_tribute_targets(p: int, mat: int) -> Array:
 	var out := []
 	if not cards.has(mat) or cards[mat]["ctl"] != p or cards[mat]["zone"] != "unit":
 		return out
 	for r in players[p]["extra"]:
-		if category(r) == "ritual" and _extra_timing_check(p, r) == "" and mat in _ritual_materials(p, r):
+		if category(r) == "arcane" and _extra_timing_check(p, r) == "" and mat in _arcane_materials(p, r):
 			out.append(r)
 	return out
 
@@ -672,9 +672,9 @@ func _execute(p: int, cmd: Dictionary) -> void:
 		"ability":
 			var idx: int = int(cmd.get("idx", 0))
 			var ab: Dictionary = script_of(uid)["abilities"][idx]
-			if ab.get("evolve", false):
-				# 2026-11-10: an Evolve action is a Summon, not an effect activation (no activate window).
-				push_frame(make_frame(uid, p, ab["ops"].duplicate(true), "%s: Evolve" % name_of(uid)))
+			if ab.get("transform", false):
+				# 2026-11-10: a Transform action is a Summon, not an effect activation (no activate window).
+				push_frame(make_frame(uid, p, ab["ops"].duplicate(true), "%s: Transform" % name_of(uid)))
 			else:
 				_push_ability(p, uid, idx, ab)
 		"stance":
@@ -694,20 +694,20 @@ func _execute(p: int, cmd: Dictionary) -> void:
 		"move":
 			push_frame(make_frame(uid, p, [{"op": "pick_slot", "zone": "adjacent", "as": "slot", "cancellable": true},
 				{"op": "move_slot", "slot": "$slot", "nimble": true}], "move " + name_of(uid)))
-		"ritual":
-			_push_ritual(p, uid, cmd, -1)
-		"ritual_tribute":
-			if int(cmd.get("target", -1)) == -1:
-				# J14: one "Ritual Summon" action; the Ritual unit is chosen in the card select tray.
-				push_frame(make_frame(uid, p, [{"op": "ritual_pick", "mat": uid, "cancellable": true}], "Ritual summon"))
-			else:
-				_push_ritual(p, int(cmd["target"]), cmd, uid)
 		"arcane":
-			push_frame(make_frame(uid, p, [{"op": "arcane_materials", "as": "mats", "cancellable": true},
+			_push_arcane(p, uid, cmd, -1)
+		"arcane_tribute":
+			if int(cmd.get("target", -1)) == -1:
+				# J14: one "Arcane Summon" action; the Arcane unit is chosen in the card select tray.
+				push_frame(make_frame(uid, p, [{"op": "arcane_pick", "mat": uid, "cancellable": true}], "Arcane summon"))
+			else:
+				_push_arcane(p, int(cmd["target"]), cmd, uid)
+		"spirit":
+			push_frame(make_frame(uid, p, [{"op": "spirit_materials", "as": "mats", "cancellable": true},
 				{"op": "pick_slot", "zone": "unit", "as": "slot", "cancellable": true},
 				_stance_op(cmd),
 				{"op": "tribute", "target": "$mats", "to": "exhaust"},
-				{"op": "place", "target": "self", "slot": "$slot", "stance": "$stance"}] + summon_tail(uid, p), "Arcane summon " + name_of(uid)))
+				{"op": "place", "target": "self", "slot": "$slot", "stance": "$stance"}] + summon_tail(uid, p), "Spirit summon " + name_of(uid)))
 	run()
 
 
@@ -749,39 +749,39 @@ func _fusion_lead(ops: Array, lead: Array, ability: bool) -> Array:
 	return []
 
 
-## The Ritual summon of Extra Deck unit `uid`; `mat` (or -1 to choose) is the tributed unit.
-func _push_ritual(p: int, uid: int, cmd: Dictionary, mat: int) -> void:
-	push_frame(make_frame(uid, p, _ritual_ops(p, uid, mat, cmd), "Ritual summon " + name_of(uid)))
+## The Arcane summon of Extra Deck unit `uid`; `mat` (or -1 to choose) is the tributed unit.
+func _push_arcane(p: int, uid: int, cmd: Dictionary, mat: int) -> void:
+	push_frame(make_frame(uid, p, _arcane_ops(p, uid, mat, cmd), "Arcane summon " + name_of(uid)))
 
 
-## The ops of Ritual unit `uid`'s summon by player p with material `mat` (-1: the player chooses it).
-func _ritual_ops(p: int, uid: int, mat: int, cmd: Dictionary = {}) -> Array:
-	return [{"op": "ritual_material", "as": "mat", "cancellable": true, "preset": mat},
+## The ops of Arcane unit `uid`'s summon by player p with material `mat` (-1: the player chooses it).
+func _arcane_ops(p: int, uid: int, mat: int, cmd: Dictionary = {}) -> Array:
+	return [{"op": "arcane_material", "as": "mat", "cancellable": true, "preset": mat},
 		{"op": "pick_slot", "zone": "unit", "as": "slot", "cancellable": true, "freeing": "$mat"},
 		_stance_op(cmd),
-		{"op": "tribute", "target": "$mat", "ritual": true},
+		{"op": "tribute", "target": "$mat", "arcane": true},
 		{"op": "place", "target": "self", "slot": "$slot", "stance": "$stance"},
 		{"op": "tribute_bonus", "target": "self"}] + summon_tail(uid, p)
 
 
-## J14 (owner feedback 2026-10-22): a Ritual Tribute started from unit op.mat without a target asks
-## which Ritual unit to summon, in the card select tray (always, even with one candidate, so the
-## flow is the same every time). The answer turns this frame into that unit's Ritual summon.
-func _op_ritual_pick(f: Dictionary, op: Dictionary) -> int:
+## J14 (owner feedback 2026-10-22): an Arcane Tribute started from unit op.mat without a target asks
+## which Arcane unit to summon, in the card select tray (always, even with one candidate, so the
+## flow is the same every time). The answer turns this frame into that unit's Arcane summon.
+func _op_arcane_pick(f: Dictionary, op: Dictionary) -> int:
 	var mat: int = int(op["mat"])
 	var ans: Variant = take_answer(f)
 	if ans != null:
 		var r: int = int(ans[0])
 		f["src"] = r
-		f["label"] = "Ritual summon " + name_of(r)
-		_splice(f, _ritual_ops(f["ctl"], r, mat))
+		f["label"] = "Arcane summon " + name_of(r)
+		_splice(f, _arcane_ops(f["ctl"], r, mat))
 		return R.CONT
 	var opts := []
-	for r in ritual_tribute_targets(f["ctl"], mat):
+	for r in arcane_tribute_targets(f["ctl"], mat):
 		opts.append(card_option(r))
 	if opts.is_empty():
 		return R.END
-	return ask(f, f["ctl"], "select", "Choose the Ritual unit to summon by tributing %s." % name_of(mat), opts, 1, 1,
+	return ask(f, f["ctl"], "select", "Choose the Arcane unit to summon by tributing %s." % name_of(mat), opts, 1, 1,
 		op.get("cancellable", true), {"reveal_pile": true})
 
 
@@ -853,9 +853,18 @@ func _op_pay(f: Dictionary, op: Dictionary) -> int:
 	if cost > players[f["ctl"]]["ap"]:
 		add_log("Not enough AP; action fails.")
 		return R.END
+	var discounters := discount_powers(uid)
 	players[f["ctl"]]["ap"] -= cost
 	note("play", {"uid": uid, "p": f["ctl"], "ap": cost, "set": f["ops"].any(func(o): return o["op"] == "set_card")})
 	add_log("%s pays %d AP (AP %d)." % [pname(f["ctl"]), cost, players[f["ctl"]]["ap"]])
+	# 2026-11-16: a Power that made this cheaper has activated its effect: the opponent may answer it
+	# (Hot Stove: "If your opponent activates a Power Effect").
+	var wins := []
+	for pw in discounters:
+		wins.append({"op": "window", "event": {"name": "activate", "player": f["ctl"], "card": pw,
+			"text": "%s's %s lowers a cost" % [pname(f["ctl"]), name_of(pw)]}})
+	if not wins.is_empty():
+		_splice(f, wins)
 	return R.CONT
 
 

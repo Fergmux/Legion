@@ -54,6 +54,21 @@ func build(col: VBoxContainer) -> PanelContainer:
 	toggle.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	toggle.pressed.connect(func(): set_expanded(not GameLog.expanded()))
 	head.add_child(toggle)
+	# N batch (owner, 16 Nov): Hide folds the log to a thin "Game log" bar; Show brings it back.
+	hide_btn = UIStyle.secondary_button("Hide", 12)
+	hide_btn.name = "LogHide"
+	for st in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		var hsb := hide_btn.get_theme_stylebox(st)
+		hsb.content_margin_left = 10
+		hsb.content_margin_right = 10
+		hsb.content_margin_top = 0
+		hsb.content_margin_bottom = 0
+	hide_btn.custom_minimum_size = Vector2(0, LogToggle.SIZE.y)
+	hide_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hide_btn.set_meta(Sfx.BUTTON_META, "none")   # set_hidden plays toggle_on / toggle_off
+	hide_btn.pressed.connect(func(): set_hidden(not GameLog.hidden()))
+	head.add_child(hide_btn)
+	head.move_child(hide_btn, toggle.get_index())
 	# #46: an F3 ink well with leather grain (not a terminal-black box), 14 px padding and md between
 	# the text and its scrollbar.
 	var lbg := PanelContainer.new()
@@ -67,6 +82,7 @@ func build(col: VBoxContainer) -> PanelContainer:
 	lbg.add_theme_stylebox_override("panel", lsb)
 	lbg.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lv.add_child(lbg)
+	well = lbg
 	label = RichTextLabel.new()
 	var tsb := StyleBoxEmpty.new()
 	tsb.content_margin_right = UIStyle.SCROLL_CONTENT_GAP
@@ -94,6 +110,7 @@ func build(col: VBoxContainer) -> PanelContainer:
 	var vs := label.get_v_scroll_bar()
 	vs.value_changed.connect(func(v: float) -> void: top_fade.visible = v > 0.5)
 	top_fade.visible = false
+	_apply_hidden()
 	return panel
 
 
@@ -101,6 +118,64 @@ func build(col: VBoxContainer) -> PanelContainer:
 var top_fade: Control
 ## H11: the collapse / expand button in the log header.
 var toggle: LogToggle
+## N batch: the Hide / Show button in the log header, and the log's ink well (hidden with the log).
+var hide_btn: Button
+var well: Control
+
+
+# ---------------------------------------------------------------- N batch: hide the log
+## Settings key of the hidden-log choice (same file and section as SIZE_KEY). Shown by default.
+const HIDDEN_KEY := "log_hidden"
+static var _hidden: bool = false
+static var _hidden_loaded: bool = false
+
+
+## True while the viewer has hidden the game log (a thin "Game log" bar with a Show button).
+static func hidden() -> bool:
+	if not _hidden_loaded:
+		_hidden_loaded = true
+		var cf := ConfigFile.new()
+		if cf.load(settings_path()) == OK:
+			_hidden = bool(cf.get_value(SIZE_SECTION, HIDDEN_KEY, false))
+	return _hidden
+
+
+## Records the viewer's hidden-log choice (and saves it when `persist`), keeping the file's other
+## sections and keys.
+static func store_hidden(on: bool, persist: bool = true) -> void:
+	_hidden = on
+	_hidden_loaded = true
+	if not persist:
+		return
+	var cf := ConfigFile.new()
+	cf.load(settings_path())
+	cf.set_value(SIZE_SECTION, HIDDEN_KEY, on)
+	cf.save(settings_path())
+
+
+## Hides the log to its thin bar (`on`) or shows it again: saves the choice, plays toggle_off /
+## toggle_on and eases the panel to its new height (GameSidebar.animate_log); the panels below take
+## the freed height. `persist` false leaves the saved choice alone (screenshots, tests).
+func set_hidden(on: bool, persist: bool = true) -> void:
+	if on == GameLog.hidden():
+		return
+	GameLog.store_hidden(on, persist)
+	Sfx.play("toggle_off" if on else "toggle_on")
+	_apply_hidden()
+	if gs != null and gs.sidebar != null:
+		gs.sidebar.animate_log()
+
+
+## Shows the header controls and the well for the current hidden-log choice.
+func _apply_hidden() -> void:
+	var h := GameLog.hidden()
+	if well != null:
+		well.visible = not h
+	if toggle != null:
+		toggle.visible = not h
+	if hide_btn != null:
+		hide_btn.text = "Show" if h else "Hide"
+		hide_btn.tooltip_text = "Show the game log" if h else "Hide the game log to a thin bar"
 
 
 # ---------------------------------------------------------------- H11 log size

@@ -44,7 +44,7 @@ var scoreboard: SeriesScoreboard
 ## M4: the menu's series section (the scoreboard, a status line and a divider); shown with the
 ## scoreboard.
 var series_box: VBoxContainer
-## M4: the series status line under the scoreboard ("Game 2 · first to 2 wins").
+## M4: the series status line under the scoreboard ("Ana wins the series"; hidden while it is played).
 var series_status: Label
 var _sb_holder: Control
 ## The top strip's button row (its right end follows the opponent's plate).
@@ -244,16 +244,16 @@ func _fit_scoreboard() -> void:
 	_sb_holder.custom_minimum_size = (sb.size * k).ceil()
 	sb.place()
 	series_status.text = series_status_text(sb.m)
+	series_status.visible = series_status.text != ""
 
 
-## M4: the line under the menu's scoreboard: "Game 2 · first to 2 wins", or "Ana wins the series".
+## M4: the line under the menu's scoreboard once the series is decided ("Ana wins the series"); ""
+## while it is being played (N batch, owner 16 Nov: no "Game 2 · first to 2 wins" line).
 static func series_status_text(md: Dictionary) -> String:
-	if md.is_empty():
+	if md.is_empty() or not bool(md["over"]):
 		return ""
-	if bool(md["over"]):
-		var w := int(md["winner"])
-		return "%s wins the series" % String(md["names"][w]) if w in [0, 1] else "Series over"
-	return "Game %d · first to %d wins" % [int(md["current"]) + 1, int(md["need"])]
+	var w := int(md["winner"])
+	return "%s wins the series" % String(md["names"][w]) if w in [0, 1] else "Series over"
 
 
 ## Places the top strip over the play field and the popups under it, against the sidebar. M9: the

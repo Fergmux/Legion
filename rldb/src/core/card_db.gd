@@ -18,9 +18,9 @@ const ELEMENTS := ["Water", "Fire", "Earth", "Lightning", "Light", "Dark", "Phys
 const RACES := ["Mage", "Dragon", "Warrior", "Beast", "Monster", "God"]
 
 const STATUS_HELP := {
-	"rune": "Rune: a unit with enough Runes can be tributed for a Ritual summon. Unaffected by Curse.",
+	"rune": "Rune: a unit with enough Runes can be tributed for an Arcane summon. Unaffected by Curse.",
 	"retain": "Retain: not discarded at end of turn. One stack is consumed each time it prevents a discard.",
-	"reveal": "Reveal: this card is face up. No duration.",
+	"reveal": "Reveal: this card is face up. Permanent.",
 	"eternal": "Eternal: prevents the next destruction of this unit (one stack consumed). Battle HP damage still applies.",
 	"burn": "Burn: when this unit attacks, its controller takes Damage equal to Burn, then all Burn is removed.",
 	"pierce": "Pierce: attacking a Defense-stance unit, excess ATK damages the opponent. One stack consumed.",
@@ -91,11 +91,11 @@ static func _order_before(a: Dictionary, b: Dictionary) -> bool:
 	return int(a["id"]) < int(b["id"])
 
 
-## L23 Evolve: the card id `id` evolves into, or -1 when it has no Evolve section.
-static func evolves_into(id: int) -> int:
+## L23 Transform: the card id `id` transforms into, or -1 when it has no Transform section.
+static func transforms_into(id: int) -> int:
 	if not has(id):
 		return -1
-	var nxt = _defs[id].get("evolves_into")
+	var nxt = _defs[id].get("transforms_into")
 	return -1 if nxt == null else int(nxt)
 
 
@@ -120,14 +120,14 @@ static func playable_deck(ids: Array) -> Array:
 
 
 ## L23: true for a card players can own as a card: drafted, offered as a reward, put in a deck,
-## listed in the deck builder and the card library. False for an evolution-only form (Symbiote
-## Larva, Symbiote Siphonophore): it exists only by evolving its base card during a game, and is
-## reached in the catalogue through that card's "Evolves into" preview. False for an unknown id.
+## listed in the deck builder and the card library. False for a transformation-only form (Symbiote
+## Larva, Symbiote Siphonophore): it exists only by transforming its base card during a game, and is
+## reached in the catalogue through that card's "Transforms into" preview. False for an unknown id.
 ## The one predicate every collection surface calls.
 static func is_collectible(id: int) -> bool:
 	if not has(id):
 		return false
-	return not _evolution_bases().has(id)
+	return not _transformation_bases().has(id)
 
 
 ## M8: every collectible definition (is_collectible) in catalogue order (catalogue_before): by card
@@ -140,8 +140,8 @@ static func collectible() -> Array:
 
 
 ## M8: card kinds in the order every list shows them (the sheet's own grouping): Basic units, Units,
-## Spells, Traps, Powers, then the Extra Deck's Fusions, Rituals and Arcanes.
-const KIND_ORDER := ["basic_unit", "unit", "spell", "trap", "power", "fusion", "ritual", "arcane"]
+## Spells, Traps, Powers, then the Extra Deck's Fusions, Arcanes and Spirits.
+const KIND_ORDER := ["basic_unit", "unit", "spell", "trap", "power", "fusion", "arcane", "spirit"]
 
 
 ## M8: position of card kind `category` in KIND_ORDER (an unknown kind after every known one).
@@ -161,7 +161,7 @@ static func catalogue_before(a: Dictionary, b: Dictionary) -> bool:
 	return _order_before(a, b)
 
 
-## M8: card id -> position in catalogue order over every definition (evolution-only forms included,
+## M8: card id -> position in catalogue order over every definition (transformation-only forms included,
 ## so any id a list may hold has a place). Built once.
 static func catalogue_rank() -> Dictionary:
 	if _rank.is_empty():
@@ -186,10 +186,10 @@ static func sort_ids(ids: Array) -> Array:
 	return out
 
 
-## L23: the collectible card an evolution-only form evolves from (the start of its chain:
+## L23: the collectible card a transformation-only form transforms from (the start of its chain:
 ## Siphonophore -> Spawn); the id itself for any other card.
-static func evolution_base(id: int) -> int:
-	var bases := _evolution_bases()
+static func transformation_base(id: int) -> int:
+	var bases := _transformation_bases()
 	var cur := id
 	var guard := 0
 	while bases.has(cur) and guard < 16:
@@ -198,29 +198,29 @@ static func evolution_base(id: int) -> int:
 	return cur
 
 
-## L23: deck `ids` with every evolution-only form replaced by its base card (a deck or series saved
+## L23: deck `ids` with every transformation-only form replaced by its base card (a deck or series saved
 ## before 5 Nov 2026 may hold Symbiote Larva / Siphonophore as separate cards). Mapping keeps the
-## deck's size and its Symbiote: the player owns a Spawn that can evolve into what they had. Unknown
+## deck's size and its Symbiote: the player owns a Spawn that can transform into what they had. Unknown
 ## ids are kept (the callers report them). Returns a new array of ints.
 static func sanitize_deck(ids: Array) -> Array:
 	var out := []
 	for i in ids:
 		var id := int(i)
-		out.append(evolution_base(id) if has(id) else id)
+		out.append(transformation_base(id) if has(id) else id)
 	return out
 
 
-## Evolved form -> the card it evolves from, built once from the definitions.
+## Transformed form -> the card it transforms from, built once from the definitions.
 static var _bases_cache: Dictionary = {}
 static var _bases_built := false
 
 
-static func _evolution_bases() -> Dictionary:
+static func _transformation_bases() -> Dictionary:
 	ensure_loaded()
 	if not _bases_built:
 		_bases_built = true
 		for id in _defs:
-			var nxt = _defs[id].get("evolves_into")
+			var nxt = _defs[id].get("transforms_into")
 			if nxt != null:
 				_bases_cache[int(nxt)] = int(id)
 	return _bases_cache
@@ -232,11 +232,11 @@ static func unassigned_notes() -> Array:
 
 
 static func is_unit_category(cat: String) -> bool:
-	return cat in ["basic_unit", "unit", "fusion", "ritual", "arcane"]
+	return cat in ["basic_unit", "unit", "fusion", "arcane", "spirit"]
 
 
 static func is_extra_category(cat: String) -> bool:
-	return cat in ["fusion", "ritual", "arcane"]
+	return cat in ["fusion", "arcane", "spirit"]
 
 
 static func is_buff(status: String) -> bool:
@@ -252,9 +252,9 @@ static func cost_label(d: Dictionary, current = null) -> String:
 	match d["cost_kind"]:
 		"fusion":
 			return "Fusion"
-		"ritual":
+		"arcane":
 			var r = current if current != null else d["cost"]
 			return ("?" if r == null else str(r)) + " Rune"
-		"arcane":
-			return str(current if current != null else d["cost"]) + " Arcane"
+		"spirit":
+			return str(current if current != null else d["cost"]) + " Spirit"
 	return str(current if current != null else d["cost"]) + " AP"

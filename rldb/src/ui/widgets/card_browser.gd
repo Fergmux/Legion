@@ -48,8 +48,8 @@ const SCROLL_TIME := 0.22
 
 const COST_OPTIONS := [
 	["Any cost", ""], ["0 AP", "ap:0"], ["1 AP", "ap:1"], ["2 AP", "ap:2"], ["3 AP", "ap:3"],
-	["4 AP", "ap:4"], ["5+ AP", "ap:5+"], ["Fusion", "kind:fusion"], ["Ritual", "kind:ritual"],
-	["Arcane", "kind:arcane"],
+	["4 AP", "ap:4"], ["5+ AP", "ap:5+"], ["Fusion", "kind:fusion"], ["Arcane", "kind:arcane"],
+	["Spirit", "kind:spirit"],
 ]
 const SORT_OPTIONS := [["Catalogue order", "index"], ["Name", "name"], ["Cost", "cost"], ["Highest ATK", "atk"], ["Highest DEF", "def"]]
 
@@ -133,7 +133,7 @@ func build() -> void:
 # ------------------------------------------------------------ pure logic (testable)
 
 ## True if card def `d` passes the filters. Empty string means "any".
-## cost is "", "ap:N", "ap:5+" or "kind:fusion|ritual|arcane". The search matches every word
+## cost is "", "ap:N", "ap:5+" or "kind:fusion|arcane|spirit". The search matches every word
 ## against the name, rules text, race, type and category name.
 static func matches(d: Dictionary, query: String, category: String, type: String, race: String, cost: String) -> bool:
 	if category != "" and d["category"] != category:
@@ -190,7 +190,7 @@ static func sort_before(a: Dictionary, b: Dictionary, mode: String, index_of: Di
 	return ia < ib
 
 
-## Card id -> position in canonical catalogue order (CardDB.collectible(): L23, no evolution-only forms).
+## Card id -> position in canonical catalogue order (CardDB.collectible(): L23, no transformation-only forms).
 static func catalogue_index() -> Dictionary:
 	var out := {}
 	var i := 0

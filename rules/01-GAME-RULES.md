@@ -112,6 +112,18 @@ When a draw is required and Draw is empty, recycle Spent. Ordinary cards shuffle
 
 Extra-deck units can be revived from Spent by effects whose restrictions they meet. They do not match ordinary AP-cost restrictions: 2R or 2A is not ordinary cost two, and a Fusion's blank AP cost is not zero.
 
+## Mechanic names (2026-11-17)
+
+The owner renamed three mechanics on 17 Nov 2026. The game, its code, data and tests use the new names; the older text in this file and in the design history keeps the old ones.
+
+| Old name | New name | Code key / cost kind | Cost shown |
+|---|---|---|---|
+| Ritual summon / Ritual Unit (tribute a unit carrying enough Runes) | Arcane summon / Arcane Unit | `arcane` (was `ritual`) | sheet "2R" becomes "2A"; in game "2 Rune" |
+| Arcane summon / Arcane Unit (exhaust Spent units whose costs total the requirement) | Spirit summon / Spirit Unit | `spirit` (was `arcane`) | sheet "3A" becomes "3S"; in game "3 Spirit" |
+| Evolution / Evolve / Evolved | Transformation / Transform / Transformed | `transform`, `transforms_into` (were `evolve`, `evolves_into`) | — |
+
+Careful: "Arcane" before this date means today's Spirit mechanic. Below, "Ritual" means today's Arcane and "Arcane" means today's Spirit. Rune and card names (e.g. Ritual Sanct) are unchanged.
+
 ## Special summoning
 
 ### Fusion

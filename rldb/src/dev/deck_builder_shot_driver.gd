@@ -26,7 +26,7 @@ func run(main: Control, dir: String) -> void:
 		if DeckBuilder.matches(d, "dragon", "", "", "", ""):
 			db.add_card(int(d["id"]), 2 if added < 2 else 1)
 			added += 1
-	for cost in ["kind:fusion", "kind:ritual", "kind:arcane"]:
+	for cost in ["kind:fusion", "kind:arcane", "kind:spirit"]:
 		for d in CardDB.all():
 			if DeckBuilder.matches(d, "", "", "", "", cost):
 				db.add_card(int(d["id"]))
@@ -47,7 +47,7 @@ func run(main: Control, dir: String) -> void:
 	db.browser.refresh()
 	db.save()
 	await _frames(3)
-	await _shot_to(dir, "04_builder_saved_filter_arcane")
+	await _shot_to(dir, "04_builder_saved_filter_spirit")
 	DeckStore.delete_deck(SHOT_DECK)  # leave the player's decks untouched
 	get_tree().quit()
 

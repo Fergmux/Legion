@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 ## Cancel is a real button, L7 the targeting arrow hides the moment a target is picked, L16 the
 ## opponent-is-responding notice. The windowed run with screenshots is src/dev/l_interaction_shots.gd.
 
-const PIERCE_UNIT := 15     # ability: Apply 1 Pierce to a unit (a cancellable target pick)
+const TARGET_UNIT := 79     # Akakaiju, ability: Apply 1 Infiltrate to a unit (a cancellable target pick)
 
 var host: LocalHost
 var gs: GameScreen
@@ -28,9 +28,9 @@ func before_test() -> void:
 	await await_idle_frame()
 
 
-## Opens the Pierce unit's targeted ability (a cancellable board pick); returns the unit's uid.
+## Opens the Infiltrate unit's targeted ability (a cancellable board pick); returns the unit's uid.
 func _open_target_pick() -> int:
-	var u := TB.unit(m, me, PIERCE_UNIT, 0)
+	var u := TB.unit(m, me, TARGET_UNIT, 0)
 	TB.unit(m, 1 - me, TB.WATER, 1)
 	host.broadcast()
 	gs.skip_effects()
@@ -38,7 +38,7 @@ func _open_target_pick() -> int:
 	for a in gs.mv.get("actions", []):
 		if String(a["t"]) == "ability" and int(a.get("uid", -1)) == u and a["ok"]:
 			act = a
-	assert_bool(act.is_empty()).override_failure_message("no Pierce ability offered").is_false()
+	assert_bool(act.is_empty()).override_failure_message("no Infiltrate ability offered").is_false()
 	gs.action_row.run_action(u, act)
 	gs.skip_effects()
 	return u

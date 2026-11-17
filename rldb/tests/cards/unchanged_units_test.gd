@@ -5,15 +5,19 @@ extends GdUnitTestSuite
 
 # ---------------------------------------------------------------- 14 Avatar of the Flame Spirit
 
-## 2026-11-10: Avatar (now evolution-only, from Edwin) has no On Summon any more (it was an optional
-## Rune on a unit).
-func test_c014_avatar_on_summon_asks_nothing_any_more() -> void:
+## 2026-11-17: Avatar's On Summon is "Apply 1 Debilitate to a Unit." (tested in
+## tests/unit/cards/cards_db_update_2026_11_17_test.gd); it is mandatory, so it may hit Avatar itself.
+func test_c014_avatar_on_summon_debilitate_is_mandatory_and_may_target_itself() -> void:
 	var m := CF.make()
 	var foe := TB.unit(m, 1, TB.WATER, 0)
 	var av := TB.special(m, 0, 14, 0)
-	assert_str(TB.pend_kind(m)).is_empty()
-	assert_int(m.status_count(av, "rune")).is_equal(0)
-	assert_int(m.status_count(foe, "rune")).is_equal(0)
+	var offered := CF.offered(m)
+	assert_bool(foe in offered).is_true()
+	assert_bool(av in offered).is_true()
+	assert_bool(CF.labels(m).has("Skip")).is_false()
+	TB.choose_uids(m, [av])
+	assert_int(m.status_count(av, "debilitate")).is_equal(1)
+	assert_int(m.status_count(foe, "debilitate")).is_equal(0)
 
 
 ## 2026-11-10: "If you Destroy an opponent's Unit: apply 1 Rune to a Unit": any unit, an opponent's too.
@@ -169,14 +173,20 @@ func test_c070_krakeshin_summons_with_three_nimble() -> void:
 
 # ---------------------------------------------------------------- 73 Man's Best Friend
 
-func test_c073_mans_best_friend_search_offers_only_warriors() -> void:
+## 2026-11-17: the Warrior search is gone; On Summon "You can Destroy a card with Reveal."
+func test_c073_mans_best_friend_on_summon_destroys_only_a_card_with_reveal() -> void:
 	var m := CF.make()
-	var warrior := TB.card(m, 0, 3, "draw")             # Basic Warrior
-	TB.summon(m, 0, 73, 0)
+	var revealed := TB.set_card(m, 1, 45, 0)
+	var hidden := TB.set_card(m, 1, 45, 1)
+	m.apply_status(revealed, "reveal", 1)
+	TB.summon(m, 0, 73, 2)
 	var offered := CF.offered(m)
-	assert_bool(warrior in offered).is_true()
-	for u in offered:
-		assert_str(m.unit_race(u)).is_equal("Warrior")
+	assert_bool(revealed in offered).is_true()
+	assert_bool(hidden in offered).is_false()
+	TB.choose_uids(m, [revealed])
+	assert_str(CF.zone(m, revealed)).is_not_equal("trap")
+	assert_bool(m.on_field(revealed)).is_false()
+	assert_bool(m.on_field(hidden)).is_true()
 
 
 func test_c073_mans_best_friend_does_not_guard_non_warriors() -> void:
@@ -199,15 +209,24 @@ func test_c074_sparky_destroyed_by_effect_gives_nothing() -> void:
 	assert_int(m.status_count(friend, "infiltrate")).is_equal(0)
 
 
-# ---------------------------------------------------------------- 17 Accursed Zealot
+# ---------------------------------------------------------------- 17 Pickpocket of the Marked Claw
 
-func test_c017_accursed_zealot_ignores_opponent_turn_start() -> void:
+## 2026-11-17: was Accursed Zealot (a Rune at the start of each own turn). Pickpocket gains nothing at a turn
+## start any more; its Rune move (tests/unit/cards/cards_db_update_2026_11_17_test.gd) is once per turn.
+func test_c017_pickpocket_gains_no_rune_at_turn_start_and_moves_one_once_per_turn() -> void:
 	var m := CF.make()
-	var z := TB.unit(m, 0, 17, 0)
-	TB.to_turn2(m)                                     # player 1's turn starts
-	assert_int(m.status_count(z, "rune")).is_equal(0)
+	var pp := TB.unit(m, 0, 17, 0)
+	TB.to_turn2(m)
 	CF.end_turn(m)                                     # player 0's turn 3 starts
-	assert_int(m.status_count(z, "rune")).is_equal(1)
+	assert_int(m.status_count(pp, "rune")).is_equal(0)
+	var foe := TB.unit(m, 1, TB.WATER, 0)
+	m.apply_status(foe, "rune", 2)
+	assert_str(TB.ability(m, pp, 0)).is_equal("")
+	TB.choose_uids(m, [foe])
+	TB.choose_uids(m, [pp])
+	assert_int(m.status_count(foe, "rune")).is_equal(1)
+	assert_int(m.status_count(pp, "rune")).is_equal(1)
+	assert_str(TB.ability(m, pp, 0)).is_not_empty()
 
 
 # ---------------------------------------------------------------- 77 Radablast

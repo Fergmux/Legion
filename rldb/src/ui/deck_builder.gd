@@ -1,6 +1,6 @@
 class_name DeckBuilder
 extends Control
-## Custom deck builder. The deck is a flat id list; Fusion/Ritual/Arcane cards land in the
+## Custom deck builder. The deck is a flat id list; Fusion/Arcane/Spirit cards land in the
 ## Extra Deck automatically (shown grouped here). Category mix and duplicates are free; size is
 ## capped by DeckStore (99 combined, 15 Extra, F16) with no visible limit labels: Add simply
 ## becomes unavailable. Presentation only: persists through DeckStore.
@@ -925,7 +925,7 @@ func _build_deck(body: HBoxContainer) -> void:
 	# Illustrated empty state (WP-7): an engraved deck emblem on the leather, no box.
 	var en := CenterContainer.new()
 	en.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	en.add_child(EngravedIcon.empty_state("deck", "Your deck is empty", "Hover a card to read it, click it to add a copy. Fusion, Ritual and Arcane cards go to the Extra Deck.", "", Callable(), 340.0))
+	en.add_child(EngravedIcon.empty_state("deck", "Your deck is empty", "Hover a card to read it, click it to add a copy. Fusion, Arcane and Spirit cards go to the Extra Deck.", "", Callable(), 340.0))
 	_empty_note = en
 	v.add_child(_empty_note)
 	_deck_scroll = SmoothScroll.new()

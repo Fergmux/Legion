@@ -3,7 +3,7 @@
 Replaces the per-cue tests of the retired procedural generator (test_gen_sfx_*.py, H28 / H29 / K1) and keeps
 their intent for the new files: every cue exists and is clean (44.1 kHz 16-bit, peak headroom, no DC, a
 tail that fades to silence), the UI answers at once, the summon build-ups crest just before their climax
-and let go, the Arcane climax blooms instead of hitting (H28), the three climaxes are level (H29), the
+and let go, the Spirit climax blooms instead of hitting (H28), the three climaxes are level (H29), the
 Spell / Trap spotlight sits between the board sounds and the climaxes (K1), and the mix keeps its order
 (hover < UI < cards < combat). The cue sheet (tiers, length windows) is design/audio/sfx-cues.json; the
 files are made by tools/sfx_master.py. Python stdlib only.
@@ -30,7 +30,7 @@ SNAPPY_TIERS = ("hover", "ui_soft", "ui", "ui_major", "tick", "tick_soft", "card
 MAX_ONSET_MS = 6.0       # first sample above -40 dB of the peak, from the start of the file
 LET_GO_DB = 6.0          # a build-up's last 50 ms under its loudest 50 ms
 CREST_SLACK_S = 0.1      # a build-up crests no later than its align time + this
-MIN_ARCANE_ATTACK_MS = 15.0
+MIN_SPIRIT_ATTACK_MS = 15.0
 MAX_CLIMAX_SPREAD_LU = 1.5
 SPOT_MARGIN_LU = 0.5
 ORDER = (("hover",), ("ui", "ui_soft"), ("card",), ("combat",))
@@ -196,24 +196,24 @@ class SfxSetTest(unittest.TestCase):
                 self.assertLessEqual(crest, c["align"] + CREST_SLACK_S)
                 self.assertGreaterEqual(_db(max(e)) - _db(e[-1]), LET_GO_DB)
 
-    def test_arcane_climax_blooms_instead_of_hitting(self):
-        # H28 (owner): Arcane is mystical, not jarring: 10% -> 90% of the loudest 5 ms frame takes time.
-        chans, sr, _, _ = _load("arcane_impact")
+    def test_spirit_climax_blooms_instead_of_hitting(self):
+        # H28 (owner): Spirit is mystical, not jarring: 10% -> 90% of the loudest 5 ms frame takes time.
+        chans, sr, _, _ = _load("spirit_impact")
         e = _env(_mono(chans), sr)
         top = max(e)
         i10 = next(i for i, v in enumerate(e) if v >= 0.1 * top)
         i90 = next(i for i, v in enumerate(e) if v >= 0.9 * top)
-        self.assertGreaterEqual((i90 - i10) * 5.0, MIN_ARCANE_ATTACK_MS)
+        self.assertGreaterEqual((i90 - i10) * 5.0, MIN_SPIRIT_ATTACK_MS)
 
     def test_the_three_climaxes_are_level(self):
-        # H29: Fusion, Ritual and Arcane land equally hard.
-        lv = [_m100(n) for n in ("fusion_impact", "ritual_impact", "arcane_impact")]
+        # H29: Fusion, Arcane and Spirit land equally hard.
+        lv = [_m100(n) for n in ("fusion_impact", "arcane_impact", "spirit_impact")]
         self.assertLessEqual(max(lv) - min(lv), MAX_CLIMAX_SPREAD_LU, lv)
 
     def test_spotlight_sits_between_board_sounds_and_climaxes(self):
         # K1: a Spell / Trap shows many times a game, so it is under the set-piece climaxes and over
         # the everyday board sounds.
-        climax = min(_m100(n) for n in ("fusion_impact", "ritual_impact", "arcane_impact", "serpent_strike"))
+        climax = min(_m100(n) for n in ("fusion_impact", "arcane_impact", "spirit_impact", "serpent_strike"))
         board = max(_m100(n) for n in ("attack", "summon", "destroy", "sacrifice"))
         for n in ("spell_cast", "trap_spring"):
             with self.subTest(cue=n):

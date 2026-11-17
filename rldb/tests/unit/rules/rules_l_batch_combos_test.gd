@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## L batch final QA (design/qa-final-2026-11-05.md): where the new systems meet. Evolve (L23) with
+## L batch final QA (design/qa-final-2026-11-05.md): where the new systems meet. Transform (L23) with
 ## Hypnotise (L9), Sneaky Snunday (L15), Cleanse batches (L20), Shapeshifter Loak's copied art (L11)
 ## and Fusion Ceremony's material timing (L19).
 
@@ -41,17 +41,17 @@ func test_hypnotised_spawn_is_home_and_offered_to_its_owner_at_their_turn_start(
 	assert_bool(m.pending.is_empty()).is_true()
 	_hypnotise(m, 1, spawn, "Front row, column 3")
 	assert_int(int(m.cards[spawn]["ctl"])).is_equal(1)
-	assert_bool(m.can_evolve(spawn)).is_true()          # a face-up unit; only the turn start asks
+	assert_bool(m.can_transform(spawn)).is_true()          # a face-up unit; only the turn start asks
 	# Act
 	_end_turn(m)
-	# Assert: back in its own zone, and player 0's turn 3 opens with its Evolve prompt.
+	# Assert: back in its own zone, and player 0's turn 3 opens with its Transform prompt.
 	assert_int(m.turn).is_equal(3)
 	assert_int(int(m.cards[spawn]["ctl"])).is_equal(0)
 	assert_int(int(m.cards[spawn]["slot"])).is_equal(1)
-	assert_str(TB.pend_kind(m)).is_equal("evolve")
+	assert_str(TB.pend_kind(m)).is_equal("transform")
 	assert_int(int(m.pending["player"])).is_equal(0)
 	assert_int(int(m.pending["source"])).is_equal(spawn)
-	assert_str(TB.choose(m, ["Evolve"])).is_equal("")
+	assert_str(TB.choose(m, ["Transform"])).is_equal("")
 	assert_int(int(m.cards[spawn]["id"])).is_equal(LARVA)
 
 
@@ -68,13 +68,13 @@ func test_hypnotised_spawn_sent_to_spent_on_return_is_not_offered() -> void:
 
 # ---------------------------------------------------------------- Sneaky Snunday (L15)
 
-func test_snunday_mirrors_kept_changes_around_the_evolved_base() -> void:
-	# Arrange: a Spawn with a permanent +6 ATK / -4 DEF evolves into Larva (base 0/0).
+func test_snunday_mirrors_kept_changes_around_the_transformed_base() -> void:
+	# Arrange: a Spawn with a permanent +6 ATK / -4 DEF transforms into Larva (base 0/0).
 	var m := TB.make()
 	var spawn := TB.unit(m, 1, SPAWN, 3)
 	m.cards[spawn]["mods"].append({"atk": 6, "def": -4, "until": "perm", "src": "test"})
 	TB.to_turn2(m)
-	TB.choose(m, ["Evolve"])
+	TB.choose(m, ["Transform"])
 	assert_int(m.atk_of(spawn)).is_equal(6)
 	assert_int(m.def_of(spawn)).is_equal(0)
 	# Act
@@ -87,14 +87,14 @@ func test_snunday_mirrors_kept_changes_around_the_evolved_base() -> void:
 
 # ---------------------------------------------------------------- Cleanse batches (L20)
 
-func test_evolved_unit_keeps_cleanse_and_it_blocks_the_whole_batch() -> void:
-	# Arrange: player 1's Spawn with 1 Cleanse evolves on turn 2; player 0's Frost Wyvern shares its column.
+func test_transformed_unit_keeps_cleanse_and_it_blocks_the_whole_batch() -> void:
+	# Arrange: player 1's Spawn with 1 Cleanse transforms on turn 2; player 0's Frost Wyvern shares its column.
 	var m := TB.make()
 	var spawn := TB.unit(m, 1, SPAWN, 0)
 	m.apply_status(spawn, "cleanse", 1)
 	var wyvern := TB.unit(m, 0, FROST_WYVERN, 0)
 	TB.to_turn2(m)
-	TB.choose(m, ["Evolve"])
+	TB.choose(m, ["Transform"])
 	assert_int(m.status_count(spawn, "cleanse")).is_equal(1)
 	_end_turn(m)
 	assert_int(m.active).is_equal(0)
@@ -111,13 +111,13 @@ func test_evolved_unit_keeps_cleanse_and_it_blocks_the_whole_batch() -> void:
 
 # ---------------------------------------------------------------- Loak / Mimic copied art (L11)
 
-func test_loak_copying_an_evolved_unit_shows_the_evolved_art() -> void:
-	# Arrange: player 1's evolved Larva (+6 ATK kept) in column 1; player 0's turn 3.
+func test_loak_copying_a_transformed_unit_shows_the_transformed_art() -> void:
+	# Arrange: player 1's transformed Larva (+6 ATK kept) in column 1; player 0's turn 3.
 	var m := TB.make()
 	var spawn := TB.unit(m, 1, SPAWN, 0)
 	m.cards[spawn]["mods"].append({"atk": 6, "def": 2, "until": "perm", "src": "test"})
 	TB.to_turn2(m)
-	TB.choose(m, ["Evolve"])
+	TB.choose(m, ["Transform"])
 	_end_turn(m)
 	# Act
 	var loak := TB.summon(m, 0, LOAK, 0)
@@ -131,37 +131,41 @@ func test_loak_copying_an_evolved_unit_shows_the_evolved_art() -> void:
 
 
 ## Decision (qa-final): the copy is a snapshot taken On Summon ("become the ATK/DEF/Race of that
-## Unit"), so a copied Spawn that evolves later does not change Loak's stats or its art.
-func test_loak_keeps_the_spawn_art_it_copied_when_that_spawn_evolves_later() -> void:
+## Unit"), so a copied Spawn that transforms later does not change Loak's stats or its art.
+func test_loak_keeps_the_spawn_art_it_copied_when_that_spawn_transforms_later() -> void:
 	var m := TB.make()
 	var spawn := TB.unit(m, 1, SPAWN, 0)
 	var loak := TB.summon(m, 0, LOAK, 0)
 	if TB.pend_kind(m) == "select":
 		TB.choose_uids(m, [spawn])
 	assert_int(m.art_id(loak)).is_equal(SPAWN)
+	# 2026-11-17: Loak's On Summon Debilitates the unit it copies (it gave Eternal) and a Debilitated Spawn
+	# cannot Transform; the Debilitate is lifted here so the Spawn can transform later.
+	assert_int(m.status_count(spawn, "debilitate")).is_equal(1)
+	m.decrement_status(spawn, "debilitate")
 	m.submit(0, {"t": "next_phase"})
 	m.submit(0, {"t": "next_phase"})
-	assert_str(TB.pend_kind(m)).is_equal("evolve")
-	TB.choose(m, ["Evolve"])
+	assert_str(TB.pend_kind(m)).is_equal("transform")
+	TB.choose(m, ["Transform"])
 	assert_int(int(m.cards[spawn]["id"])).is_equal(LARVA)
 	assert_int(m.art_id(loak)).is_equal(SPAWN)
 	assert_int(m.art_id(spawn)).is_equal(LARVA)
 
 
-func test_evolving_a_unit_drops_a_copied_art_it_showed() -> void:
+func test_transforming_a_unit_drops_a_copied_art_it_showed() -> void:
 	var m := TB.make()
 	var spawn := TB.unit(m, 1, SPAWN, 0)
 	m.cards[spawn]["art_o"] = 1                          # as if it showed another unit's art
 	TB.to_turn2(m)
-	TB.choose(m, ["Evolve"])
+	TB.choose(m, ["Transform"])
 	assert_int(m.art_id(spawn)).is_equal(LARVA)
 	assert_bool(MatchView.card_view(m, spawn, 0).has("art_id")).is_false()
 
 
 # ---------------------------------------------------------------- Fusion Ceremony (L19)
 
-func test_evolved_material_is_in_spent_as_its_evolved_form_before_the_fusions_on_summon() -> void:
-	# Arrange: player 1's Spawn with Eternal (Buffed) evolves; a Poisoned unit (Debuffed) beside it.
+func test_transformed_material_is_in_spent_as_its_transformed_form_before_the_fusions_on_summon() -> void:
+	# Arrange: player 1's Spawn with Eternal (Buffed) transforms; a Poisoned unit (Debuffed) beside it.
 	var m := TB.make()
 	var spawn := TB.unit(m, 1, SPAWN, 0)
 	m.apply_status(spawn, "eternal", 1)
@@ -170,7 +174,7 @@ func test_evolved_material_is_in_spent_as_its_evolved_form_before_the_fusions_on
 	var rot := TB.card(m, 1, ROTMAW, "extra")
 	var bystander := TB.unit(m, 0, TB.FILLER, 2)
 	TB.to_turn2(m)
-	TB.choose(m, ["Evolve"])
+	TB.choose(m, ["Transform"])
 	# Act
 	TB.cast(m, 1, FUSION_CEREMONY)
 	var mats := [rot, spawn, sick]

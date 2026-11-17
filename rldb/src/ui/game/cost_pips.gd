@@ -1,6 +1,6 @@
 class_name CostPips
 extends Control
-## F08: the exact cost of an Arcane material choice as a row of hex gem sockets (wrapping when
+## F08: the exact cost of a Spirit material choice as a row of hex gem sockets (wrapping when
 ## needed; design review #35 uses the rewards' PickPips gems).
 ## Each circle is one point of the required total: hollow dark sockets while unpaid, filled gold
 ## coins for the points the selected materials pay (a material fills as many circles as its current

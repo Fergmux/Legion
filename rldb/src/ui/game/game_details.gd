@@ -142,7 +142,7 @@ func _queue_art_fit() -> void:
 
 
 ## L23 follow-up: the art crop yields to the text (down to ART_MIN_H) so a long card's sections
-## (Evolve, Statuses...) show without scrolling when they can. Sized from the pane's height now,
+## (Transform, Statuses...) show without scrolling when they can. Sized from the pane's height now,
 ## not the one at render time (the pane may still have been laying out).
 func _fit_art() -> void:
 	_art_fit_queued = false
@@ -248,7 +248,7 @@ func render() -> void:
 
 ## Own pile inspection in the details panel (user feedback 2026-10-16: a scrollable list, not a
 ## board overlay). Draw is listed in a random display order. Clicking a row selects it; its legal
-## actions (Ritual / Arcane Summon from the Extra Deck) appear in that row. The pile shows the
+## actions (Arcane / Spirit Summon from the Extra Deck) appear in that row. The pile shows the
 ## selected brackets while open (2026-10-18: no Close button); clicking the same pile again, empty
 ## space, Esc or right-click returns the panel to card details.
 func show_pile(zone: String, sel_uid: int = -1) -> void:
@@ -348,8 +348,7 @@ func render_pile_list() -> void:
 		pile_hint.text = "The cards you have drafted so far."
 		details_title.text = "Your draft (%d)" % cards.size()
 	else:
-		pile_hint.text = "Shown in a random order; the real order is unchanged." if pile_zone == "draw" else \
-			("" if pile_zone == "extra" else "Click a card to open its details; click it again to close them.")   # review: the Extra rows' buttons speak for themselves
+		pile_hint.text = ""   # N batch (owner, 16 Nov): no hint line at the top of the pile viewer
 		details_title.text = "Your %s (%d)" % [PILE_NAMES.get(pile_zone, pile_zone.capitalize()), cards.size()]
 	pile_hint.visible = pile_hint.text != ""
 	if sig == _pile_sig:
@@ -513,9 +512,9 @@ func _pile_row(c: Dictionary) -> Control:
 ## CardWidget drawn face up through GamePromptBanner.pane_view), not an art crop, at 7/8 of the pane's
 ## GamePromptBanner.SUBJECT_CARD so the rows stay compact.
 const PILE_CARD := GamePromptBanner.SUBJECT_CARD * 0.875
-## H6: the kind a pile row names: units by how they are summoned (Unit / Fusion / Ritual / Arcane),
+## H6: the kind a pile row names: units by how they are summoned (Unit / Fusion / Arcane / Spirit),
 ## other cards by their category.
-const ROW_KIND := {"basic_unit": "Unit", "unit": "Unit", "fusion": "Fusion", "ritual": "Ritual", "arcane": "Arcane",
+const ROW_KIND := {"basic_unit": "Unit", "unit": "Unit", "fusion": "Fusion", "arcane": "Arcane", "spirit": "Spirit",
 	"spell": "Spell", "trap": "Trap", "power": "Power"}
 ## H6: text sizes of the row (px): name, chips and the race / materials lines.
 const ROW_NAME_PX := 15
@@ -530,7 +529,7 @@ static func row_kind(c: Dictionary) -> String:
 	return String(ROW_KIND.get(cat, cat.capitalize()))
 
 
-## H6: the cost a pile row shows for `c`: {"text", "kind"} ("3 AP", "2 Rune", "1 Arcane"), or the
+## H6: the cost a pile row shows for `c`: {"text", "kind"} ("3 AP", "2 Rune", "1 Spirit"), or the
 ## Fusion materials as {"text": "Beast Unit + Dragon Unit", "kind": "fusion"}; {} when it has none.
 static func row_cost(c: Dictionary) -> Dictionary:
 	var kind := String(c.get("cost_kind", "ap"))
@@ -547,7 +546,7 @@ static func row_cost(c: Dictionary) -> Dictionary:
 
 ## #91 / H6: the summary line of a pile row before it expands: the small card face (as in the left
 ## input pane), then the name with "ATK / DEF" at the right for units, a line of chips with the kind
-## (Unit / Fusion / Ritual / Arcane, or Spell / Trap / Power) and the cost, the Race and Type for
+## (Unit / Fusion / Arcane / Spirit, or Spell / Trap / Power) and the cost, the Race and Type for
 ## units, and a Fusion's material cost.
 func _pile_summary(c: Dictionary, can_act: bool) -> Control:
 	var hb := HBoxContainer.new()
@@ -610,7 +609,7 @@ func _pile_summary(c: Dictionary, can_act: bool) -> Control:
 	if not cost.is_empty() and String(cost["kind"]) != "fusion":
 		var ck := String(cost["kind"])
 		chips.add_child(_row_chip(String(cost["text"]), UIStyle.COST_COLORS.get(ck, UIStyle.COST_COLORS["ap"]),
-			{"ap": "circle", "ritual": "square", "arcane": "hex"}.get(ck, "circle")))
+			{"ap": "circle", "arcane": "square", "spirit": "hex"}.get(ck, "circle")))
 	# Race and Type (units).
 	if unit:
 		var sub := HBoxContainer.new()
@@ -695,7 +694,7 @@ func _row_actions(uid: int) -> Array:
 
 
 ## F04: every summon of Extra Deck card `uid` that is legal right now, as buttons
-## [{label, full, kind, run}]. Ritual / Arcane come from the view's legal actions (the authority's
+## [{label, full, kind, run}]. Arcane / Spirit come from the view's legal actions (the authority's
 ## validate: phase, materials, AP, zones); Fusion from `extra_avail` (the Fusion methods the
 ## authority can activate now that can summon this unit). Nothing while I cannot act.
 func extra_summons(uid: int) -> Array:
@@ -703,7 +702,7 @@ func extra_summons(uid: int) -> Array:
 	if gs.locked():
 		return out
 	for a in gs.action_row.actions_for_card(uid):
-		if String(a["t"]) in ["ritual", "arcane"]:
+		if String(a["t"]) in ["arcane", "spirit"]:
 			var act: Dictionary = a
 			out.append({"label": a["label"], "full": a.get("full", a["label"]), "kind": a["t"], "run": func():
 				close_pile()

@@ -1,10 +1,10 @@
 extends "res://tests/integration/qa/qa_net_base.gd"
 ## Adversarial QA: drop/reconnect during an optional trigger choice and during
-## multi-selects (Arcane materials, Plan B targets); each completes exactly once.
+## multi-selects (Spirit materials, Plan B targets); each completes exactly once.
 
 const RITUAL_SANCT := 91
-# 2026-11-03: Tyde is 3A now; Flying Sandworm (2A, no On Summon) keeps the material total of 2.
-const ARCANE_2 := 171
+# 2026-11-17: Flying Sandworm is 1S now; Cliff the Flying Bison (2S, no On Summon) keeps the material total of 2.
+const SPIRIT_2 := 174
 const PLAN_B := 163
 
 
@@ -44,14 +44,14 @@ func test_reconnect_during_optional_start_of_turn_trigger_applies_once() -> void
 	assert_int(m.status_count(u, "rune")).is_equal(1)
 
 
-func test_reconnect_during_arcane_material_multiselect_summons_once() -> void:
+func test_reconnect_during_spirit_material_multiselect_summons_once() -> void:
 	# Arrange
 	var m: MatchEngine = await _client_turn2()
-	var tyde := TB.card(m, 1, ARCANE_2, "extra")
+	var sp := TB.card(m, 1, SPIRIT_2, "extra")
 	var mats := [TB.card(m, 1, TB.WATER, "spent"), TB.card(m, 1, TB.FIRE, "spent"), TB.card(m, 1, TB.EARTH, "spent")]
 	var ex_before: int = m.players[1]["exhaust"].size()
 	await _sync()
-	client.local_seat.send({"t": "arcane", "uid": tyde})
+	client.local_seat.send({"t": "spirit", "uid": sp})
 	assert_bool(await _await_pending(m, 1, "select")).is_true()
 	var pid: int = m.pending["id"]
 	# Act
@@ -72,10 +72,10 @@ func test_reconnect_during_arcane_material_multiselect_summons_once() -> void:
 		_client_choose(["Attack"])
 	assert_bool(await _await_idle(m)).is_true()
 	# Assert
-	assert_str(m.cards[tyde]["zone"]).is_equal("unit")
+	assert_str(m.cards[sp]["zone"]).is_equal("unit")
 	assert_int(m.players[1]["exhaust"].size()).is_equal(ex_before + 2)
 	assert_str(m.cards[mats[1]]["zone"]).is_equal("spent")
-	assert_int(m.field_units(1).filter(func(x): return m.cards[x]["id"] == ARCANE_2).size()).is_equal(1)
+	assert_int(m.field_units(1).filter(func(x): return m.cards[x]["id"] == SPIRIT_2).size()).is_equal(1)
 
 
 func test_drop_during_host_plan_b_selection_blocks_host_then_resolves_once() -> void:

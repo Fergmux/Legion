@@ -144,7 +144,7 @@ func run() -> void:
 	_check("Necro inspector shows its Fusion materials", t.contains("Monster Unit + Dark Unit"))
 	_check("Necro inspector shows its doubling ability", t.contains("double the Debuffs"))
 	t = await _inspect_slot(me, "unit", 1, "02_inspect_drako")
-	_check("Drako inspector shows its Arcane requirement and Power ability", t.contains("combined Cost equals this Unit's Cost") and t.contains("Destroy a Power"))
+	_check("Drako inspector shows its Spirit requirement and Power ability", t.contains("combined Cost equals this Unit's Cost") and t.contains("Destroy a Power"))
 	t = await _inspect_slot(me, "unit", 2, "03_inspect_fence")
 	_check("Fence inspector shows the lower-case apply", t.contains("you can apply 1 Rune"))
 	t = await _inspect_slot(me, "unit", 3, "04_inspect_chaos_witch_dark")

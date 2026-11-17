@@ -208,7 +208,7 @@ func run() -> void:
 	_check("Esc with inspector open stays in the builder", main.menu == db and not db._modal_open())
 
 	# A spread of categories (more than a screen of deck rows).
-	for cat in ["fusion", "ritual", "arcane", "spell", "trap", "power", "unit"]:
+	for cat in ["fusion", "arcane", "spirit", "spell", "trap", "power", "unit"]:
 		for d in CardDB.all():
 			if d["category"] == cat:
 				await _select_and_add(int(d["id"]))

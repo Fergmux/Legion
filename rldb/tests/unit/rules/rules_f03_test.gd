@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
-## Rules-side support for playtest feedback 03 (design/playtest-feedback-03.md): exact Arcane
-## material totals (F03-04), zero-cost Arcane material filtering (F03-05), Fusion availability
+## Rules-side support for playtest feedback 03 (design/playtest-feedback-03.md): exact Spirit
+## material totals (F03-04), zero-cost Spirit material filtering (F03-05), Fusion availability
 ## (F03-08), basic-unit display names (F03-09), Overextend's chosen target (F03-19) and the
 ## pending choice's effect source (F03-18).
 
@@ -9,12 +9,12 @@ const COST2_UNIT_B := 32        # Frost Wyvern, cost 2
 const COST3_UNIT := 13          # Chaos Witch, cost 3
 const COST0_UNIT := 33          # Fledgling Drake, cost 0
 const COST2_SPELL := 84         # Assassinate, cost 2
-# 2026-11-03 raised every Arcane cost by 1 (Kaya 1->2, Cliff 2->3, Boom 3->4); no Arcane costs 1 now.
-# The fixtures keep the requirements the tests were written for: 2 and 3.
-const ARCANE2_K := 170          # Grandmother Kaya, 2 Arcane (its On Summon needs the opponent ahead: silent here)
-const ARCANE2 := 171            # Flying Sandworm, 2 Arcane, no On Summon (Cliff before 3 Nov)
-const ARCANE3 := 174            # Cliff the Flying Bison, 3 Arcane (Boom before 3 Nov)
-const FUSION_ARCANE_SPENT := 93 # Bastion Wyrm (Fusion) used as an ineligible Spent card
+# 2026-11-17 lowered the Spirit costs again (Kaya and Sandworm 2->1, Cliff 3->2) and made Boom an Arcane Unit.
+# The fixtures keep the requirements the tests were written for: 2 and 3 (Kaya's 1 for the zero-cost filter).
+const SPIRIT1_K := 170          # Grandmother Kaya, 1 Spirit (its On Summon needs the opponent ahead: silent here)
+const SPIRIT2 := 174            # Cliff the Flying Bison, 2 Spirit, no On Summon (Flying Sandworm before 17 Nov)
+const SPIRIT3 := 177            # The Illusionist, 3 Spirit, no On Summon (Cliff before 17 Nov)
+const FUSION_SPIRIT_SPENT := 93 # Bastion Wyrm (Fusion) used as an ineligible Spent card
 const POLY := 82                # Fusion Ceremony (Fusion Spell, cost 1)
 # Bastion Wyrm needs a 20+ ATK-or-DEF unit since 3 Nov; Owlbear Druid keeps two Basic Unit materials.
 const FUSION_T := 189           # Owlbear Druid: Beast Unit + Physical Unit
@@ -25,12 +25,12 @@ const NETHER_PORTAL := 89       # Power: once per turn, pay 1 AP to Fusion Summo
 const OVEREXTEND := 48
 
 
-func _arcane_actions(m: MatchEngine, uid: int) -> Array:
-	return MatchView.actions_for(m, 0).filter(func(a): return a.get("uid", -1) == uid and a["t"] == "arcane")
+func _spirit_actions(m: MatchEngine, uid: int) -> Array:
+	return MatchView.actions_for(m, 0).filter(func(a): return a.get("uid", -1) == uid and a["t"] == "spirit")
 
 
-func _arcane_ok(m: MatchEngine, uid: int) -> bool:
-	var acts := _arcane_actions(m, uid)
+func _spirit_ok(m: MatchEngine, uid: int) -> bool:
+	var acts := _spirit_actions(m, uid)
 	return not acts.is_empty() and acts[0]["ok"]
 
 
@@ -38,15 +38,15 @@ func _option_uids(m: MatchEngine) -> Array:
 	return m.pending["options"].map(func(o): return o["v"])
 
 
-# ---------------------------------------------------------------- F03-04 exact Arcane total
+# ---------------------------------------------------------------- F03-04 exact Spirit total
 
 func test_f03_04_requirement_two_paid_by_one_plus_one() -> void:
 	var m := TB.make()
 	var a := TB.card(m, 0, TB.WATER, "spent")
 	var b := TB.card(m, 0, TB.FIRE, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	assert_bool(_arcane_ok(m, worm)).is_true()
-	assert_str(m.submit(0, {"t": "arcane", "uid": worm, "stance": "atk"})).is_empty()
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	assert_bool(_spirit_ok(m, worm)).is_true()
+	assert_str(m.submit(0, {"t": "spirit", "uid": worm, "stance": "atk"})).is_empty()
 	assert_str(TB.choose_uids(m, [a, b])).is_empty()
 	TB.choose(m, [TB.slot_label(0)])
 	assert_str(m.cards[worm]["zone"]).is_equal("unit")
@@ -58,9 +58,9 @@ func test_f03_04_requirement_two_paid_by_one_plus_one() -> void:
 func test_f03_04_requirement_two_paid_by_single_two() -> void:
 	var m := TB.make()
 	var a := TB.card(m, 0, COST2_UNIT, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	assert_bool(_arcane_ok(m, worm)).is_true()
-	m.submit(0, {"t": "arcane", "uid": worm, "stance": "atk"})
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	assert_bool(_spirit_ok(m, worm)).is_true()
+	m.submit(0, {"t": "spirit", "uid": worm, "stance": "atk"})
 	assert_str(TB.choose_uids(m, [a])).is_empty()
 	TB.choose(m, [TB.slot_label(0)])
 	assert_str(m.cards[worm]["zone"]).is_equal("unit")
@@ -70,8 +70,8 @@ func test_f03_04_overpayment_is_rejected_and_nothing_is_consumed() -> void:
 	var m := TB.make()
 	var one := TB.card(m, 0, TB.WATER, "spent")
 	var two := TB.card(m, 0, COST2_UNIT, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	m.submit(0, {"t": "arcane", "uid": worm, "stance": "atk"})
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	m.submit(0, {"t": "spirit", "uid": worm, "stance": "atk"})
 	var id: int = m.pending["id"]
 	assert_str(TB.choose_uids(m, [one, two])).contains("exactly")
 	# The choice stays open and nothing moved.
@@ -86,19 +86,19 @@ func test_f03_04_underpayment_is_rejected() -> void:
 	var m := TB.make()
 	var one := TB.card(m, 0, TB.WATER, "spent")
 	TB.card(m, 0, TB.FIRE, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	m.submit(0, {"t": "arcane", "uid": worm, "stance": "atk"})
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	m.submit(0, {"t": "spirit", "uid": worm, "stance": "atk"})
 	assert_str(TB.choose_uids(m, [one])).contains("exactly")
 	assert_str(m.cards[one]["zone"]).is_equal("spent")
 
 
-func test_f03_04_only_overpaying_materials_means_no_arcane_action() -> void:
+func test_f03_04_only_overpaying_materials_means_no_spirit_action() -> void:
 	# A single cost-3 unit cannot pay 2 exactly, so the summon is unavailable (not "total >= cost").
 	var m := TB.make()
 	TB.card(m, 0, COST3_UNIT, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	assert_bool(_arcane_ok(m, worm)).is_false()
-	assert_str(m.validate(0, {"t": "arcane", "uid": worm})).contains("exactly")
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	assert_bool(_spirit_ok(m, worm)).is_false()
+	assert_str(m.validate(0, {"t": "spirit", "uid": worm})).contains("exactly")
 
 
 func test_f03_04_availability_is_subset_sum_not_total() -> void:
@@ -106,10 +106,10 @@ func test_f03_04_availability_is_subset_sum_not_total() -> void:
 	var m := TB.make()
 	TB.card(m, 0, COST2_UNIT, "spent")
 	TB.card(m, 0, COST2_UNIT_B, "spent")
-	var three := TB.card(m, 0, ARCANE3, "extra")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	assert_bool(_arcane_ok(m, three)).is_false()
-	assert_bool(_arcane_ok(m, worm)).is_true()
+	var three := TB.card(m, 0, SPIRIT3, "extra")
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	assert_bool(_spirit_ok(m, three)).is_false()
+	assert_bool(_spirit_ok(m, worm)).is_true()
 
 
 func test_f03_04_modified_cost_determines_the_total() -> void:
@@ -118,9 +118,9 @@ func test_f03_04_modified_cost_determines_the_total() -> void:
 	var w := TB.card(m, 0, COST3_UNIT, "spent")
 	m.cards[w]["cost_p"] = -1
 	assert_int(m.current_cost(w)).is_equal(2)
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	assert_bool(_arcane_ok(m, worm)).is_true()
-	m.submit(0, {"t": "arcane", "uid": worm, "stance": "atk"})
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	assert_bool(_spirit_ok(m, worm)).is_true()
+	m.submit(0, {"t": "spirit", "uid": worm, "stance": "atk"})
 	assert_str(TB.choose_uids(m, [w])).is_empty()
 	TB.choose(m, [TB.slot_label(0)])
 	assert_str(m.cards[worm]["zone"]).is_equal("unit")
@@ -129,12 +129,12 @@ func test_f03_04_modified_cost_determines_the_total() -> void:
 
 func test_f03_04_extra_deck_units_and_non_units_are_ineligible() -> void:
 	var m := TB.make()
-	var arc := TB.card(m, 0, ARCANE2, "spent")              # an Extra Deck unit with "2"
+	var arc := TB.card(m, 0, SPIRIT2, "spent")              # an Extra Deck unit with "2"
 	var spell := TB.card(m, 0, COST2_SPELL, "spent")        # a non-unit with cost 2
-	var fus := TB.card(m, 0, FUSION_ARCANE_SPENT, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	assert_bool(_arcane_ok(m, worm)).is_false()
-	var mats: Array = m.arcane_materials(0)
+	var fus := TB.card(m, 0, FUSION_SPIRIT_SPENT, "spent")
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	assert_bool(_spirit_ok(m, worm)).is_false()
+	var mats: Array = m.spirit_materials(0)
 	assert_bool(arc in mats or spell in mats or fus in mats).is_false()
 
 
@@ -143,8 +143,8 @@ func test_f03_04_authority_rejects_unoffered_and_stale_selections() -> void:
 	var a := TB.card(m, 0, TB.WATER, "spent")
 	var b := TB.card(m, 0, TB.FIRE, "spent")
 	var spell := TB.card(m, 0, COST2_SPELL, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	m.submit(0, {"t": "arcane", "uid": worm, "stance": "atk"})
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	m.submit(0, {"t": "spirit", "uid": worm, "stance": "atk"})
 	var id: int = m.pending["id"]
 	assert_str(m.submit(0, {"t": "choose", "id": id, "values": [spell]})).contains("Invalid")
 	assert_str(m.submit(0, {"t": "choose", "id": id + 7, "values": [a, b]})).contains("No such")
@@ -156,8 +156,8 @@ func test_f03_04_pending_choice_exposes_required_total_and_values() -> void:
 	var m := TB.make()
 	TB.card(m, 0, TB.WATER, "spent")
 	TB.card(m, 0, COST2_UNIT, "spent")
-	var worm := TB.card(m, 0, ARCANE2, "extra")
-	m.submit(0, {"t": "arcane", "uid": worm, "stance": "atk"})
+	var worm := TB.card(m, 0, SPIRIT2, "extra")
+	m.submit(0, {"t": "spirit", "uid": worm, "stance": "atk"})
 	var pv: Dictionary = MatchView.build(m, 0)["pending"]
 	assert_int(int(pv["total_required"])).is_equal(2)
 	assert_bool(pv["total_exact"]).is_true()
@@ -195,9 +195,9 @@ func test_f03_05_zero_current_cost_units_are_not_offered() -> void:
 	var reduced := TB.card(m, 0, TB.WATER, "spent")
 	m.cards[reduced]["cost_p"] = -1                    # printed 1, now 0
 	var one := TB.card(m, 0, TB.FIRE, "spent")
-	var one_b := TB.card(m, 0, TB.EARTH, "spent")        # 1 + 1 reaches Kaya's 2 (1 before 3 Nov)
-	var kaya := TB.card(m, 0, ARCANE2_K, "extra")
-	assert_str(m.submit(0, {"t": "arcane", "uid": kaya, "stance": "atk"})).is_empty()
+	var one_b := TB.card(m, 0, TB.EARTH, "spent")        # each 1 pays Kaya's 1 (2 from 3 to 17 Nov)
+	var kaya := TB.card(m, 0, SPIRIT1_K, "extra")
+	assert_str(m.submit(0, {"t": "spirit", "uid": kaya, "stance": "atk"})).is_empty()
 	var offered := _option_uids(m)
 	assert_bool(zero in offered).is_false()
 	assert_bool(reduced in offered).is_false()
@@ -208,10 +208,10 @@ func test_f03_05_zero_current_cost_units_are_not_offered() -> void:
 func test_f03_05_printed_zero_with_positive_current_cost_is_offered() -> void:
 	var m := TB.make()
 	var raised := TB.card(m, 0, COST0_UNIT, "spent")
-	m.cards[raised]["cost_p"] = 2                       # printed 0, now 2: pays Kaya's 2 alone
-	var kaya := TB.card(m, 0, ARCANE2_K, "extra")
-	assert_bool(_arcane_ok(m, kaya)).is_true()
-	m.submit(0, {"t": "arcane", "uid": kaya, "stance": "atk"})
+	m.cards[raised]["cost_p"] = 1                       # printed 0, now 1: pays Kaya's 1 alone
+	var kaya := TB.card(m, 0, SPIRIT1_K, "extra")
+	assert_bool(_spirit_ok(m, kaya)).is_true()
+	m.submit(0, {"t": "spirit", "uid": kaya, "stance": "atk"})
 	assert_bool(raised in _option_uids(m)).is_true()
 
 
@@ -429,18 +429,19 @@ func test_f03_18_chosen_target_stat_event_carries_the_source_for_both_seats() ->
 		assert_dict(found.get("from", {})).is_equal({"p": 0, "zone": "backrow", "slot": 1})
 
 
-## 2026-11-10: Overextend (the old fixture) no longer asks for a target; Perfect Dodge's "a Unit in this
-## Column" choice is the pending choice now, from the same zone (backrow, slot 1).
+## 2026-11-10: Overextend (the old fixture) no longer asks for a target. 2026-11-17: Perfect Dodge (now
+## Emergency Evade) no longer asks either; Plan B's "destroy any number of your cards" is the pending choice
+## now, from the same zone (backrow, slot 1).
 func test_f03_18_pending_choice_carries_its_effect_source() -> void:
 	var m := TB.make()
 	TB.to_turn2(m)
-	var trap := TB.set_card(m, 0, 50, 1)                     # Perfect Dodge, column 2
+	var trap := TB.set_card(m, 0, 163, 1)                    # Plan B, column 2
 	TB.to_battle(m)
 	var a := TB.unit(m, 1, TB.WATER, 1, "atk", 10)
 	var d := TB.unit(m, 0, TB.WATER, 1)
-	TB.unit(m, 0, TB.WATER, 4)                              # a second unit in the column: a real choice
+	TB.unit(m, 0, TB.WATER, 4)                              # a second own card: a real choice
 	assert_str(TB.attack(m, a, d)).is_empty()
-	assert_str(TB.choose(m, ["Activate Perfect Dodge"])).is_empty()
+	assert_str(TB.choose(m, ["Activate Plan B"])).is_empty()
 	assert_int(int(m.pending.get("player", -1))).is_equal(0)
 	var mine_view: Dictionary = MatchView.build(m, 0)["pending"]
 	assert_dict(mine_view["source"]).is_equal({"p": 0, "zone": "backrow", "slot": 1})

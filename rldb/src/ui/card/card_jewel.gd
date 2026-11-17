@@ -3,7 +3,7 @@ extends RefCounted
 ## H17 (21 Oct): the faceted-gem-in-a-metal-setting look of the AP gems (ApGemRow) for the card face's
 ## indicators: the cost gem, the Type pip and the ATK / DEF badges. Pure drawing helpers on any
 ## CanvasItem; every shape is a closed outline (CardGeometry) so one gem routine serves the round AP
-## gem, the Ritual lozenge, the Arcane hexagon, the ATK rhombus and the DEF shield.
+## gem, the Arcane lozenge, the Spirit hexagon, the ATK rhombus and the DEF shield.
 ##
 ## Light falls from the upper left (LIGHT), as on the AP gems and the HP vial. A gem is: a dark
 ## girdle edge, crown facets between the girdle and an inset table (each shaded by how much it faces

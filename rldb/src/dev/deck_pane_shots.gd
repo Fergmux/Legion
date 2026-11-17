@@ -3,14 +3,14 @@ extends SceneTree
 ## Run NOT headless:
 ##   godot --path rldb -s res://src/dev/deck_pane_shots.gd -- <absolute output dir> [WxH] [--all]
 ## Opens the deck builder, shows a long-text Fusion, a long-text unit, a spell, a basic unit and an
-## Arcane card with 0 / 1 / 2 / 3 / 15 copies, and saves one JPG (q88, at most 1600 px wide) per
+## Spirit card with 0 / 1 / 2 / 3 / 15 copies, and saves one JPG (q88, at most 1600 px wide) per
 ## card. Prints the middle pane's content height against its room for each shot; `--all` also walks
 ## every card and prints the tightest fit; `--steps` also shows the longest card at each density step
 ## the pane takes when a card would not fit (DeckBuilder.FIT_STEPS). Nothing is saved: the copies are
 ## added in memory only.
 
-const SHOTS := [[146, 3, "fusion_longest"], [147, 0, "fusion_long"], [36, 1, "unit_long"], [155, 2, "evolve_spawn"],
-	[156, 0, "evolve_larva"], [80, 2, "spell"], [1, 3, "basic"], [185, 15, "arcane_15"]]
+const SHOTS := [[146, 3, "fusion_longest"], [147, 0, "fusion_long"], [36, 1, "unit_long"], [155, 2, "transform_spawn"],
+	[156, 0, "transform_larva"], [80, 2, "spell"], [1, 3, "basic"], [185, 15, "spirit_15"]]
 
 var out_dir: String = ""
 var tag: String = ""

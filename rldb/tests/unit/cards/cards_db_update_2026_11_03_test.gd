@@ -30,7 +30,7 @@ const ASSASSINATE := 84
 const SHARED_FATE := 87
 const ABYSSLORD := 59                # Fusion: Mage + Water (its materials do not change on 3 Nov)
 const MIRRORFLESH := 94              # Fusion: a unit with a Type + a unit of the same Type
-const NECROVAST := 64                # Ritual, 2 Runes
+const NECROVAST := 64                # Arcane, 2 Runes
 const DRAGON_RIDER := 135
 const SYMBIOTE_SPAWN := 155
 const SYMBIOTE_LARVA := 156
@@ -96,11 +96,11 @@ func test_c012_tag_team_x_with_one_ap_and_no_small_unit_in_spent_cannot_revive()
 
 # ---------------------------------------------------------------- tribute benefits (15, 69, 77)
 
-## Ritual-summons Necrovast by tributing `mat` (given 2 Runes); returns Necrovast's uid.
-func _ritual_with(m: MatchEngine, mat: int) -> int:
+## Arcane-summons Necrovast by tributing `mat` (given 2 Runes); returns Necrovast's uid.
+func _arcane_with(m: MatchEngine, mat: int) -> int:
 	m.apply_status(mat, "rune", 2)
 	var nec := TB.card(m, 0, NECROVAST, "extra")
-	assert_str(m.submit(0, {"t": "ritual", "uid": nec, "stance": "atk"})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": nec, "stance": "atk"})).is_empty()
 	TB.choose_uids(m, [mat])
 	TB.choose(m, ["Front row, column 1"])
 	if TB.pend_kind(m) == "stance":
@@ -109,9 +109,9 @@ func _ritual_with(m: MatchEngine, mat: int) -> int:
 	return nec
 
 
-func test_c015_da_mage_tributed_gives_the_ritual_unit_one_pierce() -> void:
+func test_c015_da_mage_tributed_gives_the_arcane_unit_one_pierce() -> void:
 	var m := TB.make()
-	var nec := _ritual_with(m, TB.unit(m, 0, DA_MAGE, 0))
+	var nec := _arcane_with(m, TB.unit(m, 0, DA_MAGE, 0))
 	assert_int(m.status_count(nec, "pierce")).is_equal(1)
 
 
@@ -128,7 +128,7 @@ func test_c015_da_mage_tributed_for_a_fusion_gives_it_one_pierce() -> void:
 
 func test_c069_magentric_tributed_gives_one_cleanse_and_no_pierce() -> void:
 	var m := TB.make()
-	var nec := _ritual_with(m, TB.unit(m, 0, MAGENTRIC, 0))
+	var nec := _arcane_with(m, TB.unit(m, 0, MAGENTRIC, 0))
 	assert_int(m.status_count(nec, "cleanse")).is_equal(1)
 	assert_int(m.status_count(nec, "pierce")).is_equal(0)
 
@@ -149,9 +149,9 @@ func test_c069_magentric_on_summon_cleanse_on_an_adjacent_unit_is_optional() -> 
 	assert_int(m2.status_count(friend2, "cleanse")).is_equal(0)
 
 
-func test_c077_radablast_tributed_gives_the_ritual_unit_one_infiltrate() -> void:
+func test_c077_radablast_tributed_gives_the_arcane_unit_one_infiltrate() -> void:
 	var m := TB.make()
-	var nec := _ritual_with(m, TB.unit(m, 0, RADABLAST, 0))
+	var nec := _arcane_with(m, TB.unit(m, 0, RADABLAST, 0))
 	assert_int(m.status_count(nec, "infiltrate")).is_equal(1)
 
 
@@ -313,7 +313,8 @@ func test_c047_damage_conversion_costs_one_and_heals_by_the_attackers_atk() -> v
 
 # ---------------------------------------------------------------- 67 / 68 Fusion first
 
-func test_c067_void_basilisk_fuses_first_then_exhausts_itself() -> void:
+## Owner, 16 Nov: Void Basilisk is exhausted BEFORE the Fusion Summon, so the Fusion unit may take its zone.
+func test_c067_void_basilisk_exhausts_itself_first_and_frees_its_zone() -> void:
 	var m := TB.make()
 	var vb := TB.unit(m, 0, VOID_BASILISK, 0)
 	var mage := TB.card(m, 0, MAGE_WATER, "spent")
@@ -323,32 +324,25 @@ func test_c067_void_basilisk_fuses_first_then_exhausts_itself() -> void:
 	TB.choose_uids(m, [lord])
 	TB.choose_uids(m, [mage])
 	TB.choose_uids(m, [water])
-	assert_bool(0 in _slots(m)).is_false()                    # its own zone is still taken
-	TB.choose(m, ["Front row, column 2"])
+	assert_bool(0 in _slots(m)).is_true()                     # its own zone is offered
+	TB.choose(m, ["Front row, column 1"])
 	TB.choose(m, ["Attack"])
 	assert_str(CF.zone(m, lord)).is_equal("unit")
+	assert_int(int(m.players[0]["units"][0])).is_equal(lord)
 	assert_str(CF.zone(m, vb)).is_equal("exhaust")
 	assert_str(CF.zone(m, mage)).is_equal("exhaust")
 	var i_sum := TB.log_index(m, "summons Abysslord")
 	var i_exh := TB.log_index(m, "Void Basilisk moves from Unit to Exhaust")
-	assert_bool(i_sum >= 0 and i_sum < i_exh).override_failure_message("summon %d exhaust %d" % [i_sum, i_exh]).is_true()
+	assert_bool(i_exh >= 0 and i_exh < i_sum).override_failure_message("summon %d exhaust %d" % [i_sum, i_exh]).is_true()
 
 
-## Owner, 3 Nov: Void Basilisk may be one of its own materials; then it is not exhausted.
-func test_c067_void_basilisk_can_be_its_own_material_and_then_is_not_exhausted() -> void:
+## Owner, 16 Nov: exhausted first, Void Basilisk can no longer be one of its own materials.
+func test_c067_void_basilisk_is_never_its_own_material() -> void:
 	var m := TB.make()
 	var vb := TB.unit(m, 0, VOID_BASILISK, 0)                 # Dark
-	var mon := TB.unit(m, 0, MONSTER_DARK, 1)                 # the only other Dark unit
-	var mf := TB.card(m, 0, MIRRORFLESH, "extra")             # takes Basilisk + the Monster
-	assert_str(TB.ability(m, vb)).is_empty()
-	TB.choose_uids(m, [mf])
-	TB.choose_uids(m, [vb])
-	TB.choose_uids(m, [mon])
-	TB.choose(m, ["Front row, column 1"])
-	TB.choose(m, ["Attack"])
-	assert_str(CF.zone(m, mf)).is_equal("unit")
-	assert_str(CF.zone(m, vb)).is_equal("spent")              # tributed, and not exhausted afterwards
-	assert_int(TB.log_index(m, "Void Basilisk moves from Unit to Exhaust")).is_equal(-1)
+	TB.unit(m, 0, MONSTER_DARK, 1)                            # the only other Dark unit
+	TB.card(m, 0, MIRRORFLESH, "extra")                       # would need Basilisk + the Monster
+	assert_str(m.validate(0, {"t": "ability", "uid": vb, "idx": 0})).is_equal("No Fusion unit can be summoned.")
 
 
 ## Owner, 3 Nov: Seppuku may be one of its own materials; then the "then Destroy this Unit" does not happen.
@@ -368,7 +362,7 @@ func test_c068_seppuku_can_be_its_own_material_and_then_is_not_destroyed() -> vo
 	assert_int(TB.log_index(m, "Zeph, Monk of Ancient Wisdom is destroyed")).is_equal(-1)
 
 
-func test_c067_void_basilisk_on_a_full_board_needs_a_field_material() -> void:
+func test_c067_void_basilisk_on_a_full_board_frees_its_own_zone() -> void:
 	var m := TB.make()
 	var vb := TB.unit(m, 0, VOID_BASILISK, 0)
 	for s in range(1, 6):
@@ -376,8 +370,8 @@ func test_c067_void_basilisk_on_a_full_board_needs_a_field_material() -> void:
 	TB.card(m, 0, MAGE_WATER, "spent")
 	TB.card(m, 0, MAGE_WATER, "spent")
 	TB.card(m, 0, ABYSSLORD, "extra")
-	# Basilisk leaves only after the summon, so Spent materials alone leave no zone for the Fusion unit.
-	assert_str(m.validate(0, {"t": "ability", "uid": vb, "idx": 0})).is_equal("No Fusion unit can be summoned.")
+	# 2026-11-16: Basilisk leaves before the summon, so its zone takes the Fusion unit from Spent materials.
+	assert_str(m.validate(0, {"t": "ability", "uid": vb, "idx": 0})).is_equal("")
 
 
 func test_c068_seppuku_fuses_first_then_destroys_itself() -> void:
@@ -443,7 +437,8 @@ func test_c072_myth_wukong_gains_16_def_in_front_and_16_atk_behind() -> void:
 	assert_int(m.def_of(back)).is_equal(16)
 
 
-func test_c076_soul_devourer_may_poison_a_unit_in_its_column_for_10() -> void:
+# 2026-11-17: 7 Poison (was 10).
+func test_c076_soul_devourer_may_poison_a_unit_in_its_column_for_7() -> void:
 	var m := TB.make()
 	var foe := TB.unit(m, 1, MAGE_WATER, 0)                   # same column, other side
 	var own := TB.unit(m, 0, MAGE_WATER, 3)                   # same column, behind it
@@ -452,7 +447,7 @@ func test_c076_soul_devourer_may_poison_a_unit_in_its_column_for_10() -> void:
 	# "a Unit in this Column" includes Soul Devourer itself, as with every other column choice.
 	assert_array(_opts(m)).contains_exactly_in_any_order([-1, foe, own, sd])
 	TB.choose_uids(m, [foe])
-	assert_int(m.status_count(foe, "poison")).is_equal(10)
+	assert_int(m.status_count(foe, "poison")).is_equal(7)
 
 
 func test_c076_soul_devourer_poison_is_optional() -> void:
@@ -681,7 +676,12 @@ func test_c191_do_not_open_box_destroyed_by_the_opponent_summons_from_draw_into_
 	assert_int(int(m.pending["player"])).is_equal(0)
 	TB.choose(m, ["Activate Do Not Open Box"])
 	assert_str(TB.pend_kind(m)).is_equal("select")
-	assert_bool(m.pending.get("reveal_pile", false)).is_true()   # the Draw is shown to its owner only
+	# The Draw is shown to its owner only. 2026-11-17: the pick is "Draw or Spent" (kind spent_or_draw),
+	# which carries no reveal_pile flag; the owner sees their own pile cards in the options anyway.
+	var own_view: Dictionary = MatchView.build(m, 0)["pending"]
+	var seen: Array = own_view["options"].filter(func(o): return o.has("card") and int(o["card"].get("uid", -1)) == b[2])
+	assert_int(seen.size()).is_equal(1)
+	assert_int(int(seen[0]["card"]["id"])).is_equal(COSMIC_DRAGON)
 	assert_bool(MatchView.build(m, 1)["pending"].has("options")).is_false()
 	assert_bool(b[2] in _opts(m)).is_true()
 	TB.choose_uids(m, [b[2]])
@@ -712,11 +712,14 @@ func test_c191_do_not_open_box_is_not_offered_without_a_free_zone_in_its_column(
 	assert_bool(CF.labels(m).has("Activate Do Not Open Box")).is_false()
 
 
-func test_c191_do_not_open_box_is_not_offered_with_no_unit_in_draw() -> void:
+# 2026-11-17: the Box summons from Draw or Spent, so it needs a unit in either.
+func test_c191_do_not_open_box_is_not_offered_with_no_unit_in_draw_or_spent() -> void:
 	var m := CF.p1_main()
 	var box := TB.set_card(m, 0, DO_NOT_OPEN_BOX, 0)
 	m.players[0]["draw"].clear()
+	m.players[0]["spent"].clear()
 	TB.card(m, 0, SACRED_OFFERINGS, "draw")                   # a Spell only
+	TB.card(m, 0, MAGIC_CYLINDER, "spent")                    # a Trap only
 	TB.kill(m, box, 1)
 	assert_bool(CF.labels(m).has("Activate Do Not Open Box")).is_false()
 
@@ -757,14 +760,15 @@ func test_c191_do_not_open_box_destroyed_by_an_opponents_card_effect_in_play() -
 
 ## Regression: the 3 Nov cards have no sheet index (null); CardDB.all() compared null with a number
 ## (a script error on every call, e.g. the game log's name tinting) and left the order undefined.
-## Since 10 Nov the cards 192-197 have no sheet index either: 189-197 sort last, in id order.
+## Since 10 Nov the cards 192-197 have no sheet index either, and since 17 Nov 198-203: 189-203 sort
+## last, in id order.
 func test_c191_cards_without_a_sheet_index_sort_last_in_id_order() -> void:
 	var all := CardDB.all()
 	var ids := all.map(func(d): return int(d["id"]))
 	assert_int(ids.size()).is_equal(CardDB._defs.size())
-	var tail := ids.slice(ids.size() - 9)
-	assert_array(tail).contains_exactly([189, 190, 191, 192, 193, 194, 195, 196, 197])
-	for d in all.slice(0, all.size() - 9):
+	var tail := ids.slice(ids.size() - 15)
+	assert_array(tail).contains_exactly(range(189, 204))
+	for d in all.slice(0, all.size() - 15):
 		assert_bool(d["source"].get("index") != null).is_true()
 
 

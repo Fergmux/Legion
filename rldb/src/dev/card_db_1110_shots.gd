@@ -4,9 +4,9 @@ extends "res://src/dev/f02_driver.gd"
 ##   godot --path rldb -- --carddb1110-shots=<absolute dir>
 ## 1. Deck builder: Draw Virus is greyed "Disabled" in the catalogue, cannot be added, and shows greyed
 ##    in a deck that still holds it; the new cards (192-196) sit with their kinds, with their new art.
-## 2. Card library: The Great Leviathan (evolution-only) in the inspector.
+## 2. Card library: The Great Leviathan (transformation-only) in the inspector.
 ## 3. A hot-seat match: Edwin (Burn, ATK above base) and Divine Serpent - Soul (Head, Body and Tail on the
-##    Field) show an Evolve button; Edwin evolves into Avatar, Soul into The Great Leviathan.
+##    Field) show a Transform button; Edwin transforms into Avatar, Soul into The Great Leviathan.
 ## Writes PNG screenshots and `carddb1110_report.json`, then quits.
 
 const DRAW_VIRUS := 44
@@ -115,12 +115,12 @@ func _match() -> void:
 	host.broadcast()
 	_view_seat(a)
 	await _wait(4.5)
-	_check("Edwin may evolve", m.validate(a, {"t": "ability", "uid": uids["edwin"], "idx": 0}) == "")
-	_check("Soul may evolve", m.validate(a, {"t": "ability", "uid": uids["soul"], "idx": 1}) == "")
-	await _shot("07_match_evolve_buttons")
+	_check("Edwin may transform", m.validate(a, {"t": "ability", "uid": uids["edwin"], "idx": 0}) == "")
+	_check("Soul may transform", m.validate(a, {"t": "ability", "uid": uids["soul"], "idx": 1}) == "")
+	await _shot("07_match_transform_buttons")
 	host.handle(a, {"t": "ability", "uid": uids["edwin"], "idx": 0})
 	await _wait(0.6)
-	await _shot("08_match_edwin_evolving")
+	await _shot("08_match_edwin_transforming")
 	await _wait(2.5)
 	_check("Edwin became Avatar", int(m.cards[uids["edwin"]]["id"]) == 14)
 	await _shot("09_match_avatar")

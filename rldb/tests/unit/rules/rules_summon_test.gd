@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Summoning, sacrifice, tribute and Fusion/Ritual/Arcane special summons.
+## Summoning, sacrifice, tribute and Fusion/Arcane/Spirit special summons.
 
 
 func test_normal_summon_pays_current_cost_and_places_in_chosen_zone() -> void:
@@ -43,7 +43,7 @@ func test_tributing_cliff_from_field_gives_one_ap() -> void:
 	var cliff := TB.unit(m, 0, 174, 0)
 	m.apply_status(cliff, "rune", 1)
 	var inferno := TB.card(m, 0, 98, "extra")      # Raging Inferno 1R
-	assert_str(m.submit(0, {"t": "ritual", "uid": inferno})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": inferno})).is_empty()
 	TB.choose_uids(m, [cliff])
 	TB.choose(m, ["Front row, column 1"])
 	TB.choose(m, ["Attack"])
@@ -64,38 +64,38 @@ func test_newly_summoned_unit_cannot_be_sacrificed_but_can_be_tributed() -> void
 	assert_str(m.validate(0, {"t": "sacrifice", "uid": u})).is_equal("A unit summoned this turn cannot be sacrificed.")
 	m.apply_status(u, "rune", 1)
 	var inferno := TB.card(m, 0, 98, "extra")
-	assert_str(m.validate(0, {"t": "ritual", "uid": inferno})).is_empty()
+	assert_str(m.validate(0, {"t": "arcane", "uid": inferno})).is_empty()
 
 
-func test_arcane_three_with_spent_costs_two_and_two_is_unavailable_no_overpayment() -> void:
+func test_spirit_three_with_spent_costs_two_and_two_is_unavailable_no_overpayment() -> void:
 	# F03-04 supersedes the original "overpayment is allowed" rule: totals must be exact.
 	var m := TB.make()
 	var a := TB.card(m, 0, 28, "spent")               # Guardian of the Forest (cost 2)
 	var b := TB.card(m, 0, 32, "spent")               # Frost Wyvern (cost 2)
-	var three := TB.card(m, 0, 174, "extra")          # Cliff 3A since 2026-11-03 (Boom is 4A now)
-	assert_str(m.submit(0, {"t": "arcane", "uid": three})).contains("exactly")
+	var three := TB.card(m, 0, 177, "extra")          # The Illusionist, 3 Spirit (Cliff is 2 since 2026-11-17)
+	assert_str(m.submit(0, {"t": "spirit", "uid": three})).contains("exactly")
 	assert_str(m.cards[a]["zone"]).is_equal("spent")
 	assert_str(m.cards[b]["zone"]).is_equal("spent")
 	assert_str(m.cards[three]["zone"]).is_equal("extra")
 	assert_int(m.players[0]["ap"]).is_equal(2)
 
 
-func test_arcane_materials_below_requirement_are_rejected() -> void:
+func test_spirit_materials_below_requirement_are_rejected() -> void:
 	var m := TB.make()
 	var a := TB.card(m, 0, 28, "spent")
 	var b := TB.card(m, 0, TB.WATER, "spent")
-	TB.card(m, 0, 174, "extra")                       # Cliff 3A (2026-11-03): 2 + 1 can pay it
+	TB.card(m, 0, 177, "extra")                       # The Illusionist, 3 Spirit (2026-11-17): 2 + 1 can pay it
 	var three: int = m.players[0]["extra"][0]
-	assert_str(m.submit(0, {"t": "arcane", "uid": three})).is_empty()
+	assert_str(m.submit(0, {"t": "spirit", "uid": three})).is_empty()
 	assert_str(TB.choose_uids(m, [b])).contains("required")
 
 
-func test_extra_deck_unit_is_not_arcane_material() -> void:
+func test_extra_deck_unit_is_not_spirit_material() -> void:
 	var m := TB.make()
 	TB.card(m, 0, 93, "spent")                       # Fusion unit in Spent
-	TB.card(m, 0, 174, "spent")                      # Arcane unit (3A) in Spent
+	TB.card(m, 0, 174, "spent")                      # Spirit unit (3A) in Spent
 	var kaya := TB.card(m, 0, 170, "extra")          # 2A (2026-11-03)
-	assert_str(m.validate(0, {"t": "arcane", "uid": kaya})).contains("exactly")
+	assert_str(m.validate(0, {"t": "spirit", "uid": kaya})).contains("exactly")
 
 
 func test_extra_deck_unit_does_not_match_ordinary_cost_two() -> void:
@@ -112,7 +112,7 @@ func test_roma_with_three_rune_material_becomes_30() -> void:
 	var mat := TB.unit(m, 0, TB.WATER, 0)
 	m.apply_status(mat, "rune", 3)
 	var roma := TB.card(m, 0, 96, "extra")
-	m.submit(0, {"t": "ritual", "uid": roma})
+	m.submit(0, {"t": "arcane", "uid": roma})
 	TB.choose_uids(m, [mat])
 	TB.choose(m, ["Front row, column 1"])
 	TB.choose(m, ["Attack"])
@@ -120,8 +120,8 @@ func test_roma_with_three_rune_material_becomes_30() -> void:
 	assert_int(m.def_of(roma)).is_equal(3 * 10)
 
 
-func test_roma_summoned_without_a_ritual_is_0_0() -> void:
-	# Ruling: revived from Spent (or summoned any non-Ritual way) no Runes were used, so 0/0.
+func test_roma_summoned_without_an_arcane_is_0_0() -> void:
+	# Ruling: revived from Spent (or summoned any non-Arcane way) no Runes were used, so 0/0.
 	var m := TB.make()
 	var roma := TB.special(m, 0, 96, 0)
 	assert_int(m.atk_of(roma)).is_equal(0)
@@ -132,7 +132,7 @@ func test_roma_with_zero_rune_material_is_illegal() -> void:
 	var m := TB.make()
 	TB.unit(m, 0, TB.WATER, 0)
 	var roma := TB.card(m, 0, 96, "extra")
-	assert_str(m.validate(0, {"t": "ritual", "uid": roma})).is_equal("No unit with enough Runes.")
+	assert_str(m.validate(0, {"t": "arcane", "uid": roma})).is_equal("No unit with enough Runes.")
 
 
 func test_polymerization_fuses_field_materials_into_bastion_wyrm() -> void:
@@ -181,7 +181,7 @@ func test_tributing_mumens_bounty_from_field_gives_one_ap() -> void:
 	var mumen := TB.unit(m, 0, 150, 0)
 	m.apply_status(mumen, "rune", 1)
 	var inferno := TB.card(m, 0, 98, "extra")
-	m.submit(0, {"t": "ritual", "uid": inferno})
+	m.submit(0, {"t": "arcane", "uid": inferno})
 	TB.choose_uids(m, [mumen])
 	TB.choose(m, ["Front row, column 2"])
 	TB.choose(m, ["Attack"])

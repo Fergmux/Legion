@@ -338,15 +338,15 @@ func _m8() -> void:
 	var power: int = CardDB.collectible().filter(func(d): return d["category"] == "power")[0]["id"]
 	var spell: int = CardDB.collectible().filter(func(d): return d["category"] == "spell")[0]["id"]
 	var fusion: int = CardDB.collectible().filter(func(d): return d["category"] == "fusion")[0]["id"]
-	var ritual: int = CardDB.collectible().filter(func(d): return d["category"] == "ritual")[0]["id"]
-	for id in [191, power, trap, spell, 189, 190, ritual, fusion]:
+	var arcane: int = CardDB.collectible().filter(func(d): return d["category"] == "arcane")[0]["id"]
+	for id in [191, power, trap, spell, 189, 190, arcane, fusion]:
 		db.add_card(id, 1)
 	await _sleep(1.0)
 	var main_flow: HFlowContainer = db._sections["main"]["flow"]
 	var main_ids: Array = main_flow.get_children().map(func(t): return int(t.get_meta("card_id")))
 	var extra_ids: Array = (db._sections["extra"]["flow"] as HFlowContainer).get_children().map(func(t): return int(t.get_meta("card_id")))
 	_check("M8 deck list Main: spell, traps (Box last), power", main_ids == [spell, trap, 191, power], str(main_ids))
-	_check("M8 deck list Extra: fusions (new ones last), then ritual", extra_ids == [fusion, 189, 190, ritual], str(extra_ids))
+	_check("M8 deck list Extra: fusions (new ones last), then arcane", extra_ids == [fusion, 189, 190, arcane], str(extra_ids))
 	# The catalogue around Do Not Open Box: the last Traps, then the first Powers.
 	var cell := db.cell_widget(191)
 	var n: Node = cell
@@ -357,7 +357,7 @@ func _m8() -> void:
 	db.show_preview(191)
 	await _sleep(0.8)
 	_check("M8 catalogue: Box right before the first Power", db.browser.cell(191).get_index() + 1 == db.browser.cell(power).get_index())
-	_check("M8 catalogue: Snow Tiger right before the first Ritual", db.browser.cell(190).get_index() + 1 == db.browser.cell(ritual).get_index())
+	_check("M8 catalogue: Snow Tiger right before the first Arcane", db.browser.cell(190).get_index() + 1 == db.browser.cell(arcane).get_index())
 	await _shot("m8-deckbuilder-box-among-traps")
 	var cell2 := db.cell_widget(189)
 	if n != null:

@@ -4,7 +4,7 @@ extends GdUnitTestSuite
 ## target pick keeps "Choose a target", and a plain choice keeps "Your choice".
 ## Story: design/owner-feedback-2026-11-05.md L9 (follow-up).
 
-const PIERCE_UNIT := 15     # ability: Apply 1 Pierce to a unit (a board target pick)
+const TARGET_UNIT := 79     # Akakaiju, ability: Apply 1 Infiltrate to a unit (a board target pick)
 const BASIC_UNIT := 1       # a 1-AP unit to summon from Hand
 const HYPNOTISE := 180      # Spell: take an opponent's unit, then pick a zone for it (L9)
 
@@ -73,14 +73,14 @@ func test_hypnotise_zone_pick_chip_reads_choose_a_zone() -> void:
 
 func test_board_target_pick_chip_still_reads_choose_a_target() -> void:
 	# Arrange
-	var u := TB.unit(m, me, PIERCE_UNIT, 0)
+	var u := TB.unit(m, me, TARGET_UNIT, 0)
 	TB.unit(m, 1 - me, TB.WATER, 1)
 	await _refresh()
 	var act := {}
 	for a in gs.mv.get("actions", []):
 		if String(a["t"]) == "ability" and int(a.get("uid", -1)) == u and a["ok"]:
 			act = a
-	assert_bool(act.is_empty()).override_failure_message("no Pierce ability offered").is_false()
+	assert_bool(act.is_empty()).override_failure_message("no Infiltrate ability offered").is_false()
 	# Act
 	gs.action_row.run_action(u, act)
 	await _refresh()

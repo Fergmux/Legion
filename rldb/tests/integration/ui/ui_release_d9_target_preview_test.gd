@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 ## (invalid ones stay darkened, valid ones get a subtle border) and clears on hover end. The preview
 ## comes from the engine's own selector, so it matches the real prompt exactly.
 
-const PIERCER := 15          # ability: Apply 1 Pierce to a unit
+const TARGETER := 79         # Akakaiju, ability: Apply 1 Infiltrate to a unit
 
 var host: LocalHost
 var gs: GameScreen
@@ -24,7 +24,7 @@ func before_test() -> void:
 	while m.turn < 2 or m.phase != "main1":
 		m.submit(m.active, {"t": "next_phase"})
 	a = m.active
-	mine = TB.unit(m, a, PIERCER, 4, "atk")
+	mine = TB.unit(m, a, TARGETER, 4, "atk")
 	their_unit = TB.unit(m, 1 - a, TB.WATER, 0, "atk")
 	host.broadcast()
 	gs = auto_free(GameScreen.new())
@@ -69,7 +69,7 @@ func test_actions_that_do_not_target_the_field_carry_no_targets() -> void:
 func test_hovering_the_effect_button_previews_targets_and_leaving_clears() -> void:
 	gs.selection.select(mine)
 	await await_idle_frame()
-	var btn: Button = gs.action_row.stack.get_children().filter(func(b): return (b as Button).text == "Apply Pierce")[0]
+	var btn: Button = gs.action_row.stack.get_children().filter(func(b): return (b as Button).text == "Apply Infiltrate")[0]
 	btn.mouse_entered.emit()
 	await await_idle_frame()
 	assert_int(gs.board.preview_refs.size()).is_equal(2)
@@ -91,14 +91,14 @@ func test_hovering_the_effect_button_previews_targets_and_leaving_clears() -> vo
 func test_preview_clears_when_the_row_closes() -> void:
 	gs.selection.select(mine)
 	await await_idle_frame()
-	var btn: Button = gs.action_row.stack.get_children().filter(func(b): return (b as Button).text == "Apply Pierce")[0]
+	var btn: Button = gs.action_row.stack.get_children().filter(func(b): return (b as Button).text == "Apply Infiltrate")[0]
 	btn.mouse_entered.emit()
 	await await_idle_frame()
 	gs.action_row.clear()
 	assert_array(gs.board.preview_refs).is_empty()
 
 
-## Owner (21 Oct): a field card's action labels ("To Defense", "Apply Pierce") show whole, never cut
+## Owner (21 Oct): a field card's action labels ("To Defense", "Apply Infiltrate") show whole, never cut
 ## with an ellipsis: each button is at least as wide as its label plus the medallion and margins.
 func test_field_action_buttons_fit_their_whole_labels() -> void:
 	gs.selection.select(mine)

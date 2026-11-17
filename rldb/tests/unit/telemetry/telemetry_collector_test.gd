@@ -162,16 +162,16 @@ func test_repeated_activations_and_special_summons_do_not_inflate_draw_conversio
 	assert_int(int(cnt["activations_by_kind"]["ability:resolved"])).is_equal(2)
 	assert_int(int(cnt["activations_by_kind"]["ability:negated"])).is_equal(1)
 	assert_int(int(cnt["plays"])).is_equal(1)
-	# A revival from Spent and an Extra Deck ritual are plays, never draw conversions.
+	# A revival from Spent and an Extra Deck arcane are plays, never draw conversions.
 	var conv := int(cnt["draw_opps_played"])
 	var spent := TB.card(m, p, int(m.cards[u]["id"]), "spent")
 	m.note("summon", {"uid": spent, "p": p, "from": "spent", "frame": {"src": 999999, "ops": [{"op": "summon"}]}})
 	var ex := TB.card(m, p, 1, "extra")
 	m.note("material", {"uid": u, "from": "unit"})
-	m.note("summon", {"uid": ex, "p": p, "from": "extra", "frame": {"src": ex, "ops": [{"op": "ritual_material"}, {"op": "place"}]}})
+	m.note("summon", {"uid": ex, "p": p, "from": "extra", "frame": {"src": ex, "ops": [{"op": "arcane_material"}, {"op": "place"}]}})
 	assert_int(int(cnt["draw_opps_played"])).is_equal(conv)
 	assert_int(int(cnt["plays_by_kind"]["special_effect"])).is_equal(1)
-	assert_int(int(c.g["counters"][p]["1"]["plays_by_kind"]["special_ritual"])).is_equal(1)
+	assert_int(int(c.g["counters"][p]["1"]["plays_by_kind"]["special_arcane"])).is_equal(1)
 	var last_play: Array = c.g["events"].filter(func(e): return e[2] == "play")[-1]
 	assert_int((last_play[10] as Array).size()).is_equal(1)
 

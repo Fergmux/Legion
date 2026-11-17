@@ -150,8 +150,9 @@ actions: [{kind: "type", category, offered}, {kind: "add", selected, index}, {ki
   activation_results: ["resolved", "negated"], unmeasured: ["response_latency", "attacks"], recovered_after_restart?}
 
 Play kinds: `normal_summon`, `cast_spell`, `set_spell`, `set_trap`, `power` (hand plays committed at AP payment),
-`special_ritual`, `special_arcane`, `special_fusion`, `special_effect` (placement from Extra Deck, Spent, Draw, Exhaust
-or Hand by an effect).
+`special_arcane`, `special_spirit`, `special_fusion`, `special_effect` (placement from Extra Deck, Spent, Draw, Exhaust
+or Hand by an effect). Mechanic rename of 2026-11-17: builds before it sent `special_ritual` for what is now
+`special_arcane` (the Rune summon) and `special_arcane` for what is now `special_spirit` (the Spent summon).
 Activation kinds: `ability` (effect `ability:<idx>`), `cast_spell`, `set_spell` (a later activation of a set Spell is not
 a second play), `power`, `trap`, `trigger` (effect `on:<event>`). Results: `resolved` or `negated`. A picker cancelled before
 commit records nothing.

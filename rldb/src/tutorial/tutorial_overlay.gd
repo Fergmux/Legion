@@ -511,7 +511,7 @@ func target_rects() -> Array:
 	return out.filter(func(r): return (r as Rect2).has_area())
 
 
-## A multi-pick step (opt.cards, e.g. Arcane materials): the expected cards not yet selected of
+## A multi-pick step (opt.cards, e.g. Spirit materials): the expected cards not yet selected of
 ## every combination the current selection can still complete; Confirm once a combination is
 ## complete; the picks to deselect when none can be completed. [] when the step has no multi-pick.
 func _multi_rects(pats: Array) -> Array:
@@ -558,7 +558,7 @@ func _banner_button_rect(text: String) -> Rect2:
 	return Rect2()
 
 
-## A Ritual / Arcane summon of an Extra Deck unit (F05-01): the Extra Deck pile until its list is
+## An Arcane / Spirit summon of an Extra Deck unit (F05-01): the Extra Deck pile until its list is
 ## open, then the unit's row until it is selected, then the row's Summon button.
 func _extra_action_rect(uid: int, pat: Dictionary) -> Rect2:
 	var d := gs.details
@@ -647,7 +647,7 @@ func _expect_rect(pat: Dictionary) -> Rect2:
 		var r := _option_rect(i)
 		return r if r.has_area() else _option_button_rect(i)
 	var uid: int = int(host.keys.get(String(pat.get("card", "")), -1))
-	if t in ["ritual", "arcane"]:
+	if t in ["arcane", "spirit"]:
 		return _extra_action_rect(uid, pat)
 	if uid == gs.selected_uid and gs.action_row.stack != null and is_instance_valid(gs.action_row.stack) \
 			and gs.action_row.stack.get_child_count() > 0:

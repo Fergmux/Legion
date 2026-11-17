@@ -69,7 +69,7 @@ func test_mimic_shows_the_copied_units_art() -> void:
 	assert_str(String(MatchView.card_view(m, mimic, 1)["name"])).is_equal("Mimic")
 
 
-func test_copying_an_evolved_unit_shows_its_evolved_art() -> void:
+func test_copying_a_transformed_unit_shows_its_transformed_art() -> void:
 	var m := TB.make()
 	var loak: int = _copy(m, LOAK, LARVA)[0]
 	assert_int(m.art_id(loak)).is_equal(LARVA)

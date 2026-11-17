@@ -15,8 +15,8 @@ const TINT := Color(0.085, 0.075, 0.068, 0.97)
 
 ## True while the cue is meant to be showing (it may still be fading in or out).
 var shown: bool = false
-## L23 follow-up: names of the sections below the fold (e.g. "Evolve", "Statuses"); the caption
-## names them when they fit ("Scroll for Evolve, Statuses"), else "Scroll for more".
+## L23 follow-up: names of the sections below the fold (e.g. "Transform", "Statuses"); the caption
+## names them when they fit ("Scroll for Transform, Statuses"), else "Scroll for more".
 var more: PackedStringArray = PackedStringArray()
 const PX := 13
 var _host: ScrollContainer

@@ -58,7 +58,7 @@ static func _spectator_pending(m: MatchEngine, vis: int) -> Dictionary:
 
 ## F03-08: what can be summoned from the viewer's Extra Deck right now, by method, so the Extra
 ## pile cue is never mistaken for Fusion-specific proof. {"any": bool, "methods": [...]} where a
-## method is {"kind": "ritual" | "arcane", "uid": Extra unit} or {"kind": "fusion", "t": command,
+## method is {"kind": "arcane" | "spirit", "uid": Extra unit} or {"kind": "fusion", "t": command,
 ## "via": method card, "idx": ability index, "targets": [Fusion units]}. Only the viewer's own
 ## cards appear, and only while the viewer can act.
 static func extra_availability(m: MatchEngine, viewer: int, actions: Array) -> Dictionary:
@@ -66,7 +66,7 @@ static func extra_availability(m: MatchEngine, viewer: int, actions: Array) -> D
 	var seen := {}
 	var extra: Array = m.players[viewer]["extra"]
 	for a in actions:
-		if a.get("ok", false) and String(a["t"]) in ["ritual", "arcane"] and int(a["uid"]) in extra and not seen.has(a["uid"]):
+		if a.get("ok", false) and String(a["t"]) in ["arcane", "spirit"] and int(a["uid"]) in extra and not seen.has(a["uid"]):
 			seen[a["uid"]] = true
 			methods.append({"kind": a["t"], "uid": a["uid"]})
 	var can_act := m.winner == -1 and m.pending.is_empty() and m.stack.is_empty() and m.active == viewer
@@ -96,13 +96,13 @@ static func card_view(m: MatchEngine, uid: int, viewer: int) -> Dictionary:
 	var v := {
 		"uid": uid, "id": df["id"], "name": df["name"], "category": df["category"],
 		"cost_kind": df["cost_kind"], "cost_text": m.cost_text(uid),
-		"cost": m.extra_cost(uid) if df["cost_kind"] in ["ritual", "arcane"] else m.current_cost(uid),
+		"cost": m.extra_cost(uid) if df["cost_kind"] in ["arcane", "spirit"] else m.current_cost(uid),
 		"printed_cost": df["cost"], "zone": inst["zone"], "slot": inst["slot"], "owner": inst["owner"], "ctl": inst["ctl"],
 		"face_up": m.is_face_up(uid), "statuses": inst["st"].duplicate(), "runes": inst["runes"],
 		"text": _rules_text(df), "text_parts": rules_parts(df), "support": CardScripts.support_status(df["id"]), "art": df["art"],
 		"keywords": df["keywords"],
 	}
-	_add_evolve(v, df)
+	_add_transform(v, df)
 	# L11: a unit on the Field showing a copied unit's art (Loak / Mimic): every renderer draws `art_id`.
 	if inst["zone"] == "unit" and m.art_id(uid) != int(df["id"]):
 		v["art_id"] = m.art_id(uid)
@@ -151,7 +151,7 @@ static func def_view(id: int) -> Dictionary:
 		"text": _rules_text(df), "text_parts": rules_parts(df), "support": CardScripts.support_status(id), "art": df["art"],
 		"keywords": df["keywords"],
 	}
-	_add_evolve(v, df)
+	_add_transform(v, df)
 	var abs: Array = CardScripts.get_entry(id).get("abilities", [])
 	if not abs.is_empty():
 		v["abilities"] = ability_views(abs)
@@ -172,8 +172,8 @@ static func summary_view(c: Dictionary) -> Dictionary:
 	var kind := "ap"
 	match c["category"]:
 		"fusion": kind = "fusion"
-		"ritual": kind = "ritual"
 		"arcane": kind = "arcane"
+		"spirit": kind = "spirit"
 	var d := CardDB.get_def(c["id"])
 	var printed = d["cost"]
 	var v := {"uid": -1000 - c["id"], "id": c["id"], "name": c["name"], "category": c["category"], "cost_kind": kind,
@@ -181,7 +181,7 @@ static func summary_view(c: Dictionary) -> Dictionary:
 		"race": c["race"], "type": c["type"], "atk": c["atk"], "def": c["def"], "printed_atk": c["atk"], "printed_def": c["def"],
 		"text": c["text"], "text_parts": rules_parts(d), "keywords": d["keywords"], "support": c["support"],
 		"art": d["art"], "statuses": {}, "runes": 0, "zone": "pile"}
-	_add_evolve(v, d)
+	_add_transform(v, d)
 	# M6: the rules split by timing and the activated abilities, exactly as def_view / card_view give
 	# them, so every inspect entry point draws the same coloured sections for a card.
 	var abs: Array = CardScripts.get_entry(int(c["id"])).get("abilities", [])
@@ -190,11 +190,11 @@ static func summary_view(c: Dictionary) -> Dictionary:
 	return v
 
 
-## L23: `evolves_into` (the id of the card it evolves into) on a view of a card with an Evolve section.
-static func _add_evolve(v: Dictionary, df: Dictionary) -> void:
-	var nxt = df.get("evolves_into")
+## L23: `transforms_into` (the id of the card it transforms into) on a view of a card with a Transform section.
+static func _add_transform(v: Dictionary, df: Dictionary) -> void:
+	var nxt = df.get("transforms_into")
 	if nxt != null:
-		v["evolves_into"] = int(nxt)
+		v["transforms_into"] = int(nxt)
 
 
 static func _rules_text(df: Dictionary) -> String:
@@ -215,14 +215,14 @@ static func rules_parts(df: Dictionary) -> Array:
 		out.append({"k": "Effect" if df["category"] == "power" else "On Field", "t": df["on_field"]})
 	if df["on_destruction"] != "":
 		out.append({"k": "On Destruction", "t": df["on_destruction"]})
-	# L23: the Evolve section, apart from the timings (like a Fusion's Materials), last.
-	if String(df.get("evolve", "")) != "":
-		out.append({"k": EVOLVE_PART, "t": String(df["evolve"])})
+	# L23: the Transform section, apart from the timings (like a Fusion's Materials), last.
+	if String(df.get("transform", "")) != "":
+		out.append({"k": TRANSFORM_PART, "t": String(df["transform"])})
 	return out
 
 
-## L23: the caption of a card's Evolve section in text_parts.
-const EVOLVE_PART := "Evolve"
+## L23: the caption of a card's Transform section in text_parts.
+const TRANSFORM_PART := "Transform"
 
 
 ## Activated abilities with their short button label and full description (F02-04).
@@ -296,7 +296,7 @@ static func _pending_view(m: MatchEngine, viewer: int) -> Dictionary:
 		if o.has("preview"):
 			ov["preview"] = o["preview"]
 		if o.has("value"):
-			ov["value"] = o["value"]          # e.g. an Arcane material's current cost (F03-04)
+			ov["value"] = o["value"]          # e.g. a Spirit material's current cost (F03-04)
 		if o.has("slot"):
 			ov["slot"] = o["slot"]
 			ov["zone"] = o["zone"]
@@ -320,12 +320,15 @@ static func _pending_view(m: MatchEngine, viewer: int) -> Dictionary:
 		out["total_exact"] = pd.get("total_exact", false)
 	if pd["kind"] == "trap_response" and pd.has("event"):
 		out["cause"] = _cause_refs(m, pd["event"])
+		var tgts := event_targets(m, pd)
+		if not tgts.is_empty():
+			out["cause"]["targets"] = tgts   # N batch: the answered effect's chosen targets (public)
 		out["mentions"] = event_cards(m, pd["event"], viewer)
-	# L23: an Evolve prompt shows the unit beside the card it becomes (both public information).
-	if pd["kind"] == "evolve" and m.cards.has(int(pd.get("source", -1))) and pd.has("evolve_to"):
-		out["evolve_to"] = int(pd["evolve_to"])
-		out["mentions"] = [{"role": "evolve_from", "card": card_view(m, int(pd["source"]), viewer)},
-			{"role": "evolve_to", "card": def_view(int(pd["evolve_to"]))}]
+	# L23: a Transform prompt shows the unit beside the card it becomes (both public information).
+	if pd["kind"] == "transform" and m.cards.has(int(pd.get("source", -1))) and pd.has("transform_to"):
+		out["transform_to"] = int(pd["transform_to"])
+		out["mentions"] = [{"role": "transform_from", "card": card_view(m, int(pd["source"]), viewer)},
+			{"role": "transform_to", "card": def_view(int(pd["transform_to"]))}]
 	# The card itself, so the input panel can show it wherever it is (a resolving Spell is in no
 	# pile the viewer's player view lists). Given only with source_uid, i.e. when visible.
 	if out.has("source_uid"):
@@ -431,6 +434,36 @@ static func _cause_refs(m: MatchEngine, ev: Dictionary) -> Dictionary:
 	return {"card": m.fx_pos(c)} if c != -1 and m.cards.has(c) else {}
 
 
+## N batch (owner, 16 Nov): the board positions ({p, zone, slot}) of the Field cards the effect a Trap
+## response window `pd` answers has already chosen as its targets (Assassinate's unit, chosen before
+## the window opens), so the responder sees its targeting arrow. Public: the choice was made on the
+## open board. Read from the waiting activation frame (the card the event names) and its "choose"
+## ops already passed; [] when it has chosen nothing on the Field yet (a triggered effect chooses
+## after its window) or for any other event.
+static func event_targets(m: MatchEngine, pd: Dictionary) -> Array:
+	var ev: Dictionary = pd.get("event", {})
+	if String(ev.get("name", "")) != "activate":
+		return []
+	var src := int(ev.get("card", -1))
+	var out := []
+	for f in m.stack:
+		if int(f.get("src", -2)) != src or int(pd.get("source", -3)) != src or not f.get("_waiting", false):
+			continue
+		var ops: Array = f.get("ops", [])
+		for i in mini(int(f.get("pc", 0)), ops.size()):
+			var op: Dictionary = ops[i]
+			if String(op.get("op", "")) != "choose":
+				continue
+			var picked = f["vars"].get(String(op.get("as", "")), [])
+			if not (picked is Array):
+				continue
+			for u in picked:
+				var pos := m.fx_pos(int(u))
+				if not pos.is_empty() and not (pos in out):
+					out.append(pos)
+	return out
+
+
 ## A selection effect may reveal a normally hidden card to the chooser only.
 static func _forced_view(m: MatchEngine, uid: int, viewer: int) -> Dictionary:
 	var inst: Dictionary = m.cards[uid]
@@ -450,7 +483,7 @@ static func _public_kind(kind: String) -> String:
 		"stance": return "choosing a stance"
 		"attack_target": return "choosing an attack target"
 		"confirm": return "deciding whether to use an effect"
-		"evolve": return "deciding whether to evolve a unit"
+		"transform": return "deciding whether to transform a unit"
 	return "making a choice"
 
 
@@ -602,20 +635,20 @@ static func actions_for(m: MatchEngine, viewer: int) -> Array:
 	for u in m.backrow_cards(viewer):
 		if m.category(u) == "spell":
 			cands.append({"t": "activate_set", "uid": u, "label": "Activate", "full": "Activate this set Spell"})
-	# Owner feedback 2026-10-18: a unit with enough Runes for a Ritual unit it could summon now
-	# offers the Ritual summon itself (only while legal). J14 (2026-10-22): one "Ritual Summon"
-	# button whatever the number of Ritual units; the player picks the unit in the card select tray.
+	# Owner feedback 2026-10-18: a unit with enough Runes for an Arcane unit it could summon now
+	# offers the Arcane summon itself (only while legal). J14 (2026-10-22): one "Arcane Summon"
+	# button whatever the number of Arcane units; the player picks the unit in the card select tray.
 	for u in m.field_units(viewer):
-		var ok_r := m.ritual_tribute_targets(viewer, u)
+		var ok_r := m.arcane_tribute_targets(viewer, u)
 		if not ok_r.is_empty():
-			cands.append({"t": "ritual_tribute", "uid": u, "label": "Ritual Summon",
-				"full": "Tribute this unit to Ritual Summon %s" % " or ".join(ok_r.map(func(r): return m.name_of(r)))})
+			cands.append({"t": "arcane_tribute", "uid": u, "label": "Arcane Summon",
+				"full": "Tribute this unit to Arcane Summon %s" % " or ".join(ok_r.map(func(r): return m.name_of(r)))})
 	for u in pl["extra"]:
 		match m.category(u):
-			"ritual":
-				cands.append({"t": "ritual", "uid": u, "label": "Summon", "full": "Ritual " + SUMMON_FULL})
 			"arcane":
 				cands.append({"t": "arcane", "uid": u, "label": "Summon", "full": "Arcane " + SUMMON_FULL})
+			"spirit":
+				cands.append({"t": "spirit", "uid": u, "label": "Summon", "full": "Spirit " + SUMMON_FULL})
 	for c in cands:
 		var reason := m.validate(viewer, c)
 		c["ok"] = reason == ""

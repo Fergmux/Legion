@@ -3,7 +3,7 @@ extends FxPart
 ## Card-movement effects between zones and piles: destruction (crack, burn, drop toward Spent),
 ## Exhaust (card shown front and centre, then pulled into the Exhaust pile in a void colour), the
 ## sacrifice (D6), the B5 transient summon ghost and a lone special-summon material (one whose summon
-## failed; the Fusion / Ritual / Arcane set pieces themselves live in FxSummon). Presentation only: every effect
+## failed; the Fusion / Arcane / Spirit set pieces themselves live in FxSummon). Presentation only: every effect
 ## is an overlay on the already-final board and is removed by FxPlayer.finish_all().
 ##
 ## Identity rule: a card is drawn face up only when the event carries `id` (core strips it for seats
@@ -13,14 +13,14 @@ extends FxPart
 ## for Exhaust. Special-summon colours come from the existing card-category palette.
 const BURN := Color("ff8a3a")
 const VOID := Color("a47bff")
-const KIND_ACCENT := {"fusion": "fusion", "ritual": "ritual", "arcane": "arcane"}
+const KIND_ACCENT := {"fusion": "fusion", "arcane": "arcane", "spirit": "spirit"}
 const BURN_SHADER := "res://assets/shaders/canvas_fx_burn.gdshader"
 
 ## Seconds the Exhaust card holds front and centre.
 const EXHAUST_HOLD := 0.6
 
 
-## Colour of a special-summon kind ("fusion" | "ritual" | "arcane"), lightened to read on the wood board.
+## Colour of a special-summon kind ("fusion" | "arcane" | "spirit"), lightened to read on the wood board.
 static func kind_color(kind: String) -> Color:
 	var c: Color = UIStyle.CATEGORY_COLORS.get(String(KIND_ACCENT.get(kind, "unit")), UIStyle.GOLD)
 	return c.lightened(0.45) if c.get_luminance() < 0.3 else c.lightened(0.2)
@@ -414,9 +414,9 @@ func exhaust(e: Dictionary, prev_mv: Dictionary) -> void:
 
 # ---------------------------------------------------------------- special summons
 
-## One material of a Fusion / Ritual / Arcane summon (event `e`): its card is drawn from where it was
+## One material of a Fusion / Arcane / Spirit summon (event `e`): its card is drawn from where it was
 ## to the summon slot (`gather`, global), flashes there as it is consumed, and a mote carries it on to
-## the pile it really went to (Spent for Fusion / Ritual field materials, Exhaust otherwise).
+## the pile it really went to (Spent for Fusion / Arcane field materials, Exhaust otherwise).
 func material(e: Dictionary, prev_mv: Dictionary, gather: Vector2) -> void:
 	var p := int(e.get("p", 0))
 	var kind := String(e.get("kind", "fusion"))

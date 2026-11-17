@@ -87,14 +87,14 @@ func test_debilitated_unit_cannot_be_sacrificed() -> void:
 
 func test_unit_leaving_field_resets_stats_but_keeps_persistent_cost() -> void:
 	var m := TB.make()
-	var u := TB.unit(m, 0, 21, 0)        # Shen the World Dragon (cost 4)
+	var u := TB.unit(m, 0, 13, 0)        # Chaos Witch (cost 3; Shen, the old fixture, is a Spirit since 2026-11-17)
 	m.apply_status(u, "eternal", 1)
 	m.cards[u]["mods"].append({"atk": 5, "def": 5, "until": "field", "src": "x"})
 	m.cards[u]["cost_p"] = 1
 	m.move_to_pile(u, "spent")
 	assert_bool(m.cards[u]["st"].is_empty()).is_true()
 	assert_bool(m.cards[u]["mods"].is_empty()).is_true()
-	assert_int(m.current_cost(u)).is_equal(5)
+	assert_int(m.current_cost(u)).is_equal(4)
 
 
 func test_nimble_moves_to_adjacent_empty_zone_once_per_turn() -> void:

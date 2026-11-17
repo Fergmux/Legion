@@ -2,7 +2,7 @@ extends SceneTree
 ## Development-only visual driver for the F03 effects package (badges, ready glow, destroy / exhaust,
 ## special summons, game end). Run windowed:
 ##   godot --path rldb -s res://src/dev/f03_fx_driver.gd -- --no-steam --fx-shots=<abs dir> --mode=<mode> [--size=1600x900]
-## Modes: ready, destroy, exhaust, fusion, ritual, arcane, win, lose, series, strike, final, fps, plus
+## Modes: ready, destroy, exhaust, fusion, arcane, spirit, win, lose, series, strike, final, fps, plus
 ## selfbuff (F02: overlapping self-buffs on a hovered unit; prints its drift), unitwin / unitwin_trap (F12:
 ## a game-winning attack on a unit, the second answered in a trap window), fpsunit and aa (F13: reports the
 ## renderer and MSAA actually in use, saves crops at Off / 4x / 8x and times frames at each). It stages a board through the
@@ -194,23 +194,23 @@ func _summon_scene(kind: String) -> void:
 			_fresh_view(a)
 			await _wait(0.5)
 			m.submit(a, {"t": "ability", "uid": mag, "idx": 0})
-		"ritual":
+		"arcane":
 			var u := TB.unit(m, a, 1, 0)
 			m.apply_status(u, "rune", 1)
 			var r := TB.card(m, a, 98, "extra")
 			_fresh_view(a)
 			await _wait(0.5)
-			m.submit(a, {"t": "ritual", "uid": r})
-		"arcane":
+			m.submit(a, {"t": "arcane", "uid": r})
+		"spirit":
 			TB.card(m, a, 1, "spent")
 			TB.card(m, a, 110, "spent")
 			var ar := TB.card(m, a, 172, "extra")
 			_fresh_view(a)
 			await _wait(0.5)
-			m.submit(a, {"t": "arcane", "uid": ar})
+			m.submit(a, {"t": "spirit", "uid": ar})
 	_auto_answer()
 	host.broadcast()
-	await _seq(kind, ceili(FxSummon.length_for(kind) / 0.06) + 4, 0.06)   # the whole set piece (Ritual / Arcane build longer since 10 Nov)
+	await _seq(kind, ceili(FxSummon.length_for(kind) / 0.06) + 4, 0.06)   # the whole set piece (Arcane / Spirit build longer since 10 Nov)
 	_done()
 
 
@@ -278,7 +278,7 @@ func _mode_resources() -> void:
 
 ## D8 / B5: frame times through each set piece (no screenshots while measuring): worst and mean frame ms.
 func _mode_fpsset() -> void:
-	var kinds := ["fusion", "ritual", "arcane", "serpent"]
+	var kinds := ["fusion", "arcane", "spirit", "serpent"]
 	for x in OS.get_cmdline_user_args():
 		if x.begins_with("--only="):
 			kinds = [x.split("=")[1]]   # one kind per process: a clean board, nothing left from earlier runs
@@ -297,14 +297,14 @@ func _mode_fpsset() -> void:
 				TB.unit(m, a, 34, 1)
 				TB.card(m, a, 142, "extra")
 				cmd = {"t": "ability", "uid": mag, "idx": 0}
-			"ritual":
+			"arcane":
 				var u := TB.unit(m, a, 1, 0)
 				m.apply_status(u, "rune", 1)
-				cmd = {"t": "ritual", "uid": TB.card(m, a, 98, "extra")}
-			"arcane":
+				cmd = {"t": "arcane", "uid": TB.card(m, a, 98, "extra")}
+			"spirit":
 				TB.card(m, a, 1, "spent")
 				TB.card(m, a, 110, "spent")
-				cmd = {"t": "arcane", "uid": TB.card(m, a, 172, "extra")}
+				cmd = {"t": "spirit", "uid": TB.card(m, a, 172, "extra")}
 			"serpent":
 				TB.unit(m, a, 158, 0)
 				TB.unit(m, a, 159, 1)
@@ -376,12 +376,12 @@ func _mode_fusion() -> void:
 	_summon_scene("fusion")
 
 
-func _mode_ritual() -> void:
-	_summon_scene("ritual")
-
-
 func _mode_arcane() -> void:
 	_summon_scene("arcane")
+
+
+func _mode_spirit() -> void:
+	_summon_scene("spirit")
 
 
 func _end_scene(viewer_wins: bool, series: bool) -> void:

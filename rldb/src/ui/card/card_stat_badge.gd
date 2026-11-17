@@ -27,6 +27,19 @@ const ATK_W := 0.84
 const DEF_W := 0.8
 
 
+## +1 / -1 / 0: the live ATK (`is_atk`) or DEF of a unit on the Field in `view` against its reference:
+## the base an effect set when there is one (a ?/? unit's arrival base, a copied base; N batch 16 Nov,
+## as the details pane's stat tile), else the printed stat. 0 off the Field or with no reference.
+static func trend(view: Dictionary, is_atk: bool) -> int:
+	var value = view.get("atk" if is_atk else "def")
+	var ref = view.get("base_atk" if is_atk else "base_def")
+	if ref == null:
+		ref = view.get("printed_atk" if is_atk else "printed_def")
+	if value == null or ref == null or view.get("zone", "") != "unit":
+		return 0
+	return 1 if value > ref else (-1 if value < ref else 0)
+
+
 ## Draws the ATK (`is_atk`) or DEF badge filling `rect`. Shows the live value, or the preview value
 ## in a provisional cyan style while the painter's pv_stat targets this stat.
 static func draw(pt: CardPainter, slot_rect: Rect2, is_atk: bool, fs_max: float) -> void:
@@ -35,7 +48,6 @@ static func draw(pt: CardPainter, slot_rect: Rect2, is_atk: bool, fs_max: float)
 	var s := pt.s
 	var view := pt.view
 	var value = view.get("atk" if is_atk else "def")
-	var printed = view.get("printed_atk" if is_atk else "printed_def")
 	var previewing := pt.pv_stat == ("atk" if is_atk else "def")
 	var c := rect.get_center()
 	pt.upright_begin(c)   # a Defense (rotated) card still shows its numbers the right way up
@@ -57,13 +69,12 @@ static func draw(pt: CardPainter, slot_rect: Rect2, is_atk: bool, fs_max: float)
 	if previewing:
 		shown_v = pt.pv_value
 		tcol = PREVIEW_TEXT
-	elif value != null and printed != null and view.get("zone", "") == "unit":
-		if value > printed:
+	else:
+		mod = trend(view, is_atk)
+		if mod > 0:
 			tcol = UIStyle.GOOD
-			mod = 1
-		elif value < printed:
+		elif mod < 0:
 			tcol = LOWERED
-			mod = -1
 	var txt := "?" if shown_v == null else str(shown_v)
 	var font := UIStyle.font_display(700)
 	# The numbers keep their earlier size: fitted to the slot before the shapes were narrowed.

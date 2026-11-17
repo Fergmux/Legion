@@ -8,6 +8,11 @@ func _fusion_pool(p: int, sources: Array) -> Array:
 	var pool := []
 	if "field" in sources:
 		pool += field_units(p).filter(func(u): return not is_debilitated(u))
+	# 2026-11-17 (Tag Team - S): "colN" = the units in column N (resolved from "column" by _fusion_sources).
+	for src in sources:
+		if String(src).begins_with("col") and String(src) != "column":
+			var col := int(String(src).substr(3))
+			pool += field_units(p).filter(func(u): return not is_debilitated(u) and column_of(u) == col)
 	if "spent" in sources:
 		pool += players[p]["spent"].filter(func(u): return is_unit(u))
 	if player_has_flag(p, "hand_fusion"):
@@ -72,9 +77,9 @@ func _fusion_needs_field_mat(p: int, exclude: int = -1, exclude_frees: bool = tr
 
 
 ## Fusion materials player p could use among `sources`, optionally excluding one uid.
-## Owner rule 2026-10-18: no Fusion, Ritual or Arcane summon happens in the Battle Phase (either
+## Owner rule 2026-10-18: no Fusion, Arcane or Spirit summon happens in the Battle Phase (either
 ## player's), whatever card offers it.
-const NO_EXTRA_IN_BATTLE := "Fusion, Ritual and Arcane summons cannot be made in the Battle Phase."
+const NO_EXTRA_IN_BATTLE := "Fusion, Arcane and Spirit summons cannot be made in the Battle Phase."
 
 
 ## True while Extra Deck summons are not allowed (the Battle Phase).
@@ -104,7 +109,19 @@ func fusion_candidates(p: int, sources: Array, exclude: int = -1, exclude_frees:
 ## Ends the effect quietly when no Fusion Summon from `sources` is possible right now, so an
 ## optional "You can Fusion Summon" (Tag Team - S, Bronze Salaman) is never offered for nothing.
 func _op_fusion_possible(f: Dictionary, op: Dictionary) -> int:
-	return R.CONT if not fusion_candidates(f["ctl"], op["sources"]).is_empty() else R.END
+	return R.CONT if not fusion_candidates(f["ctl"], _fusion_sources(f, op["sources"])).is_empty() else R.END
+
+
+## 2026-11-17: the op's sources with "column" resolved to the frame card's column ("colN").
+func _fusion_sources(f: Dictionary, sources: Array) -> Array:
+	var out := []
+	for src in sources:
+		if String(src) == "column":
+			if cards.has(f["src"]) and unit_on_field(f["src"]):
+				out.append("col%d" % column_of(f["src"]))
+		else:
+			out.append(src)
+	return out
 
 
 ## F04-22 / F07 (2026-10-17): every Fusion method makes all of its choices first, while its
@@ -206,7 +223,7 @@ func _op_fusion(f: Dictionary, op: Dictionary) -> int:
 			return R.CONT                 # the plan was abandoned (no candidates / materials)
 		var planned: Dictionary = op.duplicate()
 		planned["planned"] = true
-		_splice(f, [{"op": "fusion_pick", "sources": op["sources"], "cancellable": not f["committed"],
+		_splice(f, [{"op": "fusion_pick", "sources": _fusion_sources(f, op["sources"]), "cancellable": not f["committed"],
 			"exclude_self": op.get("not_self", false), "frees_zone": false}, planned])
 		return R.CONT
 	f["vars"].erase("fusion_ready")

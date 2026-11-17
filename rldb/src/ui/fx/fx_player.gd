@@ -70,8 +70,8 @@ var _game_end := FxGameEnd.new(self)
 var _strike := FxStrike.new(self)
 var _summon := FxSummon.new(self)
 var _serpent := FxSerpent.new(self)
-## L23 / L11: the Evolve set piece and the copied-art shimmer.
-var _evolve := FxEvolve.new(self)
+## L23 / L11: the Transform set piece and the copied-art shimmer.
+var _transform := FxTransform.new(self)
 ## L8: status application, ward, tick and expiry looks.
 var _status := FxStatus.new(self)
 ## L9: Hypnotise's glide of a unit to its new zone (and home again).
@@ -427,7 +427,7 @@ func play(events: Array, prev_mv: Dictionary) -> void:
 				var it: Dictionary = screen.fx_slot_item(sp, "unit", sslot)
 				var gone: bool = it.is_empty() or not (it["widget"] as CardWidget).visible
 				if summon_kind != "":
-					# D8: the Fusion / Ritual / Arcane set piece (materials drawn in, climax, the card slams down).
+					# D8: the Fusion / Arcane / Spirit set piece (materials drawn in, climax, the card slams down).
 					_prehide(sp, "unit", sslot, t, sched, _summon.play.bind(summon_kind, sp, sslot, mats[sp], e, prev_mv))
 					sched[-1].append("set_piece:%s:%d:%d" % [summon_kind, sp, sslot])
 					mats.erase(sp)
@@ -525,11 +525,11 @@ func play(events: Array, prev_mv: Dictionary) -> void:
 			"trigger":
 				sched.append([t, _cards.trigger.bind(e["at"]), "trigger"])
 				t += 0.1
-			"evolve", "copy_form":
-				# L23 / L11 (FxEvolve): the old look covers the slot from now until its effect plays,
+			"transform", "copy_form":
+				# L23 / L11 (FxTransform): the old look covers the slot from now until its effect plays,
 				# which holds the rest of the batch.
-				sched.append([t, _evolve.play.bind(e, _evolve.prepare(e, prev_mv)), k])
-				holds.append([sched.size(), FxEvolve.length_for() if k == "evolve" else FxEvolve.copy_hold()])
+				sched.append([t, _transform.play.bind(e, _transform.prepare(e, prev_mv)), k])
+				holds.append([sched.size(), FxTransform.length_for() if k == "transform" else FxTransform.copy_hold()])
 				t += 0.05
 			"spotlight":
 				# The card is shown first; everything after it in this batch (statuses, destroys,

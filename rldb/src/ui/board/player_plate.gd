@@ -163,6 +163,7 @@ func update_from(pv: Dictionary, active: bool, mine: bool, label_suffix: String,
 	var ap := int(pv["ap"])
 	_ap_voiced = false
 	ap_gems.set_values(ap, int(pv.get("ap_start", ap)), int(pv.get("ap_peak", ap)), snap)
+	ap_gems.set_bonus(next_ap(pv))
 	_ap_claimed = false
 	next_label.text = next_text
 	if active != _active:
@@ -170,6 +171,15 @@ func update_from(pv: Dictionary, active: bool, mine: bool, label_suffix: String,
 		_active_t0 = _now()
 		pulse()
 	_refresh_frame()
+
+
+## N batch (16 Nov): the net AP promised for this player's next turn (the view's "ap_next" entries,
+## only ever filled in for the viewer's own seat), shown as extra pending gem sockets.
+static func next_ap(pv: Dictionary) -> int:
+	var n := 0
+	for m in pv.get("ap_next", []):
+		n += int(m.get("n", 0))
+	return n
 
 
 ## The AP change of the coming update is announced by an effect, which plays its sound (D6): the gems

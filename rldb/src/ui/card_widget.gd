@@ -30,7 +30,7 @@ const SIZES := {
 ## Default sizes of EMPTY zone backgrounds (callers normally size these to the zone rect).
 const EMPTY_SIZES := {"board": Vector2(128, 128), "trap": Vector2(128, 85), "power": Vector2(85, 128)}
 const ART_DIR := CardArt.ART_DIR
-const UNIT_CATS := ["basic_unit", "unit", "fusion", "ritual", "arcane"]
+const UNIT_CATS := ["basic_unit", "unit", "fusion", "arcane", "spirit"]
 const BIG_KINDS := ["hand", "big", "mini", "back"]
 ## H12: z_index (relative to the card's parent) of a selected card, so its corner brackets draw
 ## above neighbouring zones and the board. Below the FX vignette (FxPlayer.VIGNETTE_Z) and every

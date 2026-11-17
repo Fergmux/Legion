@@ -554,13 +554,13 @@ func _shot(name: String) -> void:
 
 ## Arranges a readable mid-game board (same as the shot driver).
 ## F04 / F08 / F05: the Extra Deck list with its Summon buttons, the Fusion-method picker, the
-## method's next step, then the exact-cost Arcane material circles.
+## method's next step, then the exact-cost Spirit material circles.
 func _extra_shots(gs: GameScreen, m: MatchEngine, a: int) -> void:
 	_put(m, a, 28, 2, "atk")                     # Beast (with the Dragon of the Cave: Bastion Wyrm)
 	_put(m, a, 40, 5, "atk")                     # Aleister: a second Fusion method
 	_add(m, a, 82, "hand")
 	var wyrm := _add(m, a, 93, "extra")
-	var kaya := _add(m, a, 175, "extra")         # Boom (Arcane), cost 4 since 2026-11-03
+	var kaya := _add(m, a, 175, "extra")         # Boom (Spirit), cost 4 since 2026-11-03
 	for id in [34, 27, 13, 162]:          # costs 1, 2, 3 and 0
 		_add(m, a, id, "spent")
 	m.players[a]["ap"] = 3
@@ -576,7 +576,7 @@ func _extra_shots(gs: GameScreen, m: MatchEngine, a: int) -> void:
 				fb = n
 	_check("F04 Fusion Summon button on the Wyrm row without selecting it", fb != null and not fb.disabled)
 	var krow := gs.details.pile_row(kaya)
-	_check("F04 Arcane summon buttons on the Arcane row", krow != null and _nodes(krow).any(func(n): return n is Button and n.has_meta("summon_kind") and n.get_meta("summon_kind") == "arcane"))
+	_check("F04 Spirit summon buttons on the Spirit row", krow != null and _nodes(krow).any(func(n): return n is Button and n.has_meta("summon_kind") and n.get_meta("summon_kind") == "spirit"))
 	if row != null:
 		gs.details.pile_scroll.ensure_control_visible(row)
 	await _frames(6)
@@ -596,8 +596,8 @@ func _extra_shots(gs: GameScreen, m: MatchEngine, a: int) -> void:
 	if not m.pending.is_empty():
 		host.handle(a, {"t": "cancel", "id": m.pending["id"]})
 	await _frames(6)
-	# F08: Arcane Summon of the cost-4 Arcane unit; pay 3, then the 2 would overpay, then the 1 is exact.
-	var acts: Array = gs.action_row.actions_for_card(kaya).filter(func(x): return x["t"] == "arcane")
+	# F08: Spirit Summon of the cost-4 Spirit unit; pay 3, then the 2 would overpay, then the 1 is exact.
+	var acts: Array = gs.action_row.actions_for_card(kaya).filter(func(x): return x["t"] == "spirit")
 	if not acts.is_empty():
 		gs.action_row.run_action(kaya, acts[0])
 	await _frames(12)

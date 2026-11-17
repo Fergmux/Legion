@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 ## Independent review probes (production batch 2026-10-17): seeded bot-vs-bot series on
-## mixed custom decks (every card category, Extra Deck methods included), Ritual / Arcane
+## mixed custom decks (every card category, Extra Deck methods included), Arcane / Spirit
 ## cancel paths (F07), and hidden information from the opponent's seat.
 
 
@@ -50,7 +50,7 @@ func _bot_series(seed_value: int, best_of: int) -> Dictionary:
 			var cmd: Dictionary = bots[p].series_command(s) if s.stage != Series.STAGE_GAME else bots[p].decide(s.game)
 			if cmd.is_empty():
 				continue
-			if s.stage == Series.STAGE_GAME and String(cmd.get("t", "")) in ["ritual", "arcane", "ability", "cast", "activate_set"]:
+			if s.stage == Series.STAGE_GAME and String(cmd.get("t", "")) in ["arcane", "spirit", "ability", "cast", "activate_set"]:
 				specials[cmd["t"]] = int(specials.get(cmd["t"], 0)) + 1
 			var err := s.submit(p, cmd)
 			if err != "":
@@ -86,7 +86,7 @@ func _state(m: MatchEngine) -> Dictionary:
 	return {"cards": m.cards.duplicate(true), "players": m.players.duplicate(true), "stack": m.stack.size()}
 
 
-func test_review_ritual_cancel_each_step_then_commit() -> void:
+func test_review_arcane_cancel_each_step_then_commit() -> void:
 	# B3: no stance prompt in the Setup Phase, so the zone commits and the unit enters in Attack.
 	for k in 3:
 		var m := TB.make()
@@ -94,31 +94,32 @@ func test_review_ritual_cancel_each_step_then_commit() -> void:
 		var mat := TB.unit(m, 0, TB.WATER, 0)
 		m.apply_status(mat, "rune", 2)
 		var before := _state(m)
-		assert_str(m.submit(0, {"t": "ritual", "uid": mimic})).is_empty()
+		assert_str(m.submit(0, {"t": "arcane", "uid": mimic})).is_empty()
 		var answers := [mat, 0]
 		for i in mini(k, 2):
 			assert_str(_answer(m, answers[i])).override_failure_message("step %d" % i).is_empty()
 		if k < 2:
-			assert_bool(m.pending.get("cancellable", false)).override_failure_message("ritual step %d" % k).is_true()
+			assert_bool(m.pending.get("cancellable", false)).override_failure_message("arcane step %d" % k).is_true()
 			assert_str(m.submit(0, {"t": "cancel", "id": m.pending["id"]})).is_empty()
-			assert_dict(_state(m)).override_failure_message("ritual cancel %d" % k).is_equal(before)
+			assert_dict(_state(m)).override_failure_message("arcane cancel %d" % k).is_equal(before)
 		else:
 			assert_str(m.cards[mimic]["zone"]).is_equal("unit")
 			assert_str(m.cards[mimic]["stance"]).is_equal("atk")
 			assert_str(m.cards[mat]["zone"]).is_equal("spent")
 
 
-func test_review_arcane_cancel_each_step_then_exact_commit() -> void:
+func test_review_spirit_cancel_each_step_then_exact_commit() -> void:
 	for k in 4:
 		var m := TB.make()
-		# 2026-11-03: Tyde is 3A now; Flying Sandworm (2A, no On Summon) keeps the requirement of 2.
-		var tyde := TB.card(m, 0, 171, "extra")               # Flying Sandworm 2A
+		# 2026-11-03: Tyde is 3A now; 2026-11-17: Tyde is an Arcane Unit and Flying Sandworm costs 1, so
+		# Cliff the Flying Bison (2 Spirit, no On Summon) keeps the requirement of 2.
+		var tyde := TB.card(m, 0, 174, "extra")               # Cliff the Flying Bison 2S
 		var a := TB.card(m, 0, TB.WATER, "spent")             # cost 1
 		var b := TB.card(m, 0, TB.FIRE, "spent")              # cost 1
 		var two := TB.card(m, 0, 28, "spent")                 # cost 2
-		var three := TB.card(m, 0, 23, "spent")               # Auric, cost 4: more than the requirement
+		var three := TB.card(m, 0, 13, "spent")               # Chaos Witch, cost 3: more than the requirement (Auric is an Extra Deck Spirit since 2026-11-17)
 		var before := _state(m)
-		assert_str(m.submit(0, {"t": "arcane", "uid": tyde})).is_empty()
+		assert_str(m.submit(0, {"t": "spirit", "uid": tyde})).is_empty()
 		if k == 0:
 			assert_str(_answer_many(m, [a, two])).contains("exactly")     # overpay refused
 			assert_str(_answer_many(m, [three])).contains("exactly")
@@ -141,7 +142,7 @@ func test_review_arcane_cancel_each_step_then_exact_commit() -> void:
 			assert_str(m.cards[two]["zone"]).is_equal("spent")
 			continue
 		assert_str(m.submit(0, {"t": "cancel", "id": m.pending["id"]})).is_empty()
-		assert_dict(_state(m)).override_failure_message("arcane cancel %d" % k).is_equal(before)
+		assert_dict(_state(m)).override_failure_message("spirit cancel %d" % k).is_equal(before)
 
 
 func test_review_tag_team_w_without_match_does_not_stall() -> void:
@@ -198,7 +199,7 @@ func test_review_opponent_view_hides_searched_cards() -> void:
 ## F04 Extra Deck rows: the opponent's view never lists the active player's Extra summons.
 func test_review_extra_availability_is_private() -> void:
 	var m := TB.make()
-	var tyde := TB.card(m, 0, 171, "extra")                    # Flying Sandworm 2A (Tyde is 3A since 2026-11-03)
+	var tyde := TB.card(m, 0, 171, "extra")                    # Flying Sandworm 1S (Tyde is an Arcane Unit since 2026-11-17)
 	TB.card(m, 0, TB.WATER, "spent")
 	TB.card(m, 0, TB.FIRE, "spent")
 	var v0 := MatchView.build(m, 0)
@@ -210,19 +211,19 @@ func test_review_extra_availability_is_private() -> void:
 
 
 ## Magentric tributed through Tag Team - S's On Summon Fusion still gives the Fusion unit its tribute
-## bonus: 1 Cleanse since 2026-11-03 (it was 2 Pierce).
+## bonus: 1 Cleanse since 2026-11-03 (it was 2 Pierce). 2026-11-17: Tag Team - S fuses only units in its
+## column (itself included), so Magentric (20 ATK) behind it plus Tag Team - S (Earth) make Geolock Colossus.
 func test_review_magentric_bonus_through_tag_team_s_trigger() -> void:
 	var m := TB.make()
 	var mag := TB.unit(m, 0, 69, 3)                            # Beast, back row column 1
-	var dr := TB.unit(m, 0, 116, 1)                            # Basic Dragon (Physical)
-	# Bastion Wyrm needs a 20+ ATK-or-DEF unit since 2026-11-03; Owlbear Druid takes Magentric.
-	var wyrm := TB.card(m, 0, 189, "extra")                    # Owlbear Druid: Beast + Physical
-	TB.summon(m, 0, 8, 0)                                      # Tag Team - S in front of Magentric
-	for v in [1, wyrm, mag, dr, 1]:
+	TB.unit(m, 0, 116, 1)                                      # Basic Dragon (Physical), column 2: not a material
+	var colossus := TB.card(m, 0, 57, "extra")                 # Geolock Colossus: 20+ ATK-or-DEF unit + Earth unit
+	var tts := TB.summon(m, 0, 8, 0)                           # Tag Team - S (Warrior, Earth) in front of Magentric
+	for v in [1, colossus, mag, tts, 0]:
 		assert_str(_answer(m, v)).is_empty()
-	assert_str(m.cards[wyrm]["zone"]).is_equal("unit")
-	assert_int(m.status_count(wyrm, "cleanse")).is_equal(1)
-	assert_int(m.status_count(wyrm, "pierce")).is_equal(0)
+	assert_str(m.cards[colossus]["zone"]).is_equal("unit")
+	assert_int(m.status_count(colossus, "cleanse")).is_equal(1)
+	assert_int(m.status_count(colossus, "pierce")).is_equal(0)
 
 
 ## Chaos Witch's Type carries Mage Fusion materials: a Water Mage under a Fire Witch is a Fire Mage.

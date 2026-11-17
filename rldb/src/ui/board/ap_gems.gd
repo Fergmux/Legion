@@ -37,11 +37,16 @@ const TOPAZ_HI := Color("fff1b0")
 const TOPAZ := Color("f2b544")
 const TOPAZ_LO := Color("9a6416")
 const GEM_EDGE := Color("2a1606")
+## Alpha of the ghost gem in a pending (next-turn) socket.
+const PENDING_A := 0.5
 const SOCKET_INK := Color("0d0906")
 
 var ap: int = 0
 var ap_start: int = 0
 var ap_peak: int = 0
+## N batch (16 Nov): AP promised for next turn (Delayed Gratification and the like), drawn as extra
+## pending sockets after the row (a dim ghost gem in each) instead of a "next turn +1 AP" text.
+var ap_bonus: int = 0
 ## Seconds clock (tests and the gallery inject a frozen one).
 var clock: Callable = func() -> float: return float(Time.get_ticks_usec()) / 1000000.0
 
@@ -114,6 +119,20 @@ func slots() -> int:
 	return slots_for(ap, ap_start, ap_peak)
 
 
+## Sockets drawn including the pending next-turn sockets (ap_bonus).
+func total_slots() -> int:
+	return slots() + maxi(0, ap_bonus)
+
+
+## Sets the next-turn AP bonus `n` (net; only a gain adds pending sockets) and redraws.
+func set_bonus(n: int) -> void:
+	if n == ap_bonus:
+		return
+	ap_bonus = n
+	_update_tooltip()
+	queue_redraw()
+
+
 ## Count text: "AP 1/2"; before the first turn "AP 0/2" (IDLE_SLOTS). Used for the tooltip.
 func ap_text() -> String:
 	return "AP %d/%d" % [ap, capacity() if capacity() > 0 else IDLE_SLOTS]
@@ -126,7 +145,7 @@ func set_values(p_ap: int, p_start: int, p_peak: int, snap: bool = false) -> voi
 	ap = p_ap
 	ap_start = p_start
 	ap_peak = p_peak
-	tooltip_text = "Action Points: %d of %d" % [ap, capacity() if capacity() > 0 else IDLE_SLOTS]
+	_update_tooltip()
 	var new_filled := filled()
 	if UIStyle.reduce_motion and not snap and is_inside_tree():
 		# No motion, but the sound hooks still fire (sound is not motion).
@@ -156,6 +175,12 @@ func set_values(p_ap: int, p_start: int, p_peak: int, snap: bool = false) -> voi
 		k += 1
 	set_process(true)
 	step()
+
+
+func _update_tooltip() -> void:
+	tooltip_text = "Action Points: %d of %d" % [ap, capacity() if capacity() > 0 else IDLE_SLOTS]
+	if ap_bonus != 0:
+		tooltip_text += "\n%+d AP at the start of your next turn" % ap_bonus
 
 
 ## True while a gem animation runs.
@@ -203,11 +228,11 @@ func _now() -> float:
 
 
 func _pitch() -> float:
-	return (SOCKET + GAP) * row_scale(slots())
+	return (SOCKET + GAP) * row_scale(total_slots())
 
 
 func _slot_centre(i: int) -> Vector2:
-	var s := row_scale(slots())
+	var s := row_scale(total_slots())
 	return Vector2(SOCKET * s / 2.0 + 1.0 + float(i) * _pitch(), size.y / 2.0)
 
 
@@ -216,7 +241,7 @@ func _draw() -> void:
 	var n := slots()
 	var cap := capacity()
 	var full := filled()
-	var s := row_scale(n)
+	var s := row_scale(total_slots())
 	for i in n:
 		var c := _slot_centre(i)
 		var spent := cap > 0 and i >= full
@@ -234,6 +259,11 @@ func _draw() -> void:
 			var k := clampf((t - float(_spend_t0[i])) / UIStyle.dur(SPEND_T), 0.0, 1.0)
 			_draw_socket(c, s, true, true, k)
 			_draw_gem(c, GEM * s * 0.5 * lerpf(1.0, 0.8, k), k, 1.0 - k * k)
+	# N batch: next turn's promised AP, as extra sockets holding a dim ghost gem.
+	for i in range(n, total_slots()):
+		var c := _slot_centre(i)
+		_draw_socket(c, s, false, true)
+		_draw_gem(c, GEM * s * 0.5 * 0.82, 0.0, PENDING_A)
 	for p in _puffs:
 		var e: float = (t - float(p[2])) / UIStyle.dur(PUFF_T)
 		var pos: Vector2 = p[0] + (p[1] as Vector2) * e
@@ -306,5 +336,5 @@ func _draw_gem(c: Vector2, r: float, dim: float, alpha: float) -> void:
 
 ## X (local px) where the gem row ends: the free space for the "+N AP" floater starts here.
 func row_end_x() -> float:
-	var s := row_scale(slots())
-	return float(slots()) * _pitch() - GAP * s + 1.0
+	var s := row_scale(total_slots())
+	return float(total_slots()) * _pitch() - GAP * s + 1.0

@@ -236,7 +236,7 @@ func _phase_end_score(m: MatchEngine) -> float:
 ## for stance moves and summons, the stance score breakdown of the unit (F11).
 func _debug_text(cmd: Dictionary, sim: MatchEngine, margin: float) -> String:
 	var s := "%s margin %+.2f (%d sims)" % [cmd.get("t", "?"), margin, _sims]
-	if sim != null and cmd.has("uid") and (cmd["t"] in ["stance", "summon", "ritual", "arcane"]):
+	if sim != null and cmd.has("uid") and (cmd["t"] in ["stance", "summon", "arcane", "spirit"]):
 		var u: int = int(cmd["uid"])
 		if sim.unit_on_field(u):
 			s += " :: " + BotStance.compare_text(sim, u, me)
@@ -247,9 +247,9 @@ func _debug_text(cmd: Dictionary, sim: MatchEngine, margin: float) -> String:
 func candidates(m: MatchEngine) -> Array:
 	var out := []
 	for a in MatchView.actions_for(m, me):
-		# Ritual Tribute is the Extra Deck Ritual summon started from its material: already covered.
+		# Arcane Tribute is the Extra Deck Arcane summon started from its material: already covered.
 		# The plate's Sacrifice Unit button (J11) is the per-unit "sacrifice" with a pick: covered too.
-		if not a.get("ok", false) or a["t"] in ["next_phase", "ritual_tribute", "sacrifice_pick"]:
+		if not a.get("ok", false) or a["t"] in ["next_phase", "arcane_tribute", "sacrifice_pick"]:
 			continue
 		# A unit whose stance was already changed this turn is not flipped back (no flip loops).
 		if a["t"] == "stance" and int(m.cards[a["uid"]].get("stance_turn", -1)) == m.turn:
@@ -279,11 +279,11 @@ func choose(m: MatchEngine, depth: int) -> Dictionary:
 		if pd.get("cancellable", false):
 			return {"t": "cancel", "id": pd["id"]}
 		return {"t": "choose", "id": pd["id"], "indices": []}
-	# L23 (owner, 2026-11-05): the bot always evolves: the Evolve prompt's Evolve answer, or any
-	# option labelled "Evolve..." should the prompt change shape.
+	# L23 (owner, 2026-11-05): the bot always transforms: the Transform prompt's Transform answer, or any
+	# option labelled "Transform..." should the prompt change shape.
 	for i in n:
 		var label := String(opts[i].get("label", ""))
-		if (String(pd["kind"]) == "evolve" and label == MatchEngine.EVOLVE_YES) or label.strip_edges().to_lower().begins_with("evolve"):
+		if (String(pd["kind"]) == "transform" and label == MatchEngine.TRANSFORM_YES) or label.strip_edges().to_lower().begins_with("transform"):
 			return {"t": "choose", "id": pd["id"], "indices": [i]}
 	if int(pd["max"]) > 1:
 		return {"t": "choose", "id": pd["id"], "indices": _multi_pick(m, depth)}
@@ -361,7 +361,7 @@ func _first_legal(pd: Dictionary) -> int:
 	return 0
 
 
-## Multi-select. Exact-total selections (Arcane materials) take a combination hitting the total.
+## Multi-select. Exact-total selections (Spirit materials) take a combination hitting the total.
 ## Otherwise, when there are few combinations of the minimum size, each is tried on a copy and
 ## the best is taken; with many, options are tried one at a time (as the only extra pick) and the
 ## best ones are taken until the minimum is met.

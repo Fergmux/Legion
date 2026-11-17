@@ -30,6 +30,6 @@ func test_j30_strip_drops_the_basic_chip_once_complete() -> void:
 
 
 func test_j30_drafted_counts_group_the_extra_deck_kinds() -> void:
-	var picked := [{"category": "unit"}, {"category": "unit"}, {"category": "fusion"}, {"category": "ritual"},
-		{"category": "arcane"}, {"category": "spell"}]
+	var picked := [{"category": "unit"}, {"category": "unit"}, {"category": "fusion"}, {"category": "arcane"},
+		{"category": "spirit"}, {"category": "spell"}]
 	assert_dict(View.drafted_counts(picked)).is_equal({"unit": 2, "extra": 3, "spell": 1})

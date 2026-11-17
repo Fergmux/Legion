@@ -1,14 +1,14 @@
 class_name FxSummon
 extends FxPart
-## Fusion / Ritual / Arcane summon set pieces (D8, owner feedback 2026-10-20). Each one is a staged
-## sequence (Fusion about 1.7 s; Ritual and Arcane about 3 s and 2.3 s with a long build, owner 10 Nov)
+## Fusion / Arcane / Spirit summon set pieces (D8, owner feedback 2026-10-20). Each one is a staged
+## sequence (Fusion about 1.7 s; Arcane and Spirit about 3 s and 2.3 s with a long build, owner 10 Nov)
 ## with its own look and sound, keeping the F03-17 themes:
 ##   anticipation: the board dims under a vignette, the materials are drawn in (Fusion: they spiral into
-##                 a vortex that twists the board; Ritual: a rune circle inscribes itself and the runes are
-##                 drawn out of the tributed units as they burn away; Arcane: the spent materials rise as
+##                 a vortex that twists the board; Arcane: a rune circle inscribes itself and the runes are
+##                 drawn out of the tributed units as they burn away; Spirit: the spent materials rise as
 ##                 spectral shards and assemble into a crystalline lattice) while a charge gathers;
-##   climax:       a flash, a refracting shockwave, a camera shake, light rays and particles (Ritual: a
-##                 pillar of light; Arcane: the lattice bursts; Fusion: the core implodes and explodes);
+##   climax:       a flash, a refracting shockwave, a camera shake, light rays and particles (Arcane: a
+##                 pillar of light; Spirit: the lattice bursts; Fusion: the core implodes and explodes);
 ##   resolution:   the card drops into its slot with a squash-and-stretch slam, dust and a fading glow.
 ## Reduced motion plays a calm variant (no shake, distortion, particles or flight: fades and glows).
 ##
@@ -16,31 +16,34 @@ extends FxPart
 ## the board shows its real state. FxPlayer.play() schedules it and holds the rest of the batch for
 ## length_for(kind), so the events after the summon (its triggers, a trap) wait for the landing.
 
-## Seconds of each set piece and of its climax (before UIStyle.dur). Owner (10 Nov): Ritual and Arcane
+## Seconds of each set piece and of its climax (before UIStyle.dur). Owner (10 Nov): Arcane and Spirit
 ## build up longer, their climax on the impact of their one long cue (SOUND_FULL, measured on the
-## mastered files: Ritual 1.95 s, Arcane 1.40 s); the resolution after the climax keeps its old length.
-const LEN := {"fusion": 1.7, "ritual": 2.97, "arcane": 2.33}
-const CLIMAX := {"fusion": 0.78, "ritual": 1.95, "arcane": 1.4}
+## mastered files: Arcane 1.95 s, Spirit 1.40 s); the resolution after the climax keeps its old length.
+## Owner (16 Nov): the Fusion "should be a bit slower to match the sound effect": its climax stays on the
+## charge cue's peak (0.78 s) and the resolution now lasts as long as the impact cue rings (about 1.6 s
+## at full body before it fades), so the piece runs 2.3 s (was 1.7).
+const LEN := {"fusion": 2.3, "arcane": 2.97, "spirit": 2.33}
+const CLIMAX := {"fusion": 0.78, "arcane": 1.95, "spirit": 1.4}
 ## Seconds of the calm (reduced motion) variant.
 const CALM_LEN := 0.75
 ## The card falls this long after the climax and lands (the slam) at climax + DROP_DELAY + DROP_TIME.
 const DROP_DELAY := 0.04
 const DROP_TIME := 0.16
 ## Sounds: the anticipation layer, the climax hit and the landing slam.
-const SOUND_CHARGE := {"fusion": "fusion_vortex", "ritual": "ritual_choir", "arcane": "arcane_shimmer"}
-const SOUND_CLIMAX := {"fusion": "fusion_impact", "ritual": "ritual_impact", "arcane": "arcane_impact"}
+const SOUND_CHARGE := {"fusion": "fusion_vortex", "arcane": "arcane_choir", "spirit": "spirit_shimmer"}
+const SOUND_CLIMAX := {"fusion": "fusion_impact", "arcane": "arcane_impact", "spirit": "spirit_impact"}
 ## Owner (10 Nov): kinds with one long cue (build, impact on CLIMAX, a tail that rings on after the
 ## landing) played from the start instead of the charge and climax layers. The calm variant keeps the
 ## short climax cue.
-const SOUND_FULL := {"ritual": "ritual_full", "arcane": "arcane_full"}
+const SOUND_FULL := {"arcane": "arcane_full", "spirit": "spirit_full"}
 const SOUND_SLAM := "card_slam"
 const DUST := Color("d8c7a0")
 ## Set-piece colours per kind, [main, accent], keeping the category themes: Fusion royal blue and violet,
-## Ritual violet with gold light, Arcane spectral silver-cyan (the Arcane category grey would read flat).
+## Arcane violet with gold light, Spirit spectral silver-cyan (the Spirit category grey would read flat).
 const PALETTE := {
 	"fusion": [Color("4f7dff"), Color("a46bff")],
-	"ritual": [Color("a35cff"), Color("ffcf6b")],
-	"arcane": [Color("46b4ff"), Color("bfe6ff")],
+	"arcane": [Color("a35cff"), Color("ffcf6b")],
+	"spirit": [Color("46b4ff"), Color("bfe6ff")],
 }
 
 
@@ -116,7 +119,7 @@ func play(kind: String, p: int, slot: int, mats: Array, summon_e: Dictionary, pr
 	for m in mats:
 		match kind:
 			"fusion": _spiral_in(m, p, centre, col, climax - 0.08, float(i) * 0.05, prev_mv)
-			"ritual": _burn_away(m, p, col, climax, float(i) * 0.06, prev_mv)
+			"arcane": _burn_away(m, p, col, climax, float(i) * 0.06, prev_mv)
 			_: _shatter_up(m, p, col, float(i) * 0.05, prev_mv)
 		i += 1
 	if kind == "fusion":
@@ -220,7 +223,7 @@ func _spiral_in(m: Dictionary, p: int, centre: Vector2, col: Color, secs: float,
 		_fx.free_node(g))
 
 
-## Ritual: the tributed card stands, trembles and burns away in the kind colour while its runes are drawn
+## Arcane: the tributed card stands, trembles and burns away in the kind colour while its runes are drawn
 ## out into the circle (FxSummonArt draws them flying from this card).
 func _burn_away(m: Dictionary, p: int, col: Color, climax: float, delay: float, prev_mv: Dictionary) -> void:
 	var origin := _mat_origin(m, p)
@@ -228,7 +231,7 @@ func _burn_away(m: Dictionary, p: int, col: Color, climax: float, delay: float, 
 	var g := _mat_ghost(m, prev_mv, origin)
 	var base := g.position
 	g.fx_glow = Color(col, 0.0)
-	var mat := FxPileEffects.burn_material(g, accent_of("ritual"), Color(0.12, 0.03, 0.18), Color(1.0, 0.97, 0.9))
+	var mat := FxPileEffects.burn_material(g, accent_of("arcane"), Color(0.12, 0.03, 0.18), Color(1.0, 0.97, 0.9))
 	FxPileEffects.burn_step(0.0, g, mat)
 	var lift := Vector2(0, -60.0 if from_hand else -14.0)
 	var tw := _fx.new_tween()
@@ -246,7 +249,7 @@ func _burn_away(m: Dictionary, p: int, col: Color, climax: float, delay: float, 
 		_fx.free_node(g))
 
 
-## Arcane: the spent card rises spectral and pale from its pile and shatters into shards (FxSummonArt
+## Spirit: the spent card rises spectral and pale from its pile and shatters into shards (FxSummonArt
 ## flies the shards on into the lattice).
 func _shatter_up(m: Dictionary, p: int, col: Color, delay: float, prev_mv: Dictionary) -> void:
 	var origin := _mat_origin(m, p)
@@ -279,11 +282,11 @@ func _climax(kind: String, centre: Vector2, col: Color, reach: float) -> void:
 	_fx.screen_flash(col.lerp(Color.WHITE, 0.35), 0.34, 0.02, 0.25, centre)
 	_fx.distort(centre, reach * 2.8, 0.8, 30.0, 0.0, Color(acc, 0.14))
 	_fx.camera_shake(13.0, 0.5)
-	# Each climax has its own blast: Fusion's rings and streaks, Ritual's rays, Arcane's sharp final burst.
+	# Each climax has its own blast: Fusion's rings and streaks, Arcane's rays, Spirit's sharp final burst.
 	var b := FxBlast.new()
-	b.look = {"fusion": FxBlast.Look.HIT, "ritual": FxBlast.Look.BLAST, "arcane": FxBlast.Look.FINAL}.get(kind, FxBlast.Look.HIT)
-	b.col = col if kind != "ritual" else acc
-	b.radius = reach * {"fusion": 0.85, "ritual": 0.55, "arcane": 0.6}.get(kind, 0.7)
+	b.look = {"fusion": FxBlast.Look.HIT, "arcane": FxBlast.Look.BLAST, "spirit": FxBlast.Look.FINAL}.get(kind, FxBlast.Look.HIT)
+	b.col = col if kind != "arcane" else acc
+	b.radius = reach * {"fusion": 0.85, "arcane": 0.55, "spirit": 0.6}.get(kind, 0.7)
 	b.position = _fx.fx_pos(centre)
 	_fx.add_node(b)
 	var tb := _fx.new_tween()
@@ -291,7 +294,7 @@ func _climax(kind: String, centre: Vector2, col: Color, reach: float) -> void:
 	tb.tween_callback(_fx.free_node.bind(b))
 	_fx.burst(FxBurst.Kind.SPARK, centre, acc.lightened(0.2), 32, reach * 1.1, 0.7)
 	match kind:
-		"ritual":
+		"arcane":
 			_fx.burst(FxBurst.Kind.EMBER, centre, acc, 36, reach * 0.9, 1.2)
 			var ring := FxRuneRing.new()
 			ring.col = col
@@ -301,10 +304,10 @@ func _climax(kind: String, centre: Vector2, col: Color, reach: float) -> void:
 			var rt := _fx.new_tween()
 			rt.tween_property(ring, "t", 1.0, UIStyle.dur(0.8))
 			rt.tween_callback(_fx.free_node.bind(ring))
-		"arcane":
+		"spirit":
 			_fx.burst(FxBurst.Kind.SPARK, centre, Color(0.85, 0.97, 1.0), 24, reach * 1.7, 0.55)
 			var sg := FxSigil.new()
-			sg.kind = "arcane"
+			sg.kind = "spirit"
 			sg.col = col
 			sg.radius = reach * 1.1
 			sg.position = _fx.fx_pos(centre)

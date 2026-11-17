@@ -76,7 +76,7 @@ func _stage() -> void:
 	uids["h_loak"] = _new(a, 19, "hand")               # On Summon: opponent unit in this column
 	for i in 4:                                          # Anduras returns one; three pay Tyde's 3
 		uids["spent%d" % i] = _new(a, 1, "spent")
-	uids["tyde"] = _new(a, 172, "extra")               # Arcane, cost 3 (2026-11-03)
+	uids["tyde"] = _new(a, 172, "extra")               # Spirit, cost 3 (2026-11-03)
 	uids["o_fire"] = _put(o, 110, 0, "atk", 10)
 	uids["o_water"] = _put(o, 1, 1, "def")
 	var trap := m._create_instance(46, o)              # Mirror Force, face-down in column 3
@@ -255,8 +255,8 @@ func _steps() -> void:
 			if m.pending.get("kind", "") == "slot":
 				await _click(_zone_rect(a, "unit", 4).get_center())
 				await _wait(0.8)
-			_check("B3 Arcane summon entered Attack", m.cards[uids["tyde"]]["zone"] == "unit" and m.cards[uids["tyde"]]["stance"] == "atk")
-	await _shot("12_after_arcane")
+			_check("B3 Spirit summon entered Attack", m.cards[uids["tyde"]]["zone"] == "unit" and m.cards[uids["tyde"]]["stance"] == "atk")
+	await _shot("12_after_spirit")
 	# F02-12 combat preview.
 	await _click(gs.sidebar.phase_btn.get_global_rect().get_center())
 	await _wait(1.2)

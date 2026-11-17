@@ -1,6 +1,6 @@
 extends SceneTree
 ## Dev-only windowed evidence for the L batch polish follow-ups (design/owner-feedback-2026-11-05.md):
-## the match sidebar's card details pane for long and Evolve cards (Symbiote Spawn / Larva, Akiramari),
+## the match sidebar's card details pane for long and Transform cards (Symbiote Spawn / Larva, Akiramari),
 ## the details pane "Base" of a unit whose base an effect set (Shapeshifter Loak copying a unit, a
 ## set base on a printed unit), the turn panel chip during a zone prompt, and Esc closing the game
 ## menu with its close motion. Runs on a build before the fixes too (for the "before" shots).
@@ -146,9 +146,9 @@ func run() -> void:
 	m.players[me]["ap"] = 9
 	await _show()
 	await create_timer(4.0).timeout         # the coin flip and the deal
-	# ---- item 3: the sidebar details pane of long / Evolve cards
-	await _details("item3_details_spawn", spawn, "EVOLVE")
-	await _details("item3_details_larva", larva, "EVOLVE")
+	# ---- item 3: the sidebar details pane of long / Transform cards
+	await _details("item3_details_spawn", spawn, "TRANSFORM")
+	await _details("item3_details_larva", larva, "TRANSFORM")
 	await _details("item3_details_akiramari", aki, "ON DESTRUCTION")
 	# ---- item 4: Base of a unit whose base an effect set
 	var loak := TB.card(m, me, 19, "hand")

@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## L2 (owner, 5 Nov): every one of the 191 cards can be drafted and lands where it should. Each
 ## non-basic card is offered in its draft category, picked through the normal `draft_pick` command,
-## confirmed, and found in the right zone of game 1 (Fusion / Ritual / Arcane in the Extra Deck,
+## confirmed, and found in the right zone of game 1 (Fusion / Arcane / Spirit in the Extra Deck,
 ## everything else in the Main Deck: Draw or the opening Hand). Every basic unit is reachable through
 ## the basic-unit picker and is dealt into the Main Deck. The three 3 Nov cards (189 Owlbear Druid,
 ## 190 Snow Tiger Paladin, 191 Do Not Open Box) are checked by name as well.
@@ -10,7 +10,7 @@ extends GdUnitTestSuite
 const NEW_CARDS := [189, 190, 191]
 
 
-## The draft category a card is drafted in ("extra" for Fusion, Ritual and Arcane).
+## The draft category a card is drafted in ("extra" for Fusion, Arcane and Spirit).
 func _cat(id: int) -> String:
 	var c := String(CardDB.get_def(id)["category"])
 	return "extra" if c in Series.EXTRA_CATEGORIES else c
@@ -55,7 +55,7 @@ func test_l2_every_non_basic_card_is_in_its_draft_pool() -> void:
 		if d["category"] == "basic_unit":
 			continue
 		var offered := int(d["id"]) in s._draft_pool(_cat(int(d["id"])))
-		# L23: evolution-only cards (Symbiote Larva, Siphonophore) are never offered, nor (2026-11-10) a
+		# L23: transformation-only cards (Symbiote Larva, Siphonophore) are never offered, nor (2026-11-10) a
 		# disabled card (CardDB.DISABLED); every other card is.
 		if offered != (CardDB.is_collectible(int(d["id"])) and not CardDB.is_disabled(int(d["id"]))):
 			missing.append("%d %s" % [int(d["id"]), d["name"]])
@@ -68,7 +68,7 @@ func test_l2_every_non_basic_card_drafts_into_the_right_deck() -> void:
 	for d in CardDB.all():
 		var id := int(d["id"])
 		if d["category"] == "basic_unit" or not Series.is_offerable(id):
-			continue   # L23: evolution-only cards are not draftable; 2026-11-10: nor disabled ones
+			continue   # L23: transformation-only cards are not draftable; 2026-11-10: nor disabled ones
 		var s := _draft_one(id)
 		var want := "extra" if CardDB.is_extra_category(String(d["category"])) else "main"
 		if not (id in s.decks[0]) or s.stage != Series.STAGE_GAME or _zone_of(s.game, 0, id) != want:
@@ -101,4 +101,4 @@ func test_l2_every_basic_unit_can_be_chosen_and_is_dealt_into_the_main_deck() ->
 		if err != "" or s.game == null or _zone_of(s.game, 0, int(d["id"])) != "main":
 			wrong.append("%d %s (%s %s): %s" % [int(d["id"]), d["name"], d["type"], d["race"], err])
 	assert_array(wrong).is_empty()
-	assert_int(CardDB.all().size()).is_equal(197)            # 191 + the six cards of 2026-11-10
+	assert_int(CardDB.all().size()).is_equal(203)            # 191 + the six cards of 2026-11-10 + the six of 2026-11-17

@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 ## left to sacrifice or the game ending. Outside it nothing can be sacrificed by a click. The windowed
 ## run with screenshots is src/dev/l_interaction_shots.gd.
 
-const PIERCE_UNIT := 15
+const TARGET_UNIT := 79     # Akakaiju, ability: Apply 1 Infiltrate to a unit (opens a choice)
 
 var host: LocalHost
 var gs: GameScreen
@@ -192,7 +192,7 @@ func test_a_phase_change_ends_the_mode() -> void:
 
 func test_a_prompt_taking_over_ends_the_mode() -> void:
 	# Arrange: a unit with a targeted ability; the mode on.
-	var pu := TB.unit(m, me, PIERCE_UNIT, 3)
+	var pu := TB.unit(m, me, TARGET_UNIT, 3)
 	_board()
 	_toggle()
 	assert_bool(gs.sacrifice.active).is_true()

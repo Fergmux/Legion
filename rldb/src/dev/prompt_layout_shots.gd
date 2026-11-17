@@ -1,6 +1,6 @@
 extends SceneTree
 ## Dev-only windowed evidence for the input panel's placement (UI review 2026-10-17): a zone pick,
-## the longest Type choice (Chaos Witch) and an Arcane material payment, at one window size.
+## the longest Type choice (Chaos Witch) and a Spirit material payment, at one window size.
 ## Run NOT headless:
 ##   godot --path rldb -s res://src/dev/prompt_layout_shots.gd -- <absolute output dir> [WxH] [--fullscreen]
 ## Prints PASS / FAIL for "the settled panel covers no zone, pile or plate".
@@ -246,14 +246,14 @@ func run() -> void:
 	_check_clear("type choice")
 	gs.selection.pick_option(0)
 	await _frames(6)
-	# 3. An Arcane payment with one material picked.
+	# 3. A Spirit payment with one material picked.
 	for id in [34, 27, 28]:
 		TB.card(m, me, id, "spent")
 	var boom := TB.card(m, me, 170, "extra")
 	host.broadcast()
 	await _frames(4)
 	for a in gs.action_row.actions_for_card(boom):
-		if String(a["t"]) == "arcane":
+		if String(a["t"]) == "spirit":
 			gs.action_row.run_action(boom, a)
 			break
 	await _frames(12)

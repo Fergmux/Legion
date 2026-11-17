@@ -103,7 +103,7 @@ func set_pile(n: int, can_open: bool, is_ready: bool = false) -> void:
 	ready_mark = is_ready
 	_update_process()
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if clickable else Control.CURSOR_ARROW
-	tooltip_text = "%s: %d card%s%s" % [title, n, "" if n == 1 else "s", " — click to look through it" if clickable else ""]
+	tooltip_text = ""   # N batch (owner, 16 Nov): no tooltip on pile hover
 	queue_redraw()
 
 

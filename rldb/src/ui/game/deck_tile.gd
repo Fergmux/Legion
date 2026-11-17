@@ -10,8 +10,8 @@ signal chosen
 ## Emitted when the tile body is clicked (select / deselect).
 signal toggled
 
-const KIND_ORDER := ["basic_unit", "unit", "fusion", "ritual", "arcane", "spell", "trap", "power"]
-const DECK_SORT := ["basic_unit", "unit", "spell", "trap", "power", "fusion", "ritual", "arcane"]
+const KIND_ORDER := ["basic_unit", "unit", "fusion", "arcane", "spirit", "spell", "trap", "power"]
+const DECK_SORT := ["basic_unit", "unit", "spell", "trap", "power", "fusion", "arcane", "spirit"]
 
 ## True while selected (rim, glow and the open list follow it).
 var selected: bool = false:

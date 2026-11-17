@@ -426,7 +426,7 @@ func base_def(uid: int) -> int:
 	return 0 if v == null else v
 
 
-# ---------------------------------------------------------------- L11 art override, L23 Evolve
+# ---------------------------------------------------------------- L11 art override, L23 Transform
 
 ## L11 (owner feedback 2026-11-05): unit `uid` (Shapeshifter Loak, Mimic) takes on the ARTWORK of the
 ## unit `from_uid` whose ATK/DEF/Race/Type it copies, for as long as it stays on the Field. Its name,
@@ -452,39 +452,40 @@ func art_id(uid: int) -> int:
 	return int(cards[uid]["id"])
 
 
-## L23 (owner feedback 2026-11-05): true when unit `uid` may Evolve now: a face-up Unit on the Field
-## whose card has an Evolve section, its effects not suppressed (Debilitate suppresses all of its
-## effects, Evolve included).
-func can_evolve(uid: int) -> bool:
+## L23 (owner feedback 2026-11-05): true when unit `uid` may Transform now: a face-up Unit on the Field
+## whose card has a Transform section, its effects not suppressed (Debilitate suppresses all of its
+## effects, Transform included).
+func can_transform(uid: int) -> bool:
 	if not unit_on_field(uid) or not is_face_up(uid) or is_debilitated(uid):
 		return false
-	return CardDB.evolves_into(int(cards[uid]["id"])) != -1
+	return CardDB.transforms_into(int(cards[uid]["id"])) != -1
 
 
-## L23: replaces unit `uid`'s card with the card it evolves into, for the rest of THIS game (the
+## L23: replaces unit `uid`'s card with the card it transforms into, for the rest of THIS game (the
 ## instance keeps the new card wherever it goes: Spent, Hand, Draw, Exhaust...; the next game of a
-## series starts from the series deck, which keeps the base card). 2026-11-10 (owner): an evolution is
+## series starts from the series deck, which keeps the base card). 2026-11-10 (owner): a transformation is
 ## a Summon; the caller follows this with SpecialOps.summon_tail (On Summon, then the summon-response
 ## window). State carries over (confirmed rule, re-confirmed 2026-11-10): zone, slot and stance; statuses,
 ## Runes, counters and every temporary or permanent stat and cost change. Base ATK/DEF and the
 ## printed cost become the new card's, so a copied base (base_atk/base_def) and a copied art go;
 ## once-per-turn uses belong to the old card's abilities and are cleared.
-func evolve_unit(uid: int) -> void:
+func transform_unit(uid: int) -> void:
 	var inst: Dictionary = cards[uid]
 	var from_id: int = int(inst["id"])
-	var to_id := CardDB.evolves_into(from_id)
+	var to_id := CardDB.transforms_into(from_id)
 	if to_id == -1:
 		return
 	var from_name := name_of(uid)
 	inst["id"] = to_id
-	inst["evolved_turn"] = turn          # its new form's start-of-turn effects first fire next turn
+	inst["transformed_turn"] = turn          # its new form's start-of-turn effects first fire next turn
 	inst["base_atk"] = null
 	inst["base_def"] = null
 	inst["art_o"] = null
 	inst["opt"] = {}
-	add_log("%s evolves %s into %s." % [pname(int(inst["ctl"])), from_name, name_of(uid)])
-	add_fx({"k": "evolve", "at": fx_pos(uid), "from": from_id, "to": to_id})
-	note("evolve", {"uid": uid, "p": int(inst["ctl"]), "from": from_id, "to": to_id})
+	inst["marks"] = {}                   # 2026-11-17: its new form starts without the old one's marks
+	add_log("%s transforms %s into %s." % [pname(int(inst["ctl"])), from_name, name_of(uid)])
+	add_fx({"k": "transform", "at": fx_pos(uid), "from": from_id, "to": to_id})
+	note("transform", {"uid": uid, "p": int(inst["ctl"]), "from": from_id, "to": to_id})
 
 
 ## True while Sneaky Snunday reverses ATK/DEF gains and losses this turn (an even number of copies cancels).
@@ -634,20 +635,54 @@ func current_cost(uid: int) -> int:
 		v -= 1
 	if cat == "trap" and snow_tiger_active(p, "protecting"):
 		v -= 1                            # Snow Tiger Paladin, Protecting a Unit (stacks with the Guild)
-	# Reinforcements: -1 AP (2026-11-03; it was -2) while only the opponent controls a unit.
-	if CardDB.is_unit_category(cat) and player_has_flag(p, "units_cost_less_if_behind") \
+	# Reinforcements: -1 AP (2026-11-03; it was -2) while only the opponent controls a unit. 2026-11-16
+	# (owner): only the cards in its controller's Hand ("should not affect cards not in hand").
+	if CardDB.is_unit_category(cat) and inst["zone"] == "hand" and player_has_flag(p, "units_cost_less_if_behind") \
 			and field_units(p).is_empty() and not field_units(opp(p)).is_empty():
 		v -= 1
 	return maxi(v, 0)
 
 
-## Current Ritual (Runes needed) or Arcane (exact Spent total) cost: the printed cost plus the
+## 2026-11-16 (owner: Magical Council should trigger Hot Stove "when a spell is played for cheaper due to
+## the power"): the Powers whose cost reduction makes card `uid` cheaper right now, one per kind of
+## reduction (Magical Council for a Spell, Saboteurs' Guild for a Trap, Reinforcements for a unit in
+## Hand). A reduction that only takes a cost below 0 does not count.
+func discount_powers(uid: int) -> Array:
+	var df := d(uid)
+	if df["cost_kind"] != "ap":
+		return []
+	var inst: Dictionary = cards[uid]
+	var p: int = inst["owner"]
+	var v: int = df["cost"] + inst["cost_p"]
+	for m in inst["cost_t"]:
+		if m["turn"] == turn:
+			v += m["n"]
+	var cat: String = df["category"]
+	var flags := []
+	if cat == "spell":
+		flags.append("spells_cost_less")
+	if cat == "trap":
+		flags.append("traps_cost_less")
+	if CardDB.is_unit_category(cat) and inst["zone"] == "hand" and field_units(p).is_empty() and not field_units(opp(p)).is_empty():
+		flags.append("units_cost_less_if_behind")
+	var out := []
+	for flag in flags:
+		for pw in power_cards(p):
+			if has_flag(pw, flag):
+				if v > 0:
+					out.append(pw)
+				v -= 1
+				break
+	return out
+
+
+## Current Arcane (Runes needed) or Spirit (exact Spent total) cost: the printed cost plus the
 ## card's permanent and this-turn cost changes, floored at zero. Owner rule 2026-10-18: cards that
-## raise another card's cost (Shimmer Serum) raise these costs too. null for a "?" Ritual cost
+## raise another card's cost (Shimmer Serum) raise these costs too. null for a "?" Arcane cost
 ## (any number of Runes); -1 for every other kind of card.
 func extra_cost(uid: int) -> Variant:
 	var df := d(uid)
-	if not (df["cost_kind"] in ["ritual", "arcane"]):
+	if not (df["cost_kind"] in ["arcane", "spirit"]):
 		return -1
 	if df["cost"] == null:
 		return null
@@ -662,7 +697,7 @@ func extra_cost(uid: int) -> Variant:
 ## Printed cost label using the current cost where it applies.
 func cost_text(uid: int) -> String:
 	var kind: String = d(uid)["cost_kind"]
-	return CardDB.cost_label(d(uid), extra_cost(uid) if kind in ["ritual", "arcane"] else current_cost(uid))
+	return CardDB.cost_label(d(uid), extra_cost(uid) if kind in ["arcane", "spirit"] else current_cost(uid))
 
 
 # ---------------------------------------------------------------- statuses
@@ -722,6 +757,8 @@ func _clear_statuses_of_class(uid: int, buffs: bool) -> Array:
 func apply_status(uid: int, s: String, n: int, batch: Dictionary = {}) -> int:
 	if n <= 0 or not cards.has(uid):
 		return 0
+	if s == "eternal":
+		mark(uid, "eternal_applied")      # 2026-11-17 (The Sweeper: "has had Eternal applied")
 	if s == "rune":
 		_set_status(uid, "rune", status_count(uid, "rune") + n)
 		card_log(uid, "§ gains %d Rune (now %d)." % [n, status_count(uid, "rune")])
@@ -813,6 +850,14 @@ func change_cost_perm(uid: int, n: int, private_log: bool = false) -> void:
 
 ## Removes n stacks of status s from uid. L8: a status that wears off a card on the Field emits the
 ## presentation event {"k": "status_expire", "at": fx_pos, "s": s}.
+## 2026-11-17: a game-long mark on card `uid` (cleared when it transforms), read by the "self_mark" condition.
+func mark(uid: int, name: String) -> void:
+	if cards.has(uid):
+		if not cards[uid].has("marks"):
+			cards[uid]["marks"] = {}
+		cards[uid]["marks"][name] = true
+
+
 func decrement_status(uid: int, s: String, n: int = 1) -> void:
 	var before := status_count(uid, s)
 	_set_status(uid, s, before - n)
@@ -1018,7 +1063,7 @@ func draw_cards(p: int, n: int) -> Array:
 	return drawn
 
 
-## Shuffles Spent into Draw; Fusion/Ritual/Arcane cards return to the Extra Deck.
+## Shuffles Spent into Draw; Fusion/Arcane/Spirit cards return to the Extra Deck.
 func recycle_spent(p: int) -> void:
 	var spent: Array = players[p]["spent"].duplicate()
 	if spent.is_empty():

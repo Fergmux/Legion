@@ -30,7 +30,7 @@ static func _default_path() -> String:
 	return PLAYER_PATH
 ## Most cards in a deck, Main and Extra Deck combined.
 const MAX_CARDS := 99
-## Most Extra Deck (Fusion / Ritual / Arcane) cards, counted within MAX_CARDS.
+## Most Extra Deck (Fusion / Arcane / Spirit) cards, counted within MAX_CARDS.
 const MAX_EXTRA := 15
 
 
@@ -42,7 +42,7 @@ static func list() -> Array:
 		return []
 	var out := []
 	for e in d:
-		# L23: a deck saved with an evolution-only form (Symbiote Larva / Siphonophore) lists its base card.
+		# L23: a deck saved with a transformation-only form (Symbiote Larva / Siphonophore) lists its base card.
 		out.append({"name": String(e.get("name", "Deck")), "cards": CardDB.sanitize_deck(e.get("cards", []))})
 	return out
 

@@ -10,23 +10,28 @@ func test_c006_tag_team_l_does_nothing_without_column_partner() -> void:
 	assert_bool(m.pending.is_empty()).is_true()
 
 
-func test_c008_tag_team_s_fusion_summons_from_field() -> void:
+## 2026-11-17: Tag Team - S fuses only Units in its own column (itself included).
+func test_c008_tag_team_s_fusion_summons_from_its_column() -> void:
 	var m := TB.make()
-	# 2026-11-03 Bastion Wyrm: a unit with 20 or more ATK or DEF + a Physical unit.
-	var beast := TB.unit(m, 0, 4, 3, "atk", 20, 8)
-	var dragon := TB.unit(m, 0, 116, 1)                   # Basic Dragon (Physical)
-	var wyrm := TB.card(m, 0, 93, "extra")
-	TB.summon(m, 0, 8, 0)
+	# Dante: a Warrior Unit (Tag Team - S itself) + a Fire Unit.
+	var fire := TB.unit(m, 0, TB.FIRE, 3)                 # behind Tag Team - S: same column
+	var outside := TB.unit(m, 0, TB.FIRE, 1)              # another column: never offered
+	var dante := TB.card(m, 0, 36, "extra")
+	var tt := TB.summon(m, 0, 8, 0)
 	TB.choose(m, ["Yes"])
-	TB.choose_uids(m, [wyrm])
+	TB.choose_uids(m, [dante])
 	# F04-22 / F07: materials are picked one by one, then the zone; the stance choice commits.
-	TB.choose_uids(m, [beast])
-	TB.choose_uids(m, [dragon])
+	assert_str(TB.choose_uids(m, [tt])).is_empty()
+	var offered: Array = m.pending.get("options", []).map(func(o): return int(o.get("v", -1)))
+	assert_bool(offered.has(fire)).is_true()
+	assert_bool(offered.has(outside)).is_false()
+	assert_str(TB.choose_uids(m, [fire])).is_empty()
 	TB.choose(m, ["Back row, column 2"])
 	TB.choose(m, ["Attack"])
-	assert_str(m.cards[wyrm]["zone"]).is_equal("unit")
-	assert_str(m.cards[beast]["zone"]).is_equal("spent")
-	assert_str(m.cards[dragon]["zone"]).is_equal("spent")
+	assert_str(m.cards[dante]["zone"]).is_equal("unit")
+	assert_str(m.cards[tt]["zone"]).is_equal("spent")
+	assert_str(m.cards[fire]["zone"]).is_equal("spent")
+	assert_str(m.cards[outside]["zone"]).is_equal("unit")
 
 
 func test_c009_tag_team_f_adds_unit_with_partner_cost() -> void:
@@ -99,26 +104,32 @@ func test_c014_avatar_burns_the_unit_that_destroys_it_for_ten() -> void:
 	assert_int(m.status_count(foe, "burn")).is_equal(10)
 
 
-func test_c015_da_mage_applies_pierce() -> void:
+## 2026-11-17: the Pierce ability is gone; a Spell activated by either player gives Da Mage 1 Rune.
+func test_c015_da_mage_gains_a_rune_whenever_a_spell_is_activated() -> void:
 	var m := TB.make()
 	var dm := TB.unit(m, 0, 15, 0)
-	TB.ability(m, dm)
-	TB.choose_uids(m, [dm])                     # sole unit on the board: still chosen by the player
-	assert_int(m.status_count(dm, "pierce")).is_equal(1)
+	TB.cast(m, 0, 81)                                   # Fog of War: no choices
+	assert_int(m.status_count(dm, "rune")).is_equal(1)
+	TB.to_turn2(m)
+	TB.cast(m, 1, 81)                                   # the opponent's Spell counts too
+	assert_int(m.status_count(dm, "rune")).is_equal(2)
 
 
-func test_c019_shapeshifter_loak_copies_column_foe_and_gives_it_eternal() -> void:
+## 2026-11-17: Loak debilitates the column foe (was Eternal) and copies its ATK/DEF, not its Race.
+func test_c019_shapeshifter_loak_copies_column_foes_stats_and_debilitates_it() -> void:
 	var m := TB.make()
 	var foe := TB.unit(m, 1, 37, 0)            # Solomon, the Captain 20/14 Warrior (2026-11-03)
 	var loak := TB.summon(m, 0, 19, 0)
 	TB.choose_uids(m, [foe])                   # sole column foe: still chosen by the player
-	assert_int(m.status_count(foe, "eternal")).is_equal(1)
+	assert_int(m.status_count(foe, "debilitate")).is_equal(1)
+	assert_int(m.status_count(foe, "eternal")).is_equal(0)
 	assert_int(m.atk_of(loak)).is_equal(20)
 	assert_int(m.def_of(loak)).is_equal(14)
-	assert_str(m.unit_race(loak)).is_equal("Warrior")
+	assert_str(m.unit_race(loak)).is_equal("Mage")
 
 
-func test_c020_spirit_bomb_copies_buffs_and_grows_per_opposing_unit() -> void:
+## 2026-11-17: Courageous Soldier (was Spirit, the Virtuous) is 10/20 and grows +4 per opposing unit.
+func test_c020_courageous_soldier_copies_buffs_and_grows_per_opposing_unit() -> void:
 	var m := TB.make()
 	var ally := TB.unit(m, 0, TB.WATER, 1)
 	m.apply_status(ally, "pierce", 2)
@@ -127,21 +138,26 @@ func test_c020_spirit_bomb_copies_buffs_and_grows_per_opposing_unit() -> void:
 	var bomb := TB.summon(m, 0, 20, 0)
 	assert_int(m.status_count(bomb, "pierce")).is_equal(2)
 	assert_int(m.status_count(bomb, "nimble")).is_equal(1)
-	assert_int(m.atk_of(bomb)).is_equal(18 + 6)               # 18 ATK (2026-11-03) + 6 per opposing unit (2026-11-10)
+	assert_int(m.atk_of(bomb)).is_equal(10 + 4)
+	assert_int(m.def_of(bomb)).is_equal(20 + 4)
 
 
-func test_c021_shen_gains_protection_scales_with_exhaust_and_raises_cost() -> void:
+## 2026-11-17: Shen is a Spirit Unit (placed directly, not Normal Summoned): +8 ATK/DEF per Exhaust card, no
+## "+1 AP cost" on destruction any more, and it is Exhausted when it leaves the Field.
+func test_c021_shen_gains_protection_scales_with_exhaust_and_is_exhausted_when_destroyed() -> void:
 	var m := TB.make()
-	var shen := TB.summon(m, 0, 21, 0)
+	var shen := TB.special(m, 0, 21, 0)
 	assert_int(m.status_count(shen, "eternal")).is_equal(1)
 	assert_int(m.status_count(shen, "cleanse")).is_equal(1)    # 2026-10-17: Cleanse 3 -> 1
 	TB.card(m, 0, TB.WATER, "exhaust")
 	TB.card(m, 0, TB.WATER, "exhaust")
-	assert_int(m.atk_of(shen)).is_equal(0 + 2 * 10)           # 0/0 since 2026-11-03, +10 per Exhaust card
+	assert_int(m.atk_of(shen)).is_equal(0 + 2 * 8)            # 0/0 since 2026-11-03, +8 per Exhaust card
+	assert_int(m.def_of(shen)).is_equal(0 + 2 * 8)
 	TB.kill(m, shen)
-	assert_str(m.cards[shen]["zone"]).is_equal("unit")
+	assert_str(m.cards[shen]["zone"]).is_equal("unit")         # Eternal
 	TB.kill(m, shen)
-	assert_int(m.current_cost(shen)).is_equal(5)
+	assert_str(m.cards[shen]["zone"]).is_equal("exhaust")
+	assert_int(int(m.cards[shen]["cost_p"])).is_equal(0)            # no permanent +1 AP any more
 
 
 func test_c022_zorath_stops_adjacent_units_attacking() -> void:
@@ -279,12 +295,22 @@ func test_c033_fledgling_drake_burns_column_unit() -> void:
 	assert_int(m.status_count(foe, "burn")).is_equal(4)
 
 
-func test_c035_enraged_komodo_gives_itself_pierce_once_per_turn() -> void:
+## 2026-11-17: Battle Komodo gets its Pierce On Summon; the once-per-turn Pierce moved to Angered Komodo (199).
+func test_c035_battle_komodo_gives_itself_pierce_on_summon() -> void:
 	var m := TB.make()
-	var k := TB.unit(m, 0, 35, 0)
-	TB.ability(m, k)
+	var k := TB.summon(m, 0, 35, 0)
 	assert_int(m.status_count(k, "pierce")).is_equal(1)
-	assert_str(TB.ability(m, k)).is_equal("Already used this turn.")
+	var abs: Array = m.script_of(k).get("abilities", [])
+	assert_int(abs.size()).is_equal(1)
+	assert_bool(abs[0].get("transform", false)).is_true()     # its only ability is the Transformation
+
+
+func test_c199_angered_komodo_gives_itself_pierce_once_per_turn() -> void:
+	var m := TB.make()
+	var k := TB.unit(m, 0, 199, 0)
+	assert_str(TB.ability(m, k, 0)).is_empty()
+	assert_int(m.status_count(k, "pierce")).is_equal(1)
+	assert_str(TB.ability(m, k, 0)).is_equal("Already used this turn.")
 
 
 func test_c036_dante_revives_next_turn_for_one_ap() -> void:
@@ -424,16 +450,20 @@ func test_c072_myth_wukong_switches_rows_and_bonus_at_end_of_turn() -> void:
 	assert_int(m.def_of(wk)).is_equal(16)
 
 
-func test_c073_mans_best_friend_searches_warrior_and_dies_for_column_warrior() -> void:
+## 2026-11-17: the Warrior search is gone; On Summon it can destroy a card with Reveal (its guard is in
+## cards_db_update_2026_11_17_test.gd).
+func test_c073_mans_best_friend_can_destroy_a_revealed_card_on_summon() -> void:
 	var m := TB.make()
-	var w := TB.card(m, 0, 122, "draw")
-	var mbf := TB.summon(m, 0, 73, 3)
-	TB.choose_uids(m, [w])
-	assert_str(m.cards[w]["zone"]).is_equal("hand")
-	var warrior := TB.unit(m, 0, 122, 0)
-	TB.kill(m, warrior)
-	assert_str(m.cards[warrior]["zone"]).is_equal("unit")
-	assert_str(m.cards[mbf]["zone"]).is_equal("spent")
+	var revealed := TB.set_card(m, 1, 45, 0)
+	m.apply_status(revealed, "reveal", 1)
+	var hidden := TB.set_card(m, 1, 45, 1)
+	TB.summon(m, 0, 73, 3)
+	var offered: Array = m.pending.get("options", []).map(func(o): return int(o.get("v", -1)))
+	assert_bool(offered.has(revealed)).is_true()
+	assert_bool(offered.has(hidden)).is_false()
+	TB.choose_uids(m, [revealed])
+	assert_str(m.cards[revealed]["zone"]).is_equal("spent")
+	assert_str(m.cards[hidden]["zone"]).is_equal("backrow")
 
 
 func test_c074_sparky_gives_infiltrate_when_sacrificed() -> void:
@@ -455,13 +485,6 @@ func test_c016_edwin_gains_rune_when_you_destroy_an_opponent_unit() -> void:
 	assert_int(m.status_count(edwin, "rune")).is_equal(1)
 
 
-func test_c017_accursed_zealot_gains_rune_each_own_turn() -> void:
-	var m := TB.make()
-	var z := TB.unit(m, 1, 17, 0)
-	TB.to_turn2(m)
-	assert_int(m.status_count(z, "rune")).is_equal(1)
-
-
 func test_c075_travelwarden_gains_rune_when_ally_moves() -> void:
 	var m := TB.make()
 	var tw := TB.unit(m, 0, 75, 2)
@@ -472,23 +495,27 @@ func test_c075_travelwarden_gains_rune_when_ally_moves() -> void:
 	assert_int(m.status_count(tw, "rune")).is_equal(1)
 
 
-func test_c076_soul_devourer_gains_rune_when_any_unit_is_sacrificed() -> void:
+## 2026-11-17: a sacrifice lets Soul Devourer apply 1 Rune to any unit (was: to itself).
+func test_c076_soul_devourer_may_rune_any_unit_when_a_unit_is_sacrificed() -> void:
 	var m := TB.make()
 	var sd := TB.unit(m, 0, 76, 0)
+	var foe := TB.unit(m, 1, TB.WATER, 0)
 	var fodder := TB.unit(m, 0, TB.WATER, 1)
 	m.submit(0, {"t": "sacrifice", "uid": fodder})
-	assert_int(m.status_count(sd, "rune")).is_equal(1)
+	assert_str(TB.choose_uids(m, [foe])).is_empty()
+	assert_int(m.status_count(foe, "rune")).is_equal(1)
+	assert_int(m.status_count(sd, "rune")).is_equal(0)
 
 
 func test_c077_radablast_gains_rune_when_trap_activates() -> void:
 	var m := TB.make()
 	TB.p1_battle(m)
 	var rb := TB.unit(m, 1, 77, 3)
-	TB.set_card(m, 0, 50, 0)                              # Wabuku
+	TB.set_card(m, 0, 50, 0)                              # Emergency Evade (2026-11-17, was Perfect Dodge)
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 5)
-	var foe := TB.unit(m, 0, TB.WATER, 0)
+	var foe := TB.unit(m, 0, TB.WATER, 0)                 # unprotected, in the Trap's column
 	TB.attack(m, a, foe)
-	TB.choose(m, ["Activate Perfect Dodge"])
+	TB.choose(m, ["Activate Emergency Evade"])
 	assert_int(m.status_count(rb, "rune")).is_equal(1)
 
 
@@ -549,7 +576,7 @@ func test_c135_dragon_rider_boosts_protecting_dragon_and_cannot_attack() -> void
 
 func test_c150_mumens_bounty_puts_spent_card_on_top_of_draw_and_cannot_defend() -> void:
 	var m := TB.make()
-	var top := TB.card(m, 0, 21, "spent")
+	var top := TB.card(m, 0, 37, "spent")                     # a Main Deck unit (Shen is a Spirit Unit since 2026-11-17)
 	var mb := TB.summon(m, 0, 150, 0)
 	TB.choose_uids(m, [top])
 	assert_int(m.players[0]["draw"][-1]).is_equal(top)
@@ -599,18 +626,23 @@ func test_c159_divine_serpent_body_adjacent_def_aura() -> void:
 	assert_int(m.def_of(friend)).is_equal(8 + 8)              # +8 since 2026-11-10 (was +10)
 
 
-## 2026-11-10: Soul's -4 ATK ability moved to the Tail (196); Soul now adds a Water unit from Draw to
-## Hand, which costs 1 AP less this turn.
-func test_c160_divine_serpent_soul_adds_a_water_unit_from_draw_that_costs_one_less() -> void:
-	var m := TB.make(7, 0)
-	var s := TB.unit(m, 0, 160, 0)
-	var water := TB.card(m, 0, TB.WATER, "draw")
-	TB.card(m, 0, TB.FIRE, "draw")                             # not Water: not offered
-	assert_str(TB.ability(m, s)).is_empty()
-	assert_array(m.pending.get("options", []).map(func(o): return int(o["v"]))).contains_exactly([water])
-	TB.choose_uids(m, [water])
-	assert_str(String(m.cards[water]["zone"])).is_equal("hand")
-	assert_int(m.current_cost(water)).is_equal(0)
+## 2026-11-17: Soul of Crashing Ocean is a Spirit Unit; its Water search is gone and On Summon it applies
+## 1 Eternal and 1 Cleanse to adjacent Water units (yours).
+func test_c160_soul_of_crashing_ocean_protects_adjacent_water_units_on_summon() -> void:
+	var m := TB.make()
+	var water := TB.unit(m, 0, TB.WATER, 1)                    # adjacent, Water
+	var fire := TB.unit(m, 0, TB.FIRE, 3)                      # behind it, not Water
+	var far := TB.unit(m, 0, TB.WATER, 2)                      # not adjacent
+	var foe := TB.unit(m, 1, TB.WATER, 0)                      # the opponent's
+	var s := TB.special(m, 0, 160, 0)
+	assert_int(m.status_count(water, "eternal")).is_equal(1)
+	assert_int(m.status_count(water, "cleanse")).is_equal(1)
+	for u in [fire, far, foe]:
+		assert_int(m.status_count(u, "eternal")).is_equal(0)
+		assert_int(m.status_count(u, "cleanse")).is_equal(0)
+	assert_str(String(CardDB.get_def(160)["category"])).is_equal("spirit")
+	var labels: Array = m.script_of(s).get("abilities", []).map(func(a): return String(a.get("label", "")))
+	assert_bool(labels.any(func(l): return l.contains("Water unit from Draw"))).is_false()
 
 
 func test_c196_divine_serpent_tail_weakens_opposing_units() -> void:

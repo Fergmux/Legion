@@ -13,7 +13,7 @@ extends GdUnitTestSuite
 ## "Stat-only changes"); the 2026-10-17 value each one replaced is kept in its comment.
 const BALANCE := [
 	[9, 2, 10, 18],      # Tag Team - F: cost 1 -> 2 (10-17); 16/22 -> 10/16 (11-03) -> 10/18 (11-10)
-	[23, 4, 30, 16],     # Auric: 50/50 -> 30/16 (10-17)
+	[23, -1, 30, 16],    # Auric: 50/50 -> 30/16 (10-17); a Spirit Unit since 11-17 (Spirit cost 4, see below)
 	[69, -1, 20, 16],    # Magentric: 8/26 -> 20/20 (10-17) -> 16/16 (11-03) -> 20/16 (11-10)
 	[71, -1, -1, 18],    # Faerie Flight: DEF 18 -> 16 (10-17) -> 18 (11-03)
 	[78, -1, 8, -1],     # Abraxus Terrormane: ATK 26 -> 24 (10-17) -> 8 (11-03)
@@ -34,6 +34,9 @@ func test_changed_cards_use_their_new_stats_and_costs_in_play() -> void:
 			var h := TB.card(m, 0, row[0])
 			if m.current_cost(h) != row[1]: bad.append("%d cost %d != %d" % [row[0], m.current_cost(h), row[1]])
 	assert_array(bad).is_empty()
+	# 2026-11-17: Auric is a Spirit Unit; its cost 4 is a Spirit (Exhaust-Spent) cost, not AP.
+	assert_str(String(CardDB.get_def(23)["cost_kind"])).is_equal("spirit")
+	assert_int(int(CardDB.get_def(23)["cost"])).is_equal(4)
 
 
 func test_c009_tag_team_f_summon_pays_its_new_two_ap_cost() -> void:

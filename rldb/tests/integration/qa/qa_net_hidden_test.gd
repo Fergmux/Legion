@@ -40,12 +40,12 @@ func test_into_the_void_reveals_host_spent_to_client_only_while_choosing() -> vo
 	assert_bool(blob.contains("\"uid\":%d" % mc)).is_false()
 
 
-func test_host_arcane_and_hand_choices_never_leak_to_client() -> void:
+func test_host_spirit_and_hand_choices_never_leak_to_client() -> void:
 	# Arrange: host's turn 3
 	var m: MatchEngine = await _client_turn2()
 	await _end_client_turn(m)
 	var shen := TB.card(m, 0, SHEN, "spent")
-	var mat := TB.card(m, 0, 28, "spent")                    # cost 2: Kaya is 2A since 2026-11-03
+	var mat := TB.card(m, 0, TB.WATER, "spent")              # cost 1: Kaya is 1S since 2026-11-17
 	var secret := TB.card(m, 0, SECRET, "hand")
 	var kaya := -1
 	for u in m.players[0]["extra"]:
@@ -61,7 +61,7 @@ func test_host_arcane_and_hand_choices_never_leak_to_client() -> void:
 	client_payloads.clear()
 	await _sync()
 	# Act
-	host.local_seat.send({"t": "arcane", "uid": kaya})
+	host.local_seat.send({"t": "spirit", "uid": kaya})
 	assert_bool(await _await_pending(m, 0, "select")).is_true()
 	assert_bool(cpend().has("options")).is_false()
 	var mat_label := ""

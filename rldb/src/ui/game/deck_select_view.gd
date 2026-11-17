@@ -116,19 +116,17 @@ func _waiting(box: VBoxContainer) -> void:
 	var view := gs.view
 	var p := gs.me()
 	var opp_ready: bool = view["deck_ready"][1 - p]
-	var opp_doing := "choosing a deck…"
-	if view.has("draft"):
-		opp_doing = _opponent_doing(view["draft"])
-	var chips := [
-		{"text": "%s: deck locked in" % String(view["names"][p]), "done": true},
-		{"text": "%s: %s" % [String(view["names"][1 - p]), "deck locked in" if opp_ready else opp_doing], "done": opp_ready},
-	]
-	# A drafted deck reads "your drafted deck (15 cards)", not its stored name "Drafted deck".
+	# A drafted deck reads "your drafted deck", not its stored name "Drafted deck". N batch (owner,
+	# 16 Nov): no "(15 cards)" suffix and no "deck locked in" status chips; a View your deck button.
 	var deck_txt := String(view["deck_name"])
 	if String(view.get("deck_mode", "")) == "draft":
-		deck_txt = "your drafted deck (%d cards)" % view.get("deck", []).size()
-	var wp := WaitPlate.new("Deck locked in", "You will play %s.\nWaiting for your opponent…" % deck_txt if not opp_ready else "You will play %s.\nStarting soon…" % deck_txt, chips)
+		deck_txt = "your drafted deck"
+	var wp := WaitPlate.new("Deck locked in", "You will play %s.\nWaiting for your opponent…" % deck_txt if not opp_ready else "You will play %s.\nStarting soon…" % deck_txt, [])
 	box.add_child(wp)
+	if view.has("deck"):
+		var see := gs.overlays.rewards.view_deck_button()
+		see.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		box.add_child(see)
 
 
 # ---------------------------------------------------------------- the bot's deck (J24)
@@ -470,7 +468,7 @@ func _draft(box: VBoxContainer) -> void:
 		var c: Dictionary = dr["offer"][i]
 		var colm := CenterContainer.new()
 		colm.custom_minimum_size = Vector2(ceilf(card.x * GameSeriesOverlay.DRAFT_HOVER_SCALE), room)
-		# Owner (10 Nov): no Fusion / Ritual / Arcane tags over the Extra Deck offer (the cards show
+		# Owner (10 Nov): no Fusion / Arcane / Spirit tags over the Extra Deck offer (the cards show
 		# their kind themselves); every offer lays out the same.
 		row.add_child(colm)
 		var cw := CardWidget.new().setup(MatchView.summary_view(c), "big")
@@ -644,7 +642,7 @@ func confirm_pane(dr: Dictionary) -> Control:
 	return center
 
 
-## J30: the number of drafted cards per draft category (Fusion, Ritual and Arcane count as Extra).
+## J30: the number of drafted cards per draft category (Fusion, Arcane and Spirit count as Extra).
 static func drafted_counts(picked: Array) -> Dictionary:
 	var out := {}
 	for c in picked:

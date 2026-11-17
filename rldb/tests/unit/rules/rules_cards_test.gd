@@ -228,14 +228,14 @@ func test_hypnotised_unit_keeps_its_statuses_when_it_returns() -> void:
 	assert_int(m.status_count(victim, "rune")).is_equal(2)
 
 
-func test_hypnotised_unit_can_be_ritual_material_and_goes_to_its_owners_spent() -> void:
-	# Ruling 2026-10-16: it cannot be sacrificed, but it can be tributed (Ritual, Fusion).
+func test_hypnotised_unit_can_be_arcane_material_and_goes_to_its_owners_spent() -> void:
+	# Ruling 2026-10-16: it cannot be sacrificed, but it can be tributed (Arcane, Fusion).
 	var m := TB.make()
 	var victim := TB.unit(m, 1, TB.WATER, 0, "atk", 10)
 	m.apply_status(victim, "rune", 3)
 	_hypnotise(m, victim)
 	var roma := TB.card(m, 0, 96, "extra")
-	assert_str(m.submit(0, {"t": "ritual", "uid": roma})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": roma})).is_empty()
 	assert_str(TB.choose_uids(m, [victim])).is_empty()
 	TB.choose(m, ["Front row, column 1"])
 	TB.choose(m, ["Attack"])
@@ -324,11 +324,13 @@ func test_snunday_does_not_reverse_battle_damage_or_ap_payment() -> void:
 
 func test_controller_orders_own_simultaneous_triggers() -> void:
 	var m := TB.make()
-	var zealot := TB.unit(m, 1, 17, 0)                  # start of turn: Rune
+	# 2026-11-17: Accursed Zealot (the old start-of-turn Rune) is now Pickpocket, with no turn-start trigger;
+	# Muscle of the Marked Claw (new) blinds itself at the start of its controller's turn.
+	var muscle := TB.unit(m, 1, 198, 0)                 # start of turn: Blind
 	var neva := TB.unit(m, 1, 161, 1)                   # start of turn: Eternal
 	TB.to_turn2(m)
 	assert_str(m.pending["kind"]).is_equal("order")
 	TB.choose(m, ["Neva"])
-	assert_int(TB.log_index(m, "Neva the Divine Mother gains 1 Eternal")).is_less(TB.log_index(m, "Accursed Zealot gains 1 Rune"))
-	assert_int(m.status_count(zealot, "rune")).is_equal(1)
+	assert_int(TB.log_index(m, "Neva the Divine Mother gains 1 Eternal")).is_less(TB.log_index(m, "Muscle of the Marked Claw gains 1 Blind"))
+	assert_int(m.status_count(muscle, "blind")).is_equal(1)
 	assert_int(m.status_count(neva, "eternal")).is_equal(1)

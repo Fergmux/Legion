@@ -1,4 +1,4 @@
-// canvas_fx_burn: RLDB technical art, release batch 2026-10-20 (D6 sacrifice, D8 Ritual tribute).
+// canvas_fx_burn: RLDB technical art, release batch 2026-10-20 (D6 sacrifice, D8 Arcane tribute).
 // Purpose: a card consumed by fire. An organic burn front (three-octave value-noise fbm) climbs the card
 // from its bottom edge; ahead of the hole the card chars, then glows ember-orange, then white-hot at the
 // very edge, and the remaining paper desaturates and darkens as it heats.

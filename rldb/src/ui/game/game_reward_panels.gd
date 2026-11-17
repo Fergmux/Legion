@@ -110,7 +110,7 @@ func render() -> void:
 	var sub: Control = null
 	match mode:
 		"add": sub = _reward_add_panel(r)
-		"remove": sub = _reward_remove_panel(order, counts)
+		"remove": sub = _reward_remove_panel(remove_order(gs.view["deck"]), counts)
 		"basic": sub = _basic_change_panel(r, order, counts)
 		"extra_basic": sub = _extra_basic_panel(order, counts)
 	if sub != null:
@@ -121,6 +121,16 @@ func render() -> void:
 			(sub as OrnatePanel).appear(false)
 	_fresh_panel = false
 	box.add_child(_footer(true, r))
+
+
+## N batch (owner, 16 Nov): the remove-a-card list's cards, once each, in catalogue order (kind, then the
+## card list's order within it), as in the deck builder; it was the order they were added in.
+static func remove_order(deck: Array) -> Array:
+	var first := {}
+	for c in deck:
+		if not first.has(int(c["id"])):
+			first[int(c["id"])] = c
+	return CardDB.sort_ids(first.keys()).map(func(id): return first[id])
 
 
 # ------------------------------------------------------------------ pieces
@@ -342,26 +352,33 @@ func _footer(with_finish: bool, r: Dictionary = {}) -> Control:
 	# gold button. Owner (10 Nov): View your deck is a proper (secondary) button like Finish / Skip,
 	# its tome glyph inside on the left; it was a text link.
 	if gs.view.has("deck"):
-		var see := UIStyle.secondary_button("View your deck", 16)
-		see.name = "ViewDeckButton"
-		see.custom_minimum_size = Vector2(FOOTER_BUTTON_W, FOOTER_BUTTON_H)
-		see.add_theme_constant_override("h_separation", 0)
-		var g := DeckSelectView.TabGlyph.new("tome", UIStyle.GOLD)
-		g.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		g.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-		g.offset_left = 14
-		g.offset_right = 36
-		g.offset_top = -11
-		g.offset_bottom = 11
-		see.add_child(g)
-		see.pressed.connect(gs.overlays._show_deck)
-		h.add_child(see)
+		h.add_child(view_deck_button())
 	if with_finish:
 		var fin := UIStyle.secondary_button("Finish rewards" if not r["taken"].is_empty() else "Skip remaining rewards", 16)
 		fin.custom_minimum_size = Vector2(FOOTER_BUTTON_W, FOOTER_BUTTON_H)
 		fin.pressed.connect(func(): gs.send({"t": "reward_finish"}))
 		h.add_child(fin)
 	return v
+
+
+## The "View your deck" button (secondary, its tome glyph inside on the left) that opens the deck
+## popup. The rewards footer has it, and (N batch, owner 16 Nov) the waiting screens of the series
+## modal: deck locked in, and the next game's wait.
+func view_deck_button() -> Button:
+	var see := UIStyle.secondary_button("View your deck", 16)
+	see.name = "ViewDeckButton"
+	see.custom_minimum_size = Vector2(FOOTER_BUTTON_W, FOOTER_BUTTON_H)
+	see.add_theme_constant_override("h_separation", 0)
+	var g := DeckSelectView.TabGlyph.new("tome", UIStyle.GOLD)
+	g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	g.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
+	g.offset_left = 14
+	g.offset_right = 36
+	g.offset_top = -11
+	g.offset_bottom = 11
+	see.add_child(g)
+	see.pressed.connect(gs.overlays._show_deck)
+	return see
 
 
 ## The type was chosen and the pick is spent: one of the offered cards must be taken.

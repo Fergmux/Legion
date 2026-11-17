@@ -272,7 +272,7 @@ func test_tutorial_menu_rows_show_medallion_name_subtitle_and_state() -> void:
 
 
 func test_lesson_name_drops_the_lesson_number() -> void:
-	assert_str(TutorialMenu.lesson_name("Lesson 7 · Extra Deck: Arcane")).is_equal("Extra Deck: Arcane")
+	assert_str(TutorialMenu.lesson_name("Lesson 7 · Extra Deck: Spirit")).is_equal("Extra Deck: Spirit")
 	assert_str(TutorialMenu.lesson_name("Battle")).is_equal("Battle")
 
 

@@ -186,7 +186,7 @@ static func _gem(pt: CardPainter, g: Dictionary) -> void:
 
 
 ## Centre (base units) of the cost gem of kind `kind` in layout `g`: its outermost point (the round
-## gem's rim, the Ritual lozenge's or Arcane hexagon's tips) "gem_edge" in from the top and left edges.
+## gem's rim, the Arcane lozenge's or Spirit hexagon's tips) "gem_edge" in from the top and left edges.
 static func gem_center(g: Dictionary, kind: String) -> Vector2:
 	var d := float(g["gem_edge"]) + float(g["gem_r"]) * CardFaceParts.gem_reach(kind)
 	return Vector2(d, d)

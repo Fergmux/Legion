@@ -31,7 +31,7 @@ func test_spell_trap_and_power_have_no_stat_race_or_type_section() -> void:
 
 
 func test_units_still_show_stats_race_and_type() -> void:
-	for id in [1, 141, 63, 176]:       # basic, fusion, ritual, arcane
+	for id in [1, 141, 63, 176]:       # basic, fusion, arcane, spirit
 		var p := _panel_for(MatchView.def_view(id))
 		assert_array(p.sections).contains(["stats"])
 		assert_str(p.all_text()).contains("ATK")

@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 ## Card database update of 10 Nov 2026 (design/card-database-update-2026-11-10.md): the owner's
-## "CD - JB edit" sheet. Evolutions are Summons and can happen whenever their condition holds in the
+## "CD - JB edit" sheet. Transformations are Summons and can happen whenever their condition holds in the
 ## controller's Setup or Recovery Phase; six new cards; changed card behaviour; disabled cards.
 
 const EDWIN := 16
@@ -40,10 +40,10 @@ func _answer_all(m: MatchEngine, n: int = 8) -> void:
 		m.submit(m.pending["player"], {"t": "choose", "id": m.pending["id"], "indices": [0]})
 
 
-func _evolve_idx(m: MatchEngine, uid: int) -> int:
+func _transform_idx(m: MatchEngine, uid: int) -> int:
 	var abs: Array = m.script_of(uid).get("abilities", [])
 	for i in abs.size():
-		if abs[i].get("evolve", false):
+		if abs[i].get("transform", false):
 			return i
 	return -1
 
@@ -51,13 +51,13 @@ func _evolve_idx(m: MatchEngine, uid: int) -> int:
 # ------------------------------------------------------------ data
 
 # @cards 192,193,194,195,196,197,14,181,36,179
-func test_new_cards_have_stable_ids_and_evolution_chains() -> void:
+func test_new_cards_have_stable_ids_and_transformation_chains() -> void:
 	CardDB.ensure_loaded()
 	assert_str(String(CardDB.get_def(TAIL)["name"])).is_equal("Divine Serpent - Tail")
 	assert_str(String(CardDB.get_def(LEVIATHAN)["name"])).is_equal("The Great Leviathan")
-	assert_int(CardDB.evolves_into(EDWIN)).is_equal(AVATAR)
-	assert_int(CardDB.evolves_into(SOLOMON_CAPTAIN)).is_equal(SOLOMON_TYRANNICAL)
-	assert_int(CardDB.evolves_into(SOUL)).is_equal(LEVIATHAN)
+	assert_int(CardDB.transforms_into(EDWIN)).is_equal(AVATAR)
+	assert_int(CardDB.transforms_into(SOLOMON_CAPTAIN)).is_equal(SOLOMON_TYRANNICAL)
+	assert_int(CardDB.transforms_into(SOUL)).is_equal(LEVIATHAN)
 	for id in [AVATAR, SOLOMON_TYRANNICAL, LEVIATHAN, LARVA]:
 		assert_bool(CardDB.is_collectible(id)).override_failure_message(str(id)).is_false()
 	assert_str(String(CardDB.get_def(SOLOMON_TYRANNICAL)["category"])).is_equal("unit")
@@ -67,13 +67,13 @@ func test_new_cards_have_stable_ids_and_evolution_chains() -> void:
 		assert_bool(CardScripts.is_implemented(id)).override_failure_message(str(id)).is_true()
 
 
-# ------------------------------------------------------------ evolution
+# ------------------------------------------------------------ transformation
 
 # @cards 16,14
-func test_edwin_cannot_evolve_until_it_has_burn_and_atk_above_base() -> void:
+func test_edwin_cannot_transform_until_it_has_burn_and_atk_above_base() -> void:
 	var m := TB.make()
 	var edwin := TB.unit(m, 0, EDWIN, 0)
-	var idx := _evolve_idx(m, edwin)
+	var idx := _transform_idx(m, edwin)
 	assert_int(idx).is_not_equal(-1)
 	assert_str(TB.ability(m, edwin, idx)).is_not_empty()            # no Burn
 	m.apply_status(edwin, "burn", 1)
@@ -84,40 +84,48 @@ func test_edwin_cannot_evolve_until_it_has_burn_and_atk_above_base() -> void:
 
 
 # @cards 16,14,21
-func test_evolution_keeps_statuses_and_is_a_summon() -> void:
+func test_transformation_keeps_statuses_and_is_a_summon() -> void:
 	var m := TB.make()
-	TB.unit(m, 1, SHEN, 0)                                          # the opponent's Shen
+	TB.unit(m, 1, SHEN, 0)                                          # the opponent's Shen (a Spirit Unit, placed)
+	var target := TB.unit(m, 1, MAGE, 1)                            # for Avatar's On Summon Debilitate (2026-11-17)
 	var edwin := TB.unit(m, 0, EDWIN, 1)
 	m.apply_status(edwin, "burn", 2)
 	m.apply_status(edwin, "rune", 1)
 	m.cards[edwin]["mods"].append({"atk": 4, "def": 0, "until": "perm", "src": "test"})
-	assert_str(TB.ability(m, edwin, _evolve_idx(m, edwin))).is_equal("")
-	_answer_all(m)
+	assert_str(TB.ability(m, edwin, _transform_idx(m, edwin))).is_equal("")
+	for i in 8:
+		if m.pending.is_empty():
+			break
+		if m.pending["options"].any(func(o): return int(o.get("v", -1)) == target):
+			TB.choose_uids(m, [target])
+		else:
+			_answer_all(m, 1)
 	assert_int(int(m.cards[edwin]["id"])).is_equal(AVATAR)
+	assert_int(m.status_count(target, "debilitate")).is_equal(1)    # the transformation is a Summon
 	assert_int(m.status_count(edwin, "burn")).is_equal(2)
 	assert_int(m.status_count(edwin, "rune")).is_equal(1)
-	assert_int(m.atk_of(edwin)).is_equal(18 + 4 - 10)               # Avatar 18, kept +4, Shen's -10
+	assert_int(m.atk_of(edwin)).is_equal(20 + 4 - 10)               # Avatar 20 (2026-11-17), kept +4, Shen's -10
 
 
 # @cards 16
-func test_evolve_action_is_refused_in_the_battle_phase() -> void:
+func test_transform_action_is_refused_in_the_battle_phase() -> void:
 	var m := TB.make()
 	var edwin := TB.unit(m, 1, EDWIN, 0)
 	m.apply_status(edwin, "burn", 1)
 	m.cards[edwin]["mods"].append({"atk": 4, "def": 0, "until": "perm", "src": "test"})
 	TB.p1_battle(m)
-	assert_str(TB.ability(m, edwin, _evolve_idx(m, edwin))).is_equal(MatchEngine.EVOLVE_MAIN_ONLY)
+	assert_str(TB.ability(m, edwin, _transform_idx(m, edwin))).is_equal(MatchEngine.TRANSFORM_MAIN_ONLY)
 
 
 # @cards 155,156,49
-func test_symbiote_start_of_turn_evolve_is_a_summon_with_a_summon_window() -> void:
+func test_symbiote_start_of_turn_transform_is_a_summon_with_a_summon_window() -> void:
 	var m := TB.make()
 	TB.unit(m, 0, SHEN, 1)
 	TB.set_card(m, 0, TH_ENSNAREMENT, 0)                            # answers a Summon in column 1
 	var spawn := TB.unit(m, 1, SPAWN, 3)                            # back row, column 1
 	TB.to_turn2(m)
-	assert_str(TB.pend_kind(m)).is_equal("evolve")
-	TB.choose(m, ["Evolve"])
+	assert_str(TB.pend_kind(m)).is_equal("transform")
+	TB.choose(m, ["Transform"])
 	assert_int(int(m.cards[spawn]["id"])).is_equal(LARVA)
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")
 	assert_bool(m.cards[spawn]["mods"].is_empty()).is_false()      # Shen's -10 applied
@@ -130,11 +138,11 @@ func test_edwin_is_not_asked_at_the_start_of_the_turn() -> void:
 	m.apply_status(edwin, "burn", 1)
 	m.cards[edwin]["mods"].append({"atk": 4, "def": 0, "until": "perm", "src": "test"})
 	TB.to_turn2(m)
-	assert_str(TB.pend_kind(m)).is_not_equal("evolve")
+	assert_str(TB.pend_kind(m)).is_not_equal("transform")
 
 
 # @cards 160,158,159,196,197
-func test_soul_evolves_into_leviathan_exhausting_head_body_and_tail() -> void:
+func test_soul_transforms_into_leviathan_exhausting_head_body_and_tail() -> void:
 	var m := TB.make()
 	var head := TB.unit(m, 0, HEAD, 0)
 	var body := TB.unit(m, 0, BODY, 1)
@@ -142,7 +150,7 @@ func test_soul_evolves_into_leviathan_exhausting_head_body_and_tail() -> void:
 	var soul := TB.unit(m, 0, SOUL, 3)
 	var trap := TB.set_card(m, 1, TH_SPIKES, 2)
 	var pw := TB.power(m, 0, ABYSS, 0)
-	assert_str(TB.ability(m, soul, _evolve_idx(m, soul))).is_equal("")
+	assert_str(TB.ability(m, soul, _transform_idx(m, soul))).is_equal("")
 	_answer_all(m)
 	assert_int(int(m.cards[soul]["id"])).is_equal(LEVIATHAN)
 	for u in [head, body, tail]:
@@ -154,12 +162,12 @@ func test_soul_evolves_into_leviathan_exhausting_head_body_and_tail() -> void:
 
 
 # @cards 160
-func test_soul_cannot_evolve_without_the_tail() -> void:
+func test_soul_cannot_transform_without_the_tail() -> void:
 	var m := TB.make()
 	TB.unit(m, 0, HEAD, 0)
 	TB.unit(m, 0, BODY, 1)
 	var soul := TB.unit(m, 0, SOUL, 3)
-	assert_str(TB.ability(m, soul, _evolve_idx(m, soul))).is_not_empty()
+	assert_str(TB.ability(m, soul, _transform_idx(m, soul))).is_not_empty()
 
 
 # @cards 197
@@ -317,7 +325,7 @@ func test_dante_gains_two_atk_per_burn() -> void:
 	var m := TB.make()
 	var dante := TB.unit(m, 0, DANTE, 0)
 	m.apply_status(dante, "burn", 3)
-	assert_int(m.atk_of(dante)).is_equal(28 + 6)
+	assert_int(m.atk_of(dante)).is_equal(18 + 6)                    # 18 ATK since 2026-11-17
 
 
 # ------------------------------------------------------------ disabled cards
@@ -343,7 +351,7 @@ func test_a_deck_holding_a_disabled_card_plays_without_it() -> void:
 		assert_int(int(m.cards[uid]["id"])).is_not_equal(DRAW_VIRUS)
 
 
-func test_starter_decks_hold_no_disabled_or_evolution_only_cards() -> void:
+func test_starter_decks_hold_no_disabled_or_transformation_only_cards() -> void:
 	var decks: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/starter_decks.json"))["decks"]
 	var serpent := false
 	for dk in decks:

@@ -17,8 +17,10 @@ const FIT_SLACK := 0.51
 ## text must show. A hand card at rest (120) draws at the 6 px floor and may end in an ellipsis: its
 ## hover grows it to 210 px to read in full (owner feedback 2026-10-18).
 const READ_SCALE := 1.25
-## The card with by far the longest rules text.
-const LONGEST := "Akiramari"
+## The cards with the longest rules text: on the 150 px Extra Deck offer card they end in an ellipsis and
+## read in full from 168 px up (and in their tooltip and the inspector). Mirrorflesh Construct joined
+## Akiramari on 2026-11-17 (its new once-per-turn Debilitate).
+const LONGEST := ["Akiramari", "Mirrorflesh Construct"]
 
 
 func _texts() -> Array:
@@ -53,7 +55,7 @@ func test_tall_rules_text_is_never_cut_at_reading_sizes() -> void:
 			# The one exception: Akiramari's 391 characters (the next longest is 308) cannot fit the 150 px
 			# offer card even at the 6 px floor with the tightest leading; it ends in an ellipsis there and
 			# reads in full from 168 px up (and in its tooltip and inspector).
-			if CardTextLayout.shown_text(tp, e[2]) != e[2] and not (e[1] == LONGEST and s < 1.3):
+			if CardTextLayout.shown_text(tp, e[2]) != e[2] and not (e[1] in LONGEST and s < 1.3):
 				cut.append("%s @%.2f" % [e[1], s])
 	assert_array(cut).override_failure_message("cut:\n%s" % "\n".join(cut.slice(0, 12))).is_empty()
 

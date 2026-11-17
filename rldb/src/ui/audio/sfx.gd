@@ -13,10 +13,10 @@ const SETTINGS_PATH := "user://audio_settings.cfg"
 const NAMES: PackedStringArray = [
 	"card_draw", "card_play", "card_set", "summon", "select", "confirm", "cancel", "deny",
 	"attack", "impact", "damage", "heal", "destroy", "buff", "debuff", "turn", "phase",
-	"notice", "victory", "defeat", "exhaust", "fuse", "ritual", "arcane", "victory_big",
+	"notice", "victory", "defeat", "exhaust", "fuse", "arcane", "spirit", "victory_big",
 	"boom", "charge", "click_primary", "click_secondary", "back", "deck_add", "deck_remove", "chat",
 	# D8 / B5 / D6 (2026-10-20): the summon set pieces, the Serpents' strike, sacrifice and AP changes.
-	"fusion_vortex", "fusion_impact", "ritual_choir", "ritual_impact", "arcane_shimmer", "arcane_impact",
+	"fusion_vortex", "fusion_impact", "arcane_choir", "arcane_impact", "spirit_shimmer", "spirit_impact",
 	"card_slam", "serpent_coil", "serpent_strike", "sacrifice", "ap_gain", "ap_loss",
 	# H1 WP-1 / WP-3 (design review 1.4.6): UI feedback cues and the low-HP heartbeat. A missing file
 	# is silent (_stream_for returns null), so a name may be registered before its sound exists.
@@ -35,8 +35,8 @@ const NAMES: PackedStringArray = [
 	"status_infiltrate", "status_blind", "status_nimble", "status_debilitate",
 	# A Cleanse / Curse stack stopping an application, a status wearing off, Burn / Poison damage ticks.
 	"status_blocked", "status_expire", "burn_tick", "poison_tick",
-	# L23 Evolve: the build-up and the transformation burst.
-	"evolve_charge", "evolve_burst",
+	# L23 Transform: the build-up and the transformation burst.
+	"transform_charge", "transform_burst",
 	# L5 sacrifice mode, L7 targeting (the arrow arms, a target locks in).
 	"sacrifice_mode_on", "sacrifice_mode_off", "target_arm", "target_lock",
 	# L9 Hypnotise and other control changes, L11 Shapeshifter Loak / Mimic copying a Unit's form.
@@ -54,8 +54,8 @@ const NAMES: PackedStringArray = [
 	"dropdown_select",
 	# M batch (owner, 10 Nov): the draft offer's own hover (other card hovers keep card_hover).
 	"draft_hover",
-	# M batch (owner, 10 Nov): the Ritual and Arcane set pieces as one long cue each (build, impact, tail).
-	"ritual_full", "arcane_full",
+	# M batch (owner, 10 Nov): the Arcane and Spirit set pieces as one long cue each (build, impact, tail).
+	"arcane_full", "spirit_full",
 ]
 ## F22 / F25: UI sounds. One user action makes exactly one UI sound: within one frame only the request
 ## with the highest priority plays (a later, higher one stops the earlier voice, a lower or equal one is

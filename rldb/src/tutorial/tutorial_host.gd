@@ -19,7 +19,7 @@ const HINT_FOLLOW := "Tutorial: follow the highlighted step."
 const HINT_READ := "Tutorial: read the guidance, then click Next."
 const HINT_WAIT := "Tutorial: watch the Rival's move."
 const HINT_CONCEDE := "Use Exit tutorial to leave the lesson."
-## A material pick whose costs miss an exact total (Arcane, F03-04): selected, required.
+## A material pick whose costs miss an exact total (Spirit, F03-04): selected, required.
 const HINT_TOTAL := "Tutorial: those materials total %d; the summon needs exactly %d."
 const REASON_LOCKED := "Not part of this tutorial step."
 
@@ -160,7 +160,7 @@ func refusal(cmd: Dictionary) -> String:
 
 
 ## [selected total, required total] when `cmd` picks materials for an exact-total choice and
-## misses the total (an Arcane over- or under-pay), else [].
+## misses the total (a Spirit over- or under-pay), else [].
 func total_mismatch(cmd: Dictionary) -> Array:
 	var pd: Dictionary = game().pending
 	if String(cmd.get("t", "")) != "choose" or not pd.get("total_exact", false):

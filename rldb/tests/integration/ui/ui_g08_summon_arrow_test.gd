@@ -139,11 +139,11 @@ func test_fusion_by_ability_arrow_starts_at_the_fusion_unit() -> void:
 ## itself the first material (Tag Team - S).
 func test_fusion_material_arrow_starts_at_the_fusion_unit_not_a_material() -> void:
 	var p := m.active
-	# 2026-11-03 Bastion Wyrm: a unit with 20 or more ATK or DEF + a Physical unit.
-	var guard := TB.unit(m, p, 28, 0)               # Guardian of the Forest (22 DEF), front zone 1
-	var hydra := TB.unit(m, p, 116, 1)              # Basic Dragon (Physical), front zone 2
-	var tt := TB.card(m, p, 8, "hand")              # Tag Team - S: On Summon Fusion (Field)
-	var wyrm := TB.card(m, p, 93, "extra")          # Bastion Wyrm
+	# 2026-11-17 Tag Team - S fuses with the units in its own column only. Geolock Colossus: a unit
+	# with 20 or more ATK or DEF + an Earth unit = Guardian of the Forest + Tag Team itself (Earth).
+	var guard := TB.unit(m, p, 28, 0)               # Guardian of the Forest (22 DEF), front row, column 1
+	var tt := TB.card(m, p, 8, "hand")              # Tag Team - S (Earth): On Summon Fusion (its column)
+	var geo := TB.card(m, p, 57, "extra")           # Geolock Colossus
 	m.players[p]["ap"] = 3
 	host.broadcast()
 	await _settle()
@@ -151,15 +151,15 @@ func test_fusion_material_arrow_starts_at_the_fusion_unit_not_a_material() -> vo
 	await _settle()
 	TB.choose(m, ["Back row, column 1"])
 	TB.choose(m, ["Yes"])
-	TB.choose_uids(m, [wyrm])
+	TB.choose_uids(m, [geo])
 	host.broadcast()
 	await _settle()
-	for mat in [guard, hydra]:
-		assert_str(String(gs.pending().get("prompt", ""))).contains("for the summon of Bastion Wyrm")
-		assert_int(gs.targeting.source_uid()).is_equal(wyrm)
+	for mat in [guard, tt]:
+		assert_str(String(gs.pending().get("prompt", ""))).contains("for the summon of Geolock Colossus")
+		assert_int(gs.targeting.source_uid()).is_equal(geo)
 		var src: Rect2 = gs.targeting._source_rect()
 		assert_bool(src.size != Vector2.ZERO).override_failure_message("no arrow source").is_true()
-		for s in [0, 1, 3]:
+		for s in [0, 3]:
 			assert_bool(src == _slot_rect(s)).override_failure_message("arrow starts at zone %d" % s).is_false()
 		TB.choose_uids(m, [mat])
 		host.broadcast()

@@ -80,8 +80,8 @@ ATTACK_OK_CUE = {"attack": 0.13, "miss": 0.13, "stance_attack": 0.08, "card_shuf
                  "card_return": 0.12, "card_discard": 0.09, "deck_add": 0.05, "deck_remove": 0.05, "panel_open": 0.06,
                  "panel_close": 0.05, "exhaust": 0.4, "sacrifice": 0.2, "sacrifice_mode_on": 0.12, "ap_gain": 0.04,
                  "target_arm": 0.3, "hourglass_flip": 0.06, "draft_reveal": 0.12}
-# Per-cue overrides of the tier (the owner asked for Arcane to bloom, not hit: H28).
-SWELL = {"arcane_impact": 0.03}   # minimum attack (s) of a cue that must swell in
+# Per-cue overrides of the tier (the owner asked for Spirit to bloom, not hit: H28).
+SWELL = {"spirit_impact": 0.03}   # minimum attack (s) of a cue that must swell in
 
 
 def load_cues():

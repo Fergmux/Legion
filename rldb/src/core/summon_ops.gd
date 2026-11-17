@@ -1,7 +1,7 @@
 class_name SummonOps
 extends BattleOps
 ## Placement and summoning ops: choosing a zone and stance, placing units / set cards / Powers,
-## tribute, Ritual and Arcane materials, and Nimble zone moves.
+## tribute, Arcane and Spirit materials, and Nimble zone moves.
 
 
 # ---------------------------------------------------------------- placement
@@ -180,7 +180,7 @@ func _op_place_power(f: Dictionary, op: Dictionary) -> int:
 
 
 ## Tribute materials for a special summon. Field materials go to Spent and fire
-## tribute triggers; Spent materials (Arcane) are exhausted without field triggers.
+## tribute triggers; Spent materials (Spirit) are exhausted without field triggers.
 ## L19 (2026-11-05): every material has left for its pile before the summoned unit lands, so its On
 ## Summon effects never see one. A Field material's own "If this Unit is Tributed" effects
 ## (tribute_or_sacrifice) are queued here and emitted once the unit has landed (_op_tribute_bonus),
@@ -195,10 +195,10 @@ func _op_tribute(f: Dictionary, op: Dictionary) -> int:
 		note("material", {"uid": m, "from": from})
 		# Presentation only (F03-17): where the material came from and where it goes, by summon kind.
 		var mfx := {"k": "material", "p": p, "from": from, "at": fx_pos(m),
-			"kind": "ritual" if op.get("ritual", false) else ("arcane" if op.get("to", "") == "exhaust" else "fusion"),
+			"kind": "arcane" if op.get("arcane", false) else ("spirit" if op.get("to", "") == "exhaust" else "fusion"),
 			"to": "spent" if from == "unit" and not has_flag_raw(m, "exhaust_on_spent") else "exhaust"}
 		mfx.merge(fx_identity(m, [0, 1] if from == "unit" else [p]))
-		if op.get("ritual", false):
+		if op.get("arcane", false):
 			f["vars"]["runes_used"] = status_count(m, "rune")
 		if from == "unit":
 			var snap := _leave_field(m, op.get("to", "spent") if op.get("to", "") != "exhaust" else "spent", "tribute")
@@ -208,7 +208,7 @@ func _op_tribute(f: Dictionary, op: Dictionary) -> int:
 				f["vars"]["tribute_events"] = []
 			f["vars"]["tribute_events"].append({"self": m, "ctl": p, "player": p, "tribute": true, "debilitated": snap["st"].get("debilitate", 0) > 0})
 			# Magentric (2026-10-17): "If this Unit is Tributed, Apply 2 Pierce to the Fusion or
-			# Ritual Unit Summoned". Its On Field text needs it undebilitated on the Field.
+			# Arcane Unit Summoned". Its On Field text needs it undebilitated on the Field.
 			var tb: Dictionary = script_of(m).get("tribute_bonus", {})
 			if not tb.is_empty() and snap["st"].get("debilitate", 0) <= 0 and not op.get("to", "") == "exhaust":
 				if not f["vars"].has("tribute_bonus"):
@@ -223,13 +223,13 @@ func _op_tribute(f: Dictionary, op: Dictionary) -> int:
 			add_log("%s exhausts a card from %s as material." % [pname(p), from.capitalize()],
 				{p: "%s exhausts %s from %s as material." % [pname(p), name_of(m), from.capitalize()]})
 			add_fx(mfx)
-	if op.get("ritual", false) and d(f["src"])["cost"] == null:
+	if op.get("arcane", false) and d(f["src"])["cost"] == null:
 		var n: int = f["vars"]["runes_used"]
 		cards[f["src"]]["runes_used"] = n
 	return R.CONT
 
 
-## Applies benefits recorded by `_op_tribute` to the Fusion/Ritual unit that just landed,
+## Applies benefits recorded by `_op_tribute` to the Fusion/Arcane unit that just landed,
 ## before its own On Summon effects and the summon-response window; then the materials' own
 ## "If this Unit is Tributed" effects are emitted (L19), so they resolve next.
 func _op_tribute_bonus(f: Dictionary, op: Dictionary) -> int:
@@ -253,7 +253,7 @@ func _emit_tribute_events(f: Dictionary) -> void:
 		emit("tribute_or_sacrifice", ev)
 
 
-func _ritual_materials(p: int, uid: int) -> Array:
+func _arcane_materials(p: int, uid: int) -> Array:
 	var need = extra_cost(uid)
 	var out := []
 	for u in field_units(p):
@@ -265,28 +265,28 @@ func _ritual_materials(p: int, uid: int) -> Array:
 	return out
 
 
-func _op_ritual_material(f: Dictionary, op: Dictionary) -> int:
+func _op_arcane_material(f: Dictionary, op: Dictionary) -> int:
 	var ans: Variant = take_answer(f)
 	if ans != null:
 		f["vars"][op["as"]] = ans
 		return R.CONT
-	# Ritual Tribute (2026-10-18): the material was chosen by starting from it.
+	# Arcane Tribute (2026-10-18): the material was chosen by starting from it.
 	var preset: int = int(op.get("preset", -1))
-	if preset != -1 and preset in _ritual_materials(f["ctl"], f["src"]):
+	if preset != -1 and preset in _arcane_materials(f["ctl"], f["src"]):
 		f["vars"][op["as"]] = [preset]
 		return R.CONT
 	var opts := []
-	for u in _ritual_materials(f["ctl"], f["src"]):
+	for u in _arcane_materials(f["ctl"], f["src"]):
 		opts.append(card_option(u, "%s (%d Runes)" % [name_of(u), status_count(u, "rune")]))
 	if opts.is_empty():
 		return R.END
 	return ask(f, f["ctl"], "select", "Choose the unit to tribute for %s." % name_of(f["src"]), opts, 1, 1, true)
 
 
-## Arcane materials player p may offer (F03-04 / F03-05): ordinary AP-cost Units in Spent
+## Spirit materials player p may offer (F03-04 / F03-05): ordinary AP-cost Units in Spent
 ## (never Extra Deck units or non-Units) whose *current* cost is above 0. A zero-cost Unit
-## adds nothing to an exact total, so it is not offered in the Arcane material choice.
-func arcane_materials(p: int) -> Array:
+## adds nothing to an exact total, so it is not offered in the Spirit material choice.
+func spirit_materials(p: int) -> Array:
 	var out := []
 	for u in players[p]["spent"]:
 		if d(u)["cost_kind"] == "ap" and is_unit(u) and not is_extra(u) and current_cost(u) > 0:
@@ -326,19 +326,19 @@ static func exact_subset(values: Array, target: int) -> Array:
 	return out
 
 
-## True when some combination of p's Arcane materials totals exactly `need` (F03-04).
-func arcane_payable(p: int, need: int) -> bool:
-	return not exact_subset(arcane_materials(p).map(func(u): return current_cost(u)), need).is_empty()
+## True when some combination of p's Spirit materials totals exactly `need` (F03-04).
+func spirit_payable(p: int, need: int) -> bool:
+	return not exact_subset(spirit_materials(p).map(func(u): return current_cost(u)), need).is_empty()
 
 
-func _op_arcane_materials(f: Dictionary, op: Dictionary) -> int:
+func _op_spirit_materials(f: Dictionary, op: Dictionary) -> int:
 	var ans: Variant = take_answer(f)
 	if ans != null:
 		f["vars"][op["as"]] = ans
 		return R.CONT
 	var need: int = extra_cost(f["src"])
 	var opts := []
-	for u in arcane_materials(f["ctl"]):
+	for u in spirit_materials(f["ctl"]):
 		var o := card_option(u, "%s (cost %d)" % [name_of(u), current_cost(u)])
 		o["value"] = current_cost(u)
 		opts.append(o)

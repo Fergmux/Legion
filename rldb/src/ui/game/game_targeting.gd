@@ -51,6 +51,7 @@ func update_arrow() -> void:
 	var pv := gs.preview
 	var on := false
 	var hostile := false
+	var ends: Array = []
 	var overlay_up := gs.overlays.overlay.visible
 	var answered := gs.selection.answered()    # L7: the pick is made: no arrow while its answer plays
 	var targeting := not gs.mv.is_empty() and gs.selection.board_targeting()
@@ -81,15 +82,47 @@ func update_arrow() -> void:
 				arrow.b = inv2 * dst2
 				on = true
 				hostile = true
+		elif not cause.get("targets", []).is_empty():
+			# N batch (owner, 16 Nov): an enemy effect I may answer has already chosen its targets
+			# (Assassinate's unit): its arrow, from its card to each target, public once chosen.
+			var src3 := _cause_source(cause)
+			if src3 != Vector2.INF:
+				var inv3 := arrow.get_global_transform().affine_inverse()
+				for t in cause["targets"]:
+					var r := gs.fx_slot_global_rect(int(t["p"]), String(t["zone"]), int(t["slot"]))
+					if r.size != Vector2.ZERO:
+						ends.append(inv3 * r.get_center())
+				if not ends.is_empty():
+					arrow.a = inv3 * src3
+					arrow.b = ends.pop_front()
+					on = true
+					hostile = true
 	var want_col: Color = GameScreen.VERDICT_COLORS.get(pv.verdict, UIStyle.TARGET) if pv.text != "" else UIStyle.TARGET
 	if hostile:
 		want_col = HOSTILE_COLOR
 	var want_v := pv.verdict if pv.text != "" else ""
 	if on or arrow.on or arrow.col != want_col or arrow.verdict != want_v:
 		arrow.on = on
+		arrow.extra = ends
 		arrow.col = want_col
 		arrow.verdict = want_v
 		arrow.queue_redraw()
+
+
+## N batch: where the enemy effect a Trap prompt answers starts its arrow (global): its card on the
+## Field (a set Spell, a Power, a unit's ability), else its card in the prompt panel (a Spell cast
+## from the Hand is in no zone), else the middle of my opponent's side; Vector2.INF if none.
+func _cause_source(cause: Dictionary) -> Vector2:
+	var c: Dictionary = cause.get("card", {})
+	if not c.is_empty():
+		var r := gs.fx_slot_global_rect(int(c["p"]), String(c["zone"]), int(c["slot"]))
+		if r.size != Vector2.ZERO:
+			return r.get_center()
+	if gs.prompt != null and gs.prompt.mention_row != null and gs.prompt.mention_row.is_visible_in_tree():
+		for fig in gs.prompt.mention_row.get_children():
+			if fig is Control and String(fig.get_meta("role", "")) == "activated" and (fig as Control).is_visible_in_tree():
+				return (fig as Control).get_global_rect().get_center()
+	return gs.side_center(1 - gs.me())
 
 
 func _source_rect() -> Rect2:

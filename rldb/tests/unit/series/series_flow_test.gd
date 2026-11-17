@@ -22,11 +22,15 @@ func test_starter_decks_are_valid_and_fully_implemented() -> void:
 			if d["category"] == "basic_unit":
 				basics += 1
 		# F06-03 structure decks: 3 copies of one basic unit plus 9 other main-deck cards. 2026-11-10 (owner):
-		# Yamata's Fire plays Solomon, the Captain in its Main Deck (Solomon, the Tyrannical is evolution-only)
-		# and Divine Serpent's Rising adds the Tail, so those two have 10.
-		assert_int(main_count).is_between(12, 13)
+		# Yamata's Fire plays Solomon, the Captain in its Main Deck (Solomon, the Tyrannical is transformation-only)
+		# and Divine Serpent's Rising adds the Tail, so those two have 10. 2026-11-17: the Gods and Soul of
+		# Crashing Ocean are Spirit Units, so they move to the Extra Deck (Divine Creators keeps 10 main-deck
+		# cards); Tritu is a Unit, so it moves to the Main Deck. Every deck still holds 15 cards (16 for
+		# Divine Serpent's Rising, which adds the Tail).
+		assert_int(main_count).is_between(10, 13)
 		assert_int(basics).is_equal(3)
-		assert_int(deck["extra"].size()).is_between(1, 3)
+		assert_int(deck["extra"].size()).is_between(1, DeckStore.MAX_EXTRA)
+		assert_int(main_count + deck["extra"].size()).is_between(15, 16)
 		for id in deck["extra"]:
 			assert_bool(CardDB.is_extra_category(CardDB.get_def(id)["category"])).is_true()
 
@@ -35,7 +39,7 @@ func test_game_starts_when_both_decks_locked() -> void:
 	var s := _series()
 	assert_str(s.stage).is_equal(Series.STAGE_GAME)
 	assert_int(s.game_no).is_equal(1)
-	assert_int(s.game.players[0]["extra"].size()).is_equal(3)
+	assert_int(s.game.players[0]["extra"].size()).is_equal(2)        # Moving Ocean: Tritu moved to the Main Deck (2026-11-17)
 
 
 ## Add-card reward (feedback 04): choose a type (spends the pick), then take one offered card.
@@ -168,7 +172,7 @@ func test_f03_10_configured_draft_counts_are_used_and_shown() -> void:
 		cats[c] = cats.get(c, 0) + 1
 	assert_int(cats.get("unit", 0)).is_equal(2)
 	assert_int(cats.get("spell", 0)).is_equal(1)
-	assert_int(int(cats.get("fusion", 0)) + int(cats.get("ritual", 0)) + int(cats.get("arcane", 0))).is_equal(2)
+	assert_int(int(cats.get("fusion", 0)) + int(cats.get("arcane", 0)) + int(cats.get("spirit", 0))).is_equal(2)
 	assert_int(cats.get("basic_unit", 0)).is_equal(3)              # F06-06: the chosen basic unit, x3
 	assert_int(s.decks[0].size()).is_equal(8)
 	# Extra Deck picks still route to the Extra Deck at game start.
@@ -194,19 +198,19 @@ func test_f03_10_invalid_draft_counts_are_explained() -> void:
 
 
 func test_f03_11_draft_and_rewards_use_one_extra_deck_group() -> void:
-	assert_bool("fusion" in Series.REWARD_TYPES or "ritual" in Series.REWARD_TYPES or "arcane" in Series.REWARD_TYPES).is_false()
+	assert_bool("fusion" in Series.REWARD_TYPES or "arcane" in Series.REWARD_TYPES or "spirit" in Series.REWARD_TYPES).is_false()
 	assert_bool("extra" in Series.REWARD_TYPES).is_true()
 	var cats := {}
 	for id in Series.reward_pool("extra"):
 		cats[CardDB.get_def(id)["category"]] = true
-	assert_array(cats.keys()).contains_exactly_in_any_order(["fusion", "ritual", "arcane"])
+	assert_array(cats.keys()).contains_exactly_in_any_order(["fusion", "arcane", "spirit"])
 	var s := _series()
 	s.submit(s.game.active, {"t": "concede"})
 	var types: Array = s.view_for(0)["rewards"]["types"]
 	assert_bool("extra" in types and not ("fusion" in types)).is_true()
 	assert_str(s.submit(0, {"t": "reward_type", "category": "extra"})).is_empty()
 	for c in s.view_for(0)["rewards"]["offer"]:
-		assert_bool(String(c["category"]) in ["fusion", "ritual", "arcane"]).is_true()
+		assert_bool(String(c["category"]) in ["fusion", "arcane", "spirit"]).is_true()
 
 
 func test_opponent_reward_choices_are_private() -> void:
@@ -224,7 +228,8 @@ func test_custom_deck_is_unrestricted_and_routes_extra_cards() -> void:
 	assert_str(s.submit(0, {"t": "custom_deck", "cards": [21, 21, 21, 21, 93, 96], "name": "Gods"})).is_empty()
 	s.submit(1, {"t": "pick_starter", "index": 0})
 	assert_str(s.stage).is_equal(Series.STAGE_GAME)
-	assert_int(s.game.players[0]["extra"].size()).is_equal(2)
+	# 2026-11-17: Shen the World Dragon (21) is a Spirit Unit, so all six cards go to the Extra Deck.
+	assert_int(s.game.players[0]["extra"].size()).is_equal(6)
 	assert_str(s.deck_names[0]).is_equal("Gods")
 
 

@@ -7,8 +7,9 @@ extends GdUnitTestSuite
 ##   - "miss": a declared attack does not resolve (its attacker or target is gone, or the target is
 ##     now Protected). Sfx.for_fx plays "miss".
 
-const MANS_BEST_FRIEND := 73       # On Summon: Add a Warrior Unit from Draw to Hand.
-const WARRIOR := 37                # Solomon, the Captain (Warrior)
+# 2026-11-17: Man's Best Friend (the old fixture) lost its Warrior search; Tritu's ability adds a Water unit.
+const TRITU := 176                 # Once per turn: Add a Water Unit from Draw to Hand.
+const WATER_UNIT := 3              # Basic Warrior (Water)
 const HIDDEN_TRAP := 50            # Wabuku: any face-down card opens a hidden response window
 
 
@@ -24,11 +25,11 @@ func _events(m: MatchEngine, viewer: int, kind: String) -> Array:
 func test_card_added_from_draw_emits_to_hand_with_identity_for_its_owner_only() -> void:
 	# Arrange
 	var m := TB.make()
-	var w := TB.card(m, 0, WARRIOR, "draw")
+	var w := TB.card(m, 0, WATER_UNIT, "draw")
+	var tritu := TB.unit(m, 0, TRITU, 1)
 	# Act
-	TB.special(m, 0, MANS_BEST_FRIEND, 1)
-	if TB.pend_kind(m) != "":
-		TB.choose_uids(m, [w])
+	assert_str(TB.ability(m, tritu, 0)).is_empty()
+	TB.choose_uids(m, [w])
 	# Assert
 	assert_str(String(m.cards[w]["zone"])).is_equal("hand")
 	var mine := _events(m, 0, "to_hand")
@@ -37,7 +38,7 @@ func test_card_added_from_draw_emits_to_hand_with_identity_for_its_owner_only() 
 		return
 	assert_int(int(mine[0]["p"])).is_equal(0)
 	assert_str(String(mine[0]["from"])).is_equal("draw")
-	assert_int(int(mine[0].get("id", -1))).is_equal(WARRIOR)
+	assert_int(int(mine[0].get("id", -1))).is_equal(WATER_UNIT)
 	for viewer in [1, -1]:
 		var theirs := _events(m, viewer, "to_hand")
 		assert_int(theirs.size()).is_equal(1)

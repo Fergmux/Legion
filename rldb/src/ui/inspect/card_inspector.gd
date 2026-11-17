@@ -30,8 +30,8 @@ var _dim: ColorRect
 var _card_box: Control
 var _card_widget: CardWidget
 var _details: CardDetailsPanel
-## L23: the "Evolves into" section under the details.
-var _evolve: EvolvePreview
+## L23: the "Transforms into" section under the details.
+var _transform: TransformPreview
 var _scroll: ScrollContainer
 var _sig: int = 0
 ## Where the card came from (global rect; empty: no fly) and the flying copy while it moves.
@@ -138,9 +138,9 @@ func details() -> CardDetailsPanel:
 	return _details
 
 
-## L23: the "Evolves into" section (visible only for a card that evolves).
-func evolve_preview() -> EvolvePreview:
-	return _evolve
+## L23: the "Transforms into" section (visible only for a card that transforms).
+func transform_preview() -> TransformPreview:
+	return _transform
 
 
 ## Shows `c` (rebuilds only when it changed). A non-inspectable view closes the inspector.
@@ -163,7 +163,7 @@ func show_card(c: Dictionary) -> void:
 	# D14: a Spell / Trap / Power has no stats section, so its rules read larger and fill the column.
 	_details.text_scale = DETAILS_TEXT_SCALE if CardDetailsPanel.is_unit_view(c) else DETAILS_TEXT_SCALE * 1.3
 	_details.show_card(c)
-	_evolve.show_for(c)
+	_transform.show_for(c)
 	_scroll.set_deferred("scroll_vertical", keep if same_card else 0)
 
 
@@ -268,13 +268,13 @@ func _build() -> void:
 	_details.text_scale = DETAILS_TEXT_SCALE
 	_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(_details)
-	# L23: "Evolves into" (hidden unless the card evolves). Its preview opens the next card's inspector
+	# L23: "Transforms into" (hidden unless the card transforms). Its preview opens the next card's inspector
 	# on top of this one, so the chain can be walked and each one closes back to the last.
-	_evolve = EvolvePreview.new()
-	_evolve.open_requested.connect(func(v: Dictionary, from: Rect2) -> void:
+	_transform = TransformPreview.new()
+	_transform.open_requested.connect(func(v: Dictionary, from: Rect2) -> void:
 		if not _closing and is_inside_tree():
 			CardInspector.open(get_parent(), v, Callable(), from))
-	body.add_child(_evolve)
+	body.add_child(_transform)
 	resized.connect(_relayout)
 
 

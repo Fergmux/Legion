@@ -1,12 +1,12 @@
 extends GdUnitTestSuite
-## Owner rule 2026-10-18: no Fusion, Ritual or Arcane summon in the Battle Phase. Cards whose effect
+## Owner rule 2026-10-18: no Fusion, Arcane or Spirit summon in the Battle Phase. Cards whose effect
 ## would make one cannot use that effect there (abilities, set Spells, triggered offers).
 
 const VOID_BASILISK := 67          # ability: exhaust itself to Fusion Summon from Spent
 const FUSION_CEREMONY := 82        # Spell: Fusion Summon
-const CREEPING_NULL := 65          # Ritual unit, 3 Runes
+const CREEPING_NULL := 65          # Arcane unit, 3 Runes
 const BRONZE_SALAMAN := 186        # offers a Fusion Summon as it lands
-const BASIC_BEAST := 4            # the Ritual material
+const BASIC_BEAST := 4            # the Arcane material
 # 2026-11-03 Bastion Wyrm: a unit with 20 or more ATK or DEF + a Physical unit (was Beast + Dragon).
 const TALL_BEAST := 28             # Guardian of the Forest 12/22: the 20+ DEF material
 const BASIC_DRAGON := 116          # Basic Dragon (Physical): the Physical material
@@ -47,14 +47,14 @@ func test_set_fusion_spell_is_refused_in_the_battle_phase() -> void:
 	assert_str(m.validate(1, {"t": "activate_set", "uid": sc})).is_equal(MatchEngine.NO_EXTRA_IN_BATTLE)
 
 
-func test_ritual_summon_is_refused_in_the_battle_phase() -> void:
+func test_arcane_summon_is_refused_in_the_battle_phase() -> void:
 	var m := _turn2()
 	var mat := TB.unit(m, 1, BASIC_BEAST, 0)
 	m.apply_status(mat, "rune", 3)
 	var null_u := TB.card(m, 1, CREEPING_NULL, "extra")
-	assert_str(m.validate(1, {"t": "ritual", "uid": null_u, "stance": "atk"})).is_empty()
+	assert_str(m.validate(1, {"t": "arcane", "uid": null_u, "stance": "atk"})).is_empty()
 	TB.to_battle(m)
-	assert_str(m.validate(1, {"t": "ritual", "uid": null_u, "stance": "atk"})).is_equal(MatchEngine.NO_EXTRA_IN_BATTLE)
+	assert_str(m.validate(1, {"t": "arcane", "uid": null_u, "stance": "atk"})).is_equal(MatchEngine.NO_EXTRA_IN_BATTLE)
 
 
 func test_a_triggered_fusion_offer_is_not_made_in_the_battle_phase() -> void:

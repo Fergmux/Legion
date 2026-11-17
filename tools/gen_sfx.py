@@ -366,8 +366,8 @@ def s_fuse(r):
     return finish(mix(scale(up, 0.5), scale(up2, 0.3), (0.55, scale(hit, 0.9))), tail_kw=dict(wet=0.4, extra_s=0.3, delay_s=0.05))
 
 
-def s_ritual(r):
-    """F03-17 Ritual: low pulsing drone with a deep strike."""
+def s_arcane(r):
+    """F03-17 Arcane: low pulsing drone with a deep strike."""
     n = n_samples(0.9)
     dr = mix(tone(110.0, 0.9, 0.9, ((1, 1), (2, 0.5), (3, 0.25)), 0.05), tone(164.8, 0.9, 0.9, ((1, 0.6), (2, 0.2)), 0.05))
     pulse = [0.55 + 0.45 * math.sin(TWO_PI * 5.0 * i / SR) for i in range(len(dr))]
@@ -375,8 +375,8 @@ def s_ritual(r):
     return finish(mix(scale(mul(dr, pulse), 0.5), (0.45, scale(strike, 0.9))), tail_kw=dict(wet=0.45, extra_s=0.3, delay_s=0.06))
 
 
-def s_arcane(r):
-    """F03-17 Arcane: glassy ascending chime arpeggio."""
+def s_spirit(r):
+    """F03-17 Spirit: glassy ascending chime arpeggio."""
     notes = [(0.0, 659.25), (0.1, 783.99), (0.2, 987.77), (0.3, 1318.5), (0.42, 1760.0)]
     parts = [(o, scale(bell(f, 0.8, 0.25), 0.7)) for o, f in notes]
     return finish(mix(*parts), tail_kw=dict(wet=0.5, extra_s=0.4, delay_s=0.045))
@@ -575,8 +575,8 @@ GONG = ((1.0, 1.0, 1.6, 0.012), (1.48, 0.55, 1.1, 0.12), (2.0, 0.42, 0.9, 0.2), 
         (3.6, 0.2, 0.55, 0.4), (4.4, 0.13, 0.45, 0.45), (5.4, 0.08, 0.35, 0.5))
 
 
-def s_ritual_choir(r):
-    """D8 / H29 Ritual anticipation: dark and sacred. A low choir drone on an open fifth (A2-E3-A3) swells
+def s_arcane_choir(r):
+    """D8 / H29 Arcane anticipation: dark and sacred. A low choir drone on an open fifth (A2-E3-A3) swells
     from 'ooh' to 'aah' as the minor third (C4) enters, over an A1 drone, while a ritual heartbeat
     (soft low drums, lub-dub) quickens toward the climax (0.88 s). The choir crests with the last beat at
     0.75 s and draws a breath, so the gong tolls out of a hush. A long, dark temple hall."""
@@ -598,8 +598,8 @@ def s_ritual_choir(r):
     return finish(taper(x, 0.45), rev=False)
 
 
-def s_ritual_impact(r):
-    """D8 / H29 Ritual climax: ominous grandeur. A temple gong on A1 tolls with a soft mallet, its upper
+def s_arcane_impact(r):
+    """D8 / H29 Arcane climax: ominous grandeur. A temple gong on A1 tolls with a soft mallet, its upper
     partials blooming in after the strike; a deep ritual drum and an A1 sub give it weight, and the choir
     swells into a solemn chord that resolves from a suspended fourth (A-D-E) into A minor (A-C-E), the key
     of the build-up. A very long, dark temple hall; no crash, no soft-clip."""
@@ -628,8 +628,8 @@ def s_ritual_impact(r):
 PENTA = (1318.5, 1567.98, 1760.0, 2093.0, 2349.3, 2637.0, 3136.0, 3520.0, 4186.0)
 
 
-def s_arcane_shimmer(r):
-    """D8 Arcane anticipation: crystalline shimmer, glassy grains thickening into the climax over a rising
+def s_spirit_shimmer(r):
+    """D8 Spirit anticipation: crystalline shimmer, glassy grains thickening into the climax over a rising
     FM glass tone and air."""
     sec = 0.95
     n = n_samples(sec)
@@ -760,8 +760,8 @@ def smooth_limit(x, reduce_db, look_s=0.01, release_s=0.3):
     return out
 
 
-def s_arcane_impact(r):
-    """D8 Arcane climax (H28: mystical, not jarring): the lattice resolves into light. An open Dsus2
+def s_spirit_impact(r):
+    """D8 Spirit climax (H28: mystical, not jarring): the lattice resolves into light. An open Dsus2
     glass-harmonica chord (D-A-E-A-D, inside the shimmer's C pentatonic, so the build-up resolves into
     it) blooms upward voice by voice with slow chorus, under a soft glass 'ting', a warm sub bloom,
     a breath of air and a sparkle that climbs and fades; all of it rings out into a long airy hall.
@@ -1182,14 +1182,14 @@ SOUNDS = [
     ("destroy", s_destroy), ("buff", s_buff), ("debuff", s_debuff),
     ("turn", s_turn), ("phase", s_phase), ("notice", s_notice),
     ("victory", s_victory), ("defeat", s_defeat),
-    ("exhaust", s_exhaust), ("fuse", s_fuse), ("ritual", s_ritual), ("arcane", s_arcane), ("victory_big", s_victory_big),
+    ("exhaust", s_exhaust), ("fuse", s_fuse), ("arcane", s_arcane), ("spirit", s_spirit), ("victory_big", s_victory_big),
     ("boom", s_boom), ("charge", s_charge),
     ("click_primary", s_click_primary), ("click_secondary", s_click_secondary), ("back", s_back),
     ("deck_add", s_deck_add), ("deck_remove", s_deck_remove),
     ("chat", s_chat), ("chat_pop", s_chat_pop),
     ("fusion_vortex", s_fusion_vortex), ("fusion_impact", s_fusion_impact),
-    ("ritual_choir", s_ritual_choir), ("ritual_impact", s_ritual_impact),
-    ("arcane_shimmer", s_arcane_shimmer), ("arcane_impact", s_arcane_impact),
+    ("arcane_choir", s_arcane_choir), ("arcane_impact", s_arcane_impact),
+    ("spirit_shimmer", s_spirit_shimmer), ("spirit_impact", s_spirit_impact),
     ("card_slam", s_card_slam), ("serpent_coil", s_serpent_coil), ("serpent_strike", s_serpent_strike),
     ("sacrifice", s_sacrifice), ("ap_gain", s_ap_gain), ("ap_loss", s_ap_loss),
     ("ui_hover", s_ui_hover), ("panel_open", s_panel_open), ("panel_close", s_panel_close), ("tab", s_tab),
@@ -1208,20 +1208,20 @@ PEAK = {"chat": -12.0, "chat_pop": -10.0,"click_primary": -11.0, "click_secondar
         # H28: a sustained chord reads quieter than a hit at the same peak; -4.5 dBFS puts its
         # loudest 400 ms near fusion_impact (about -15 vs -14 LUFS) and keeps the summed set piece (shimmer +
         # this + card_slam) at about -1.4 dBFS (the old one: -2).
-        "arcane_impact": -4.5,
-        # H29: the same rule for the other two set pieces. Each climax sits within 1 LU of arcane_impact and
-        # each build-up within 1 LU of arcane_shimmer (loudest 400 ms, K-weighted); the low brass of Fusion
+        "spirit_impact": -4.5,
+        # H29: the same rule for the other two set pieces. Each climax sits within 1 LU of spirit_impact and
+        # each build-up within 1 LU of spirit_shimmer (loudest 400 ms, K-weighted); the low brass of Fusion
         # needs the most peak for the same loudness.
-        "fusion_vortex": -5.0, "fusion_impact": -3.5, "ritual_choir": -4.5, "ritual_impact": -5.0,
+        "fusion_vortex": -5.0, "fusion_impact": -3.5, "arcane_choir": -4.5, "arcane_impact": -5.0,
         # K1: the spotlight cues. A Spell or Trap shows many times a game, so each cue sits about 2 LU under
         # the set-piece climaxes and about 2 LU over the board sounds (loudest 400 ms, K-weighted).
         "spell_cast": -7.5, "trap_spring": -5.0}
 
 
 # Hard duration caps (seconds); longer renders are trimmed and re-faded.
-MAX_LEN = {"boom": 1.6, "charge": 1.4, "victory_big": 2.6, "exhaust": 1.3, "fuse": 1.3, "ritual": 1.4, "arcane": 1.3, "victory": 1.4, "defeat": 1.4, "turn": 0.9, "heal": 0.9, "summon": 0.8,
-           "fusion_vortex": 1.3, "fusion_impact": 2.6, "ritual_choir": 2.0, "ritual_impact": 2.9, "arcane_shimmer": 1.4,
-           "arcane_impact": 2.4, "card_slam": 0.6, "serpent_coil": 1.6, "serpent_strike": 1.6, "sacrifice": 1.2,
+MAX_LEN = {"boom": 1.6, "charge": 1.4, "victory_big": 2.6, "exhaust": 1.3, "fuse": 1.3, "arcane": 1.4, "spirit": 1.3, "victory": 1.4, "defeat": 1.4, "turn": 0.9, "heal": 0.9, "summon": 0.8,
+           "fusion_vortex": 1.3, "fusion_impact": 2.6, "arcane_choir": 2.0, "arcane_impact": 2.9, "spirit_shimmer": 1.4,
+           "spirit_impact": 2.4, "card_slam": 0.6, "serpent_coil": 1.6, "serpent_strike": 1.6, "sacrifice": 1.2,
            "ap_gain": 0.6, "ap_loss": 0.45,
            "ui_hover": 0.12, "panel_open": 0.55, "panel_close": 0.35, "tab": 0.2, "toggle_on": 0.16, "toggle_off": 0.16,
            "hp_low_heartbeat": 0.75, "card_hover": 0.14, "chat_pop": 0.8, "reward_reveal": 0.9, "reward_pick": 0.6, "step_done": 0.6,

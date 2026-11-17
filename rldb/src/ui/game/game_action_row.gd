@@ -192,7 +192,7 @@ func run_action(uid: int, a: Dictionary) -> void:
 	if a.has("mode"):
 		cmd["mode"] = a["mode"]          # G07: Attack / Attack Direct
 	if a.has("target"):
-		cmd["target"] = a["target"]      # a targeted Ritual Tribute (J14: the button sends none; the tray asks)
+		cmd["target"] = a["target"]      # a targeted Arcane Tribute (J14: the button sends none; the tray asks)
 	gs.selected_uid = uid
 	gs.acting_uid = uid
 	gs.row_open = false
@@ -237,9 +237,9 @@ class ActionButton extends JuicyButton:
 	## Action kind -> accent of its medallion (the gold default for summons and the rest).
 	const ACCENT := {"attack": Color("e8605a"), "stance": Color("b4b6bc"), "cast": Color("5aa2ff"),
 		"activate_set": Color("5aa2ff"), "ability": Color("5aa2ff"), "power": Color("5aa2ff"),
-		"sacrifice": Color("e07a3a"), "sacrifice_pick": Color("e07a3a"), "ritual": Color("a874e0"), "ritual_tribute": Color("a874e0"),
+		"sacrifice": Color("e07a3a"), "sacrifice_pick": Color("e07a3a"), "arcane": Color("a874e0"), "arcane_tribute": Color("a874e0"),
 		"prompts": Color("c49a5a"),
-		"arcane": Color("b4b6bc"), "set": Color("c49a5a")}
+		"spirit": Color("b4b6bc"), "set": Color("c49a5a")}
 
 	## The action kind (the action's "t") and, for a stance change, the stance it goes to.
 	var kind := ""
@@ -464,7 +464,7 @@ class ActionButton extends JuicyButton:
 	## Draws the glyph of action `k` (stance target `stance`) centred on `c`, about `s` px in radius.
 	static func draw_glyph(ci: CanvasItem, k: String, stance: String, c: Vector2, s: float, col: Color) -> void:
 		match k:
-			"summon", "ritual", "arcane", "ritual_tribute":   # rising double chevron
+			"summon", "arcane", "spirit", "arcane_tribute":   # rising double chevron
 				for j in 2:
 					var y := c.y + s * (0.5 - 0.8 * j)
 					ci.draw_polyline(PackedVector2Array([Vector2(c.x - s * 0.8, y + s * 0.35), Vector2(c.x, y - s * 0.4), Vector2(c.x + s * 0.8, y + s * 0.35)]), col, 1.7, true)

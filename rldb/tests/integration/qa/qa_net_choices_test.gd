@@ -2,7 +2,7 @@ extends "res://tests/integration/qa/qa_net_base.gd"
 ## Adversarial QA: ordered trigger prompts on both sides (P-24 windows included),
 ## hostile/stale/malformed answers and malformed commands from the remote client.
 
-const SOUL_DEVOURER := 76      # rune when any unit is sacrificed
+const SOUL_DEVOURER := 76      # may rune a unit when any unit is sacrificed (2026-11-17)
 const ENERGY_DISPEL := 140
 
 
@@ -53,15 +53,29 @@ func test_trigger_order_prompts_reject_stale_duplicate_out_of_range_and_foreign_
 	# P-24: the host may answer the triggered effect with Energy Dispel
 	assert_bool(await _await_pending(m, 0, "trap_response")).is_true()
 	_host_choose(["Energy Dispel"])
+	# 2026-11-17 Soul Devourer: "you can apply 1 Rune to a Unit" (an optional target pick per trigger).
+	# Energy Dispel destroys the card; both client triggers still resolve, each runes the surviving c0.
+	var last_id := -1
+	for i in 2:
+		assert_bool(await _wait(func(): return m.pending.get("id", -1) != last_id)).is_true()
+		assert_bool(await _await_pending(m, 1, "select")).is_true()
+		last_id = m.pending["id"]
+		_client_choose(["your Soul Devourer"])
 	assert_bool(await _await_pending(m, 0, "order")).is_true()
 	var cn := client_errors.size()
 	client.local_seat.send({"t": "choose", "id": m.pending["id"], "indices": [0]})
 	assert_str(await _client_err_after(cn)).contains("other player")
 	_host_choose(["Soul Devourer"])
+	assert_bool(await _await_pending(m, 0, "select")).is_true()
+	last_id = m.pending["id"]
+	_host_choose(["your Soul Devourer (4/30, front row col 1)"])
+	assert_bool(await _wait(func(): return m.pending.get("id", -1) != last_id)).is_true()
+	assert_bool(await _await_pending(m, 0, "select")).is_true()
+	_host_choose(["your Soul Devourer (4/30, front row col 2)"])
 	assert_bool(await _await_idle(m)).is_true()
 	# Assert
-	assert_str(m.cards[c1]["zone"]).is_equal("spent")          # negated and destroyed
-	assert_int(m.status_count(c0, "rune")).is_equal(1)
+	assert_str(m.cards[c1]["zone"]).is_equal("spent")          # destroyed by Energy Dispel
+	assert_int(m.status_count(c0, "rune")).is_equal(2)
 	assert_int(m.status_count(h0, "rune")).is_equal(1)
 	assert_int(m.status_count(h1, "rune")).is_equal(1)
 	assert_int(m.players[1]["ap"]).is_greater(0)

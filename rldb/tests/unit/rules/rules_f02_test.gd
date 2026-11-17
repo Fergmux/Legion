@@ -271,7 +271,8 @@ func test_mandatory_single_target_effect_still_prompts() -> void:
 
 func test_ability_cancelled_at_target_step_spends_and_logs_nothing() -> void:
 	var m := TB.make()
-	var dm := TB.unit(m, 0, 15, 0)                       # Da Mage: once-per-turn "apply Pierce to a unit"
+	# 2026-11-17: Da Mage (the old fixture) lost its Pierce ability; Krakeshin's is the same shape.
+	var dm := TB.unit(m, 0, 70, 0)                       # Krakeshin: once-per-turn "apply 1 Debilitate to a unit in this column"
 	m.players[0]["ap"] = 5
 	var ap_before: int = m.players[0]["ap"]
 	var hp_before: int = m.players[0]["hp"]
@@ -286,7 +287,7 @@ func test_ability_cancelled_at_target_step_spends_and_logs_nothing() -> void:
 	assert_bool(m.cards[dm]["opt"].has(0)).is_false()    # once-per-turn not consumed
 	for e in m.log_entries.slice(log_before):
 		assert_str(String(e["pub"])).is_empty()             # no public activation line (only the private "Cancelled")
-	assert_int(m.status_count(dm, "pierce")).is_equal(0)
+	assert_int(m.status_count(dm, "debilitate")).is_equal(0)
 	assert_str(m.validate(0, {"t": "ability", "uid": dm, "idx": 0})).is_empty()
 
 

@@ -35,5 +35,13 @@ func _refresh(n: int) -> void:
 	if n == _n:
 		return
 	_n = n
-	# The dots take their full width at every step, so the centred text never shifts.
-	text = base + ("…" if n < 0 else ".".repeat(n) + " ".repeat(3 - n))
+	# N batch (owner, 16 Nov): the line keeps still. The text always holds all three dots and the
+	# step only reveals them (shaped first, so the hidden dots keep their width): padding with
+	# spaces narrower than the dots used to shift the centred text at every step.
+	visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
+	if n < 0:
+		text = base + "…"
+		visible_characters = -1
+		return
+	text = base + "..."
+	visible_characters = base.length() + n

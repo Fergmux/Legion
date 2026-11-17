@@ -196,16 +196,25 @@ func _p1_turn() -> MatchEngine:
 	return m
 
 
-func test_c085_energy_capture_answers_spell_with_a_rune() -> void:
+## 2026-11-17: Energy Capture answers the opponent applying a Rune or Arcane Summoning (no longer any Spell)
+## with 2 Runes on a unit.
+func test_c085_energy_capture_answers_an_arcane_summon_with_two_runes_but_not_a_spell() -> void:
 	var m := _p1_turn()
-	TB.set_card(m, 0, 85, 0)
 	var mine := TB.unit(m, 0, TB.WATER, 0)
-	TB.unit(m, 1, TB.WATER, 0)
-	TB.cast(m, 1, 81)
+	var mat := TB.unit(m, 1, 4, 0)                          # Basic Beast, with the 2 Runes Necrovast needs
+	m.apply_status(mat, "rune", 2)
+	TB.set_card(m, 0, 85, 0)
+	TB.cast(m, 1, 81)                                       # Fog of War: no Rune, no summon
+	assert_str(TB.pend_kind(m)).is_not_equal("trap_response")
+	var nec := TB.card(m, 1, 64, "extra")                   # Necrovast the Undying: an Arcane Unit, no On Summon
+	assert_str(m.submit(1, {"t": "arcane", "uid": nec})).is_empty()
+	TB.choose_uids(m, [mat])
+	TB.choose(m, [TB.slot_label(0)])
+	assert_str(m.cards[nec]["zone"]).is_equal("unit")
 	assert_str(TB.pend_kind(m)).is_equal("trap_response")
 	TB.choose(m, ["Activate Energy Capture"])
 	TB.choose_uids(m, [mine])
-	assert_int(m.status_count(mine, "rune")).is_equal(1)
+	assert_int(m.status_count(mine, "rune")).is_equal(2)
 
 
 func test_c086_get_well_soon_heals_after_opponent_destroys_your_unit() -> void:
@@ -289,7 +298,8 @@ func test_c050_wabuku_gives_eternal_to_unit_in_its_column() -> void:
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 30)
 	var d := TB.unit(m, 0, TB.WATER, 1)
 	TB.attack(m, a, d)
-	TB.choose(m, ["Activate Perfect Dodge"])
+	assert_str(TB.choose(m, ["Activate Emergency Evade"])).is_empty()   # renamed 2026-11-17 (was Perfect Dodge)
+	assert_bool(m.pending.is_empty()).is_true()
 	assert_str(m.cards[d]["zone"]).is_equal("unit")
 
 
@@ -356,21 +366,33 @@ func test_c163_plan_b_trades_own_cards_for_hp() -> void:
 	assert_str(m.cards[d2]["zone"]).is_equal("spent")
 
 
-func test_c164_no_loyalty_curses_target_and_absorbs_adjacent_unit() -> void:
+## 2026-11-17: No Loyalty (an Attack on a unit in its column) applies 1 Curse and 1 Debilitate to the attacked
+## unit, which gains +8 ATK/DEF this turn; the adjacent unit is no longer absorbed.
+func test_c164_no_loyalty_curses_debilitates_and_boosts_the_attacked_unit_in_battle() -> void:
 	var m := _p1_turn()
 	TB.to_battle(m)
-	TB.set_card(m, 0, 164, 2)
+	TB.set_card(m, 0, 164, 0)
 	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 30)
 	var d := TB.unit(m, 0, TB.WATER, 0, "atk", 8, 8)
 	m.apply_status(d, "pierce", 1)
 	var adj := TB.unit(m, 0, TB.WATER, 1, "atk", 10, 6)
 	TB.attack(m, a, d)
 	TB.choose(m, ["Activate No Loyalty"])
-	assert_str(m.cards[adj]["zone"]).is_equal("spent")
-	assert_int(m.status_count(d, "pierce")).is_equal(0)
+	assert_str(m.cards[adj]["zone"]).is_equal("unit")
+	assert_int(m.status_count(d, "pierce")).is_equal(0)          # the Curse removed its Buff
 	assert_int(m.players[1]["hp"]).is_equal(60)
 	assert_str(m.cards[d]["zone"]).is_equal("spent")
-	assert_int(m.players[0]["hp"]).is_equal(48)
+	assert_int(m.players[0]["hp"]).is_equal(60 - (30 - (8 + 8)))
+
+
+func test_c164_no_loyalty_ignores_an_attack_outside_its_column() -> void:
+	var m := _p1_turn()
+	TB.to_battle(m)
+	TB.set_card(m, 0, 164, 2)
+	var a := TB.unit(m, 1, TB.WATER, 0, "atk", 30)
+	var d := TB.unit(m, 0, TB.WATER, 0)
+	TB.attack(m, a, d)
+	assert_str(TB.pend_kind(m)).is_not_equal("trap_response")
 
 
 func test_c052_saviour_defcon_2_revives_small_unit_in_column() -> void:

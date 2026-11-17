@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 ## 2026-11-10: the Divine Serpent 30-damage combo is gone from the cards, so the tests that played it
 ## for real were removed; FxSerpent stays reachable only through hand-built events.
 ## D8 / B5 / D6 (owner feedback 2026-10-20): the set pieces keep the FX queue in step with the log.
-## A Fusion / Ritual / Arcane summon plays one set piece that holds the rest of its batch for its full
+## A Fusion / Arcane / Spirit summon plays one set piece that holds the rest of its batch for its full
 ## length (never compressed), the Divine Serpents' strike owns its damage and destructions, a sacrifice
 ## plays before the AP it gives, and every HP / AP change has exactly one sound, for both seats.
 ## Batches come from the real rules engine (MatchView.log_for), as the screen and the network see them.
@@ -46,18 +46,18 @@ func _special(kind: String) -> Array:
 			TB.card(m, a, 142, "extra")
 			since = _since(m)
 			assert_str(m.submit(a, {"t": "ability", "uid": mag, "idx": 0})).is_empty()
-		"ritual":
+		"arcane":
 			var u := TB.unit(m, a, 1, 0)
 			m.apply_status(u, "rune", 1)
 			var r := TB.card(m, a, 98, "extra")
 			since = _since(m)
-			assert_str(m.submit(a, {"t": "ritual", "uid": r})).is_empty()
-		"arcane":
+			assert_str(m.submit(a, {"t": "arcane", "uid": r})).is_empty()
+		"spirit":
 			TB.card(m, a, 1, "spent")
 			TB.card(m, a, 110, "spent")
-			var ar := TB.card(m, a, 171, "extra")            # Flying Sandworm 2A (Tyde is 3A since 2026-11-03)
+			var ar := TB.card(m, a, 174, "extra")            # Cliff the Flying Bison 2S (Flying Sandworm is 1S since 2026-11-17)
 			since = _since(m)
-			assert_str(m.submit(a, {"t": "arcane", "uid": ar})).is_empty()
+			assert_str(m.submit(a, {"t": "spirit", "uid": ar})).is_empty()
 	_answer_all(m)
 	return [m, since]
 
@@ -74,16 +74,6 @@ func _tags(plan: Array, prefix: String) -> Array:
 
 
 # ---------------------------------------------------------------- B5: the Serpent strike
-
-func _serpent_events() -> Array:
-	var m := TB.make()
-	TB.unit(m, 0, 158, 0)
-	TB.unit(m, 0, 159, 1)
-	var since := _since(m)
-	TB.summon(m, 0, SOUL, 4)
-	return _batch(m, 0, since)
-
-
 
 func test_other_damage_and_destruction_is_not_the_serpent_strike() -> void:
 	var ev := [{"k": "hp", "p": 1, "d": -30},
@@ -107,7 +97,7 @@ func _wait_ms() -> float:
 # ---------------------------------------------------------------- D8: special-summon set pieces
 
 func test_each_special_summon_plays_one_set_piece_that_holds_its_batch() -> void:
-	for kind in ["fusion", "ritual", "arcane"]:
+	for kind in ["fusion", "arcane", "spirit"]:
 		var r := _special(kind)
 		var m: MatchEngine = r[0]
 		var ev := _batch(m, m.active, int(r[1]))
@@ -130,21 +120,21 @@ func test_each_special_summon_plays_one_set_piece_that_holds_its_batch() -> void
 
 func test_set_pieces_are_distinct_and_have_their_own_sounds() -> void:
 	var seen := {}
-	for kind in ["fusion", "ritual", "arcane"]:
+	for kind in ["fusion", "arcane", "spirit"]:
 		for snd in [FxSummon.SOUND_CHARGE[kind], FxSummon.SOUND_CLIMAX[kind]]:
 			assert_bool(Sfx.NAMES.has(snd)).is_true()
 			assert_bool(ResourceLoader.exists(Sfx.DIR + String(snd) + ".wav")).is_true()
 			assert_bool(seen.has(snd)).is_false()
 			seen[snd] = true
-		# Owner (10 Nov): Ritual and Arcane build up longer (about 3 s and 2.3 s); Fusion stays short.
+		# Owner (10 Nov): Arcane and Spirit build up longer (about 3 s and 2.3 s); Fusion stays short.
 		assert_float(FxSummon.length_for(kind)).is_between(1.2, 3.5)
 		assert_float(FxSummon.land_time(kind)).is_less(FxSummon.length_for(kind))
 	assert_bool(Sfx.NAMES.has(FxSummon.SOUND_SLAM)).is_true()
 
 
-func test_ritual_and_arcane_play_one_long_cue_with_the_climax_on_its_impact() -> void:
+func test_arcane_and_spirit_play_one_long_cue_with_the_climax_on_its_impact() -> void:
 	# Arrange / Act / Assert: owner (10 Nov) "at least 5 seconds ... building up to a big impact".
-	for kind in ["ritual", "arcane"]:
+	for kind in ["arcane", "spirit"]:
 		var snd := String(FxSummon.SOUND_FULL[kind])
 		assert_bool(Sfx.NAMES.has(snd)).is_true()
 		assert_bool(ResourceLoader.exists(Sfx.DIR + snd + ".wav")).is_true()

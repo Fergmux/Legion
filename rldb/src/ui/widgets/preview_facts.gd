@@ -95,7 +95,7 @@ static func kind_text(d: Dictionary) -> String:
 	match ck:
 		"ap":
 			cost = "%d AP" % int(d["cost"]) if d.get("cost") != null else "X AP"
-		"fusion", "ritual", "arcane":
+		"fusion", "arcane", "spirit":
 			cost = "%s summon" % ck.capitalize()
 	return kind + ("  ·  " + cost if cost != "" else "")
 

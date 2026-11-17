@@ -190,9 +190,11 @@ func test_c049_trap_hole_goes_to_spent_after_activation() -> void:
 	assert_str(CF.zone(m, trap)).is_equal("spent")
 
 
-# ---------------------------------------------------------------- 50 Wabuku
+# ---------------------------------------------------------------- 50 Emergency Evade
 
-func test_c050_wabuku_offers_only_own_units_in_its_column() -> void:
+## 2026-11-17 (was Perfect Dodge, "Eternal to a unit in this column"): the Eternal goes to the attacked unit,
+## with no choice; no other unit in the column gets it.
+func test_c050_emergency_evade_gives_eternal_only_to_the_attacked_unit() -> void:
 	var m := CF.p1_battle()
 	TB.set_card(m, 0, 50, 1)
 	var a := TB.unit(m, 1, TB.WATER, 1, "atk", 30)
@@ -200,12 +202,11 @@ func test_c050_wabuku_offers_only_own_units_in_its_column() -> void:
 	var back := TB.unit(m, 0, TB.WATER, 4)
 	var other := TB.unit(m, 0, TB.WATER, 0)
 	TB.attack(m, a, front)
-	TB.choose(m, ["Activate Perfect Dodge"])
-	var offered := CF.offered(m)
-	assert_bool(front in offered).is_true()
-	assert_bool(back in offered).is_true()
-	assert_bool(other in offered).is_false()
-	assert_bool(a in offered).is_false()
+	assert_str(TB.choose(m, ["Activate Emergency Evade"])).is_empty()
+	assert_bool(m.on_field(front)).is_true()            # 30 ATK into 8 DEF: the Eternal saved it (and was used up)
+	assert_int(m.status_count(back, "eternal")).is_equal(0)
+	assert_int(m.status_count(other, "eternal")).is_equal(0)
+	assert_int(m.status_count(a, "eternal")).is_equal(0)
 
 
 # ---------------------------------------------------------------- 103 Alexander's Arrow

@@ -146,7 +146,7 @@ func layout(w: float, h: float) -> void:
 	_col_h = h / gs.side_k
 	if _log_tw != null and _log_tw.is_valid():
 		_log_tw.kill()
-	log_panel.custom_minimum_size.y = log_height(_col_h, GameLog.expanded())
+	log_panel.custom_minimum_size.y = log_height(_col_h, GameLog.expanded(), GameLog.hidden())
 
 
 ## #48 / H11 (owner, 21 Oct): the game log takes LOG_SHARE of the sidebar's height (at least
@@ -162,8 +162,11 @@ var _col_h: float = 0.0
 var _log_tw: Tween
 
 
-## Height of the log panel in a sidebar `col_h` tall (layout px), short or `tall`.
-static func log_height(col_h: float, tall: bool = false) -> float:
+## Height of the log panel in a sidebar `col_h` tall (layout px), short or `tall`; 0 while `hidden`
+## (N batch: the panel shrinks to its header, the thin "Game log" bar, and the details take the rest).
+static func log_height(col_h: float, tall: bool = false, hidden: bool = false) -> float:
+	if hidden:
+		return 0.0
 	if tall:
 		return maxf(LOG_MIN_TALL, roundf(col_h * LOG_SHARE_TALL))
 	return maxf(LOG_MIN_H, roundf(col_h * LOG_SHARE))
@@ -174,7 +177,7 @@ static func log_height(col_h: float, tall: bool = false) -> float:
 func animate_log() -> void:
 	if log_panel == null or _col_h <= 0.0:
 		return
-	var to := log_height(_col_h, GameLog.expanded())
+	var to := log_height(_col_h, GameLog.expanded(), GameLog.hidden())
 	if _log_tw != null and _log_tw.is_valid():
 		_log_tw.kill()
 	if UIStyle.reduce_motion or not log_panel.is_inside_tree():
@@ -244,8 +247,8 @@ func render_turnbar() -> void:
 		state_arrow.visible = false
 		var waiting_s: bool = not pd.is_empty() and mv["winner"] == -1
 		gs.prompt.show_wait(chip if waiting_s else "")
-		turn_note.text = "SNEAKY SNUNDAY: all ATK/DEF gains and losses are reversed this turn" if mv["reversal"] else ""
-		turn_note.visible = turn_note.text != ""
+		turn_note.text = ""   # N batch 16 Nov: no Sneaky Snunday note by the phase button
+		turn_note.visible = false
 		return
 	if mv["winner"] != -1:
 		chip = "Game over"
@@ -275,9 +278,9 @@ func render_turnbar() -> void:
 	phase_btn.disabled = not ok
 	cta.set_on(chip == "" and ok and nothing_left(mv.get("actions", [])))
 	phase_btn.tooltip_text = tip
+	# N batch 16 Nov: the owner removed the Sneaky Snunday note ("all ATK/DEF gains and losses are
+	# reversed this turn") by the phase button; the label stays for any future turn note.
 	var note := ""
-	if mv["reversal"]:
-		note = "SNEAKY SNUNDAY: all ATK/DEF gains and losses are reversed this turn"
 	turn_note.text = note
 	turn_note.visible = note != ""
 

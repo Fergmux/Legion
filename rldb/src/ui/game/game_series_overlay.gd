@@ -320,7 +320,7 @@ func _show_deck() -> void:
 	(pile_popup as HousePanel).set_tag("%d cards" % cards.size())
 	var head := HBoxContainer.new()
 	pile_box.add_child(head)
-	var tl := UIStyle.label("Your deck (%d cards)" % cards.size(), 18, UIStyle.GOLD_HI, true, true)
+	var tl := UIStyle.label("Your deck", 18, UIStyle.GOLD_HI, true, true)   # N batch: no "(N cards)"; the tag has it
 	TitleText.apply(tl, TitleText.Tier.SECTION, 18)
 	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(tl)
@@ -415,9 +415,9 @@ func render() -> void:
 		"first_player": _render_first()
 		"over": _render_over()
 	if stage == "first_player" and view.has("deck"):
-		var see := UIStyle.size_button(UIStyle.secondary_button("View your deck", 14), "small")
+		# N batch (owner, 16 Nov): the same View your deck button as the rewards footer.
+		var see := rewards.view_deck_button()
 		see.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		see.pressed.connect(_show_deck)
 		overlay_box.add_child(see)
 	place_modals()
 	_fit_overlay()
@@ -664,9 +664,8 @@ func _render_first() -> void:
 		overlay_box.add_child(_centred("%s lost the last game and is choosing who goes first in game %d…" % [opp, next_no], 17, UIStyle.TEXT))
 	if you_ready:
 		var sub := "Waiting for %s to choose who goes first…" % opp if not chosen else "Waiting for %s to start the next duel…" % opp
-		var chips := [{"text": "You: ready", "done": true},
-			{"text": "%s: %s" % [opp, "ready" if opp_ready else "not ready yet"], "done": opp_ready}]
-		var wp := WaitPlate.new("Ready for game %d" % next_no, sub, chips)
+		# N batch (owner, 16 Nov): no status chips on the waiting plate; the line says what it waits for.
+		var wp := WaitPlate.new("Ready for game %d" % next_no, sub, [])
 		wp.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		wp.custom_minimum_size = Vector2(minf(420.0, overlay_box.custom_minimum_size.x), 0)
 		overlay_box.add_child(wp)

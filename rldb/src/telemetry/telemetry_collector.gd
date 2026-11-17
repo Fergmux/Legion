@@ -17,7 +17,7 @@ extends RefCounted
 const MAX_TURN_TIMES := 600
 
 const PLAY_KINDS := ["normal_summon", "cast_spell", "set_spell", "set_trap", "power",
-	"special_ritual", "special_arcane", "special_fusion", "special_effect"]
+	"special_arcane", "special_spirit", "special_fusion", "special_effect"]
 
 var emit_item: Callable
 var now_ms: Callable = func() -> int: return int(Time.get_unix_time_from_system() * 1000.0)
@@ -475,10 +475,10 @@ func _on_summon(m: MatchEngine, data: Dictionary) -> void:
 	var ops: Array = f.get("ops", []).map(func(o): return String(o.get("op", "")))
 	var kind := "special_effect"
 	if from == "extra":
-		if "ritual_material" in ops:
-			kind = "special_ritual"
-		elif "arcane_materials" in ops:
+		if "arcane_material" in ops:
 			kind = "special_arcane"
+		elif "spirit_materials" in ops:
+			kind = "special_spirit"
 		elif int(f.get("vars", {}).get("fusion", -1)) == uid:
 			kind = "special_fusion"
 	var mats: Array = g["mats"] if kind != "special_effect" else []

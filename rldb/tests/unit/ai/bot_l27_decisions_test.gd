@@ -199,12 +199,12 @@ func test_bot_answers_an_unknown_prompt_kind_with_a_legal_option() -> void:
 	assert_bool(int(cmd["indices"][0]) in [0, 1]).is_true()
 
 
-func test_bot_always_answers_an_evolve_prompt_with_evolve() -> void:
-	# Arrange: L23's turn-start prompt, Evolve offered second
+func test_bot_always_answers_a_transform_prompt_with_transform() -> void:
+	# Arrange: L23's turn-start prompt, Transform offered second
 	var m := _board()
-	var f := m.make_frame(-1, BOT, [], "evolve")
+	var f := m.make_frame(-1, BOT, [], "transform")
 	m.stack.append(f)
-	m.ask(f, BOT, "evolve", "Evolve Symbiote Spawn?", [{"v": 0, "label": "Skip"}, {"v": 1, "label": "Evolve"}])
+	m.ask(f, BOT, "transform", "Transform Symbiote Spawn?", [{"v": 0, "label": "Skip"}, {"v": 1, "label": "Transform"}])
 	# Act
 	var cmd := BotBrain.new(BOT, 1).decide(m)
 	# Assert

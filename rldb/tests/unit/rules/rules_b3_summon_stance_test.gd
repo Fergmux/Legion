@@ -6,7 +6,7 @@ extends GdUnitTestSuite
 const TAG_TEAM_X := 12             # ability: lose 2 AP, summon a unit from Spent in this column
 const HYDRA := 27                  # On Destroy: may summon a 1-cost Dragon from Spent to its zone
 const BASIC_DRAGON := 2
-const CREEPING_NULL := 65          # Ritual unit, 3 Runes
+const CREEPING_NULL := 65          # Arcane unit, 3 Runes
 const BASIC_BEAST := 4
 
 
@@ -79,13 +79,13 @@ func test_summon_actions_offer_one_summon_button_without_a_stance() -> void:
 	assert_bool(acts[0].has("stance")).is_false()
 
 
-func test_ritual_summon_enters_attack_without_a_stance_prompt() -> void:
+func test_arcane_summon_enters_attack_without_a_stance_prompt() -> void:
 	var m := TB.make()
 	TB.to_turn2(m)
 	var mat := TB.unit(m, 1, BASIC_BEAST, 0)
 	m.apply_status(mat, "rune", 3)
 	var r := TB.card(m, 1, CREEPING_NULL, "extra")
-	assert_str(m.submit(1, {"t": "ritual", "uid": r})).is_empty()
+	assert_str(m.submit(1, {"t": "arcane", "uid": r})).is_empty()
 	assert_str(TB.choose_uids(m, [mat])).is_empty()
 	assert_str(TB.choose(m, [TB.slot_label(0)])).is_empty()
 	assert_str(TB.pend_kind(m)).is_not_equal("stance")

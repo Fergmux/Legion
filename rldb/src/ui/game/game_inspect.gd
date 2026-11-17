@@ -72,7 +72,8 @@ func open_pile(zone: String) -> bool:
 	browser_zone = zone
 	var ps: PileStack = gs.board.piles[1].get(zone)
 	var from := ps.get_global_rect().get_center() if ps != null and ps.is_inside_tree() else Vector2.INF
-	browser = PileBrowser.open(gs, GameDetails.PILE_NAMES[zone], _pile_cards(zone), DRAW_HINT if zone == "draw" else BROWSE_HINT, Callable(), from)
+	# N batch (owner, 16 Nov): no hint line at the top of the pile viewer.
+	browser = PileBrowser.open(gs, GameDetails.PILE_NAMES[zone], _pile_cards(zone), "", Callable(), from)
 	Sfx.play("select")
 	return true
 

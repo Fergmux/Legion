@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Per-card behaviour checks for Powers and Extra Deck units (Fusion, Ritual, Arcane).
+## Per-card behaviour checks for Powers and Extra Deck units (Fusion, Arcane, Spirit).
 
 
 # ---------------------------------------------------------------- Powers
@@ -18,8 +18,8 @@ func test_c054_strength_in_unity_scales_with_unique_races() -> void:
 	TB.power(m, 0, 54)
 	var mage := TB.unit(m, 0, TB.WATER, 0)
 	TB.unit(m, 0, 4, 1)
-	assert_int(m.atk_of(mage)).is_equal(16)
-	assert_int(m.def_of(mage)).is_equal(16)
+	assert_int(m.atk_of(mage)).is_equal(8 + 2 * 2)          # 2026-11-17: +2 per unique Race (was +4)
+	assert_int(m.def_of(mage)).is_equal(8 + 2 * 2)
 
 
 func test_c089_nether_portal_fuses_for_one_ap() -> void:
@@ -348,7 +348,7 @@ func test_c151_ultimate_dragon_doubles_debuffs_on_death() -> void:
 	assert_int(m.status_count(foe, "poison")).is_equal(6)
 
 
-# ---------------------------------------------------------------- Ritual
+# ---------------------------------------------------------------- Arcane
 
 func test_c098_raging_inferno_burns_itself_and_its_destroyer() -> void:
 	var m := TB.make()
@@ -436,13 +436,15 @@ func test_c065_creeping_null_no_longer_paralyses_opposing_units() -> void:
 	assert_int(m.status_count(b, "rune")).is_equal(1)
 
 
-func test_c097_legendary_swordsman_gains_cleanse_and_comeback_atk() -> void:
+## 2026-11-17: 40/40; On Summon 3 Cleanse and 3 Infiltrate (the once-per-turn Infiltrate is gone); +20 ATK when behind.
+func test_c097_legendary_swordsman_gains_cleanse_infiltrate_and_comeback_atk() -> void:
 	var m := TB.make()
 	var ls := TB.special(m, 0, 97, 0)
 	assert_int(m.status_count(ls, "cleanse")).is_equal(3)
-	assert_int(m.atk_of(ls)).is_equal(30)                  # 2026-11-03: 30/30, +20 when behind
+	assert_int(m.status_count(ls, "infiltrate")).is_equal(3)
+	assert_int(m.atk_of(ls)).is_equal(40)
 	m.players[0]["hp"] = 40
-	assert_int(m.atk_of(ls)).is_equal(50)
+	assert_int(m.atk_of(ls)).is_equal(40 + 20)
 
 
 # 2026-11-03 (intent updated): the start-of-turn Damage became a once-per-turn Poison ability.
@@ -455,7 +457,7 @@ func test_c183_yamata_has_eight_eternal_and_no_longer_burns_opponent_at_start_of
 	assert_int(m.players[0]["hp"]).is_equal(60)
 
 
-# ---------------------------------------------------------------- Arcane
+# ---------------------------------------------------------------- Spirit
 
 func test_c170_grandmother_kaya_discards_for_ap() -> void:
 	var m := TB.make()
@@ -471,12 +473,13 @@ func test_c170_grandmother_kaya_discards_for_ap() -> void:
 func test_c170_grandmother_kaya_buys_back_a_card_on_death() -> void:
 	var m := TB.make()
 	var k := TB.unit(m, 0, 170, 0)
-	var s := TB.card(m, 0, 21, "spent")
+	var s := TB.card(m, 0, 37, "spent")                     # a Main Deck unit (Shen is a Spirit Unit since 2026-11-17)
 	TB.kill(m, k)
 	TB.choose(m, ["Yes"])
 	TB.choose_uids(m, [s])
 	assert_str(m.cards[s]["zone"]).is_equal("hand")
 	assert_int(m.players[0]["hp"]).is_equal(50)
+	assert_str(m.cards[k]["zone"]).is_equal("exhaust")     # 2026-11-17: "You must Exhaust this Unit."
 
 
 func test_c171_flying_sandworm_grows_attacks_directly_and_exhausts() -> void:
@@ -507,20 +510,23 @@ func test_c175_boom_flips_opposing_stances() -> void:
 	assert_str(m.cards[b]["stance"]).is_equal("atk")
 
 
-func test_c176_tritu_atk_is_combined_atk_of_water_units() -> void:
+## 2026-11-17: Tritu (a plain Unit now) takes the combined ATK/DEF of the Water units adjacent to it only.
+func test_c176_tritu_atk_is_combined_atk_of_adjacent_water_units() -> void:
 	var m := TB.make()
-	TB.unit(m, 0, TB.WATER, 1, "atk", 10)
-	TB.unit(m, 1, TB.WATER, 0, "atk", 12)
-	TB.unit(m, 1, TB.FIRE, 1, "atk", 50)
+	TB.unit(m, 0, TB.WATER, 1, "atk", 10, 6)              # adjacent Water: counted
+	TB.unit(m, 0, TB.WATER, 2, "atk", 30)                 # not adjacent: ignored
+	TB.unit(m, 0, TB.FIRE, 3, "atk", 50)                  # behind it, not Water: ignored
+	TB.unit(m, 1, TB.WATER, 0, "atk", 12)                 # the opponent's: ignored
 	var t := TB.special(m, 0, 176, 0)
-	assert_int(m.atk_of(t)).is_equal(22)
+	assert_int(m.atk_of(t)).is_equal(10)
+	assert_int(m.def_of(t)).is_equal(6)
 
 
 func test_c177_illusionist_strong_on_own_turn_but_deals_no_battle_damage() -> void:
 	var m := TB.make()
 	TB.p1_battle(m)
 	var il := TB.unit(m, 1, 177, 0)
-	assert_int(m.atk_of(il)).is_equal(50)          # 2026-11-03: 30 + 20 on its own turn
+	assert_int(m.atk_of(il)).is_equal(16 + 30)     # 2026-11-17: 16 ATK, +30 on its own turn
 	TB.attack(m, il, -1)
 	assert_int(m.players[0]["hp"]).is_equal(60)
 	var foe := TB.unit(m, 0, TB.WATER, 0)

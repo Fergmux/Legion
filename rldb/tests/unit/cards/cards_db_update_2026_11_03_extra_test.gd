@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Behaviour of the Extra Deck cards (Fusion, Ritual, Arcane) changed or added by the 3 November
+## Behaviour of the Extra Deck cards (Fusion, Arcane, Spirit) changed or added by the 3 November
 ## 2026 card database (design/card-database-update-2026-11-03.md, "Extra Deck"). Test names carry
 ## the card id (test_cNNN_...) for the support ledger; shared tests list their ids in an `# @cards`
 ## comment. Each new effect is tested with its target rules and its no-target case, and each
@@ -565,7 +565,7 @@ func test_c190_snow_tiger_alone_gives_no_discount_and_no_protection() -> void:
 	assert_bool(m.destroy(trap, "effect", -1, 1)).is_true()
 
 
-# ---------------------------------------------------------------- Ritual
+# ---------------------------------------------------------------- Arcane
 
 func test_c063_last_foundation_reveal_is_optional() -> void:
 	var m := TB.make()
@@ -676,10 +676,10 @@ func test_c096_roma_gains_10_per_rune_used() -> void:
 
 func test_c097_legendary_swordsman_gains_20_atk_while_behind_on_hp() -> void:
 	var m := TB.make()
-	var sw := TB.unit(m, 0, SWORDSMAN, 0)                                 # 30/30
-	assert_int(m.atk_of(sw)).is_equal(30)
+	var sw := TB.unit(m, 0, SWORDSMAN, 0)                                 # 40/40 since 2026-11-17
+	assert_int(m.atk_of(sw)).is_equal(40)
 	m.players[0]["hp"] = 40
-	assert_int(m.atk_of(sw)).is_equal(50)
+	assert_int(m.atk_of(sw)).is_equal(60)
 
 
 func test_c183_yamata_poisons_a_unit_in_its_column_instead_of_burning_hp() -> void:
@@ -697,16 +697,18 @@ func test_c183_yamata_poisons_a_unit_in_its_column_instead_of_burning_hp() -> vo
 	assert_int(CF.hp(m, 1)).is_equal(hp1 - 4)                              # only the Poison's own 4, on their end turn
 
 
-# ---------------------------------------------------------------- Arcane
+# ---------------------------------------------------------------- Spirit
 
-func test_c170_kaya_offers_the_discard_only_while_the_opponent_controls_more_cards() -> void:
+# 2026-11-17: "If your opponent Controls the same or more Units" (was: more cards on the Field).
+func test_c170_kaya_offers_the_discard_only_while_the_opponent_controls_as_many_units_or_more() -> void:
 	var m := TB.make()
-	TB.unit(m, 1, MAGE_WATER, 0)                                          # 1 against Kaya's 1
+	TB.unit(m, 1, MAGE_WATER, 0)                                          # 1 unit against Kaya and an ally
+	TB.unit(m, 0, MAGE_WATER, 1)
+	TB.set_card(m, 1, MAGIC_CYLINDER, 0)                                  # a set card is not a unit
 	TB.special(m, 0, KAYA, 0)
 	assert_bool(m.pending.is_empty()).is_true()
 	var m2 := TB.make()
-	TB.unit(m2, 1, MAGE_WATER, 0)
-	TB.set_card(m2, 1, MAGIC_CYLINDER, 0)                                 # 2 cards against 1
+	TB.unit(m2, 1, MAGE_WATER, 0)                                         # 1 unit against Kaya's 1: the same
 	TB.special(m2, 0, KAYA, 0)
 	var hand: Array = m2.players[0]["hand"].duplicate()
 	assert_bool(-1 in _opts(m2)).is_true()
@@ -735,22 +737,27 @@ func test_c174_cliff_sacrificed_gains_one_more_ap() -> void:
 	assert_int(CF.ap(m, 0)).is_equal(ap + 2)                              # +1 sacrifice, +1 Cliff (was +2)
 
 
-func test_c175_boom_arcane_cost_4_is_paid_exactly() -> void:
+# 2026-11-17: Boom is an Arcane unit costing 3 Runes (was a Spirit costing 4).
+func test_c175_boom_arcane_cost_3_needs_a_unit_with_three_runes() -> void:
 	var m := TB.make()
 	var boom := TB.card(m, 0, BOOM, "extra")
-	assert_int(int(m.extra_cost(boom))).is_equal(4)
-	TB.card(m, 0, MAGE_WATER, "spent")
-	var hydra := TB.card(m, 0, HYDRA, "spent")
-	assert_bool(m.arcane_payable(0, 4)).is_false()                          # 1 + 2 = 3
-	assert_str(m.validate(0, {"t": "arcane", "uid": boom})).is_not_empty()
-	var wyvern := TB.card(m, 0, FROST_WYVERN, "spent")
-	assert_str(m.validate(0, {"t": "arcane", "uid": boom})).is_empty()       # 2 + 2 = 4
-	assert_str(m.submit(0, {"t": "arcane", "uid": boom})).is_empty()
-	assert_int(int(m.pending["total_required"])).is_equal(4)
-	TB.choose_uids(m, [hydra, wyvern])
-	TB.choose(m, ["Front row, column 1"])
+	assert_int(int(m.extra_cost(boom))).is_equal(3)
+	TB.card(m, 0, HYDRA, "spent")
+	TB.card(m, 0, FROST_WYVERN, "spent")
+	assert_str(m.validate(0, {"t": "spirit", "uid": boom})).is_not_empty()   # Spent units no longer pay
+	var two := TB.unit(m, 0, MAGE_WATER, 0)
+	m.apply_status(two, "rune", 2)
+	assert_str(m.validate(0, {"t": "arcane", "uid": boom})).is_not_empty()   # 2 Runes are not enough
+	var three := TB.unit(m, 0, MAGE_WATER, 1)
+	m.apply_status(three, "rune", 3)
+	assert_str(m.validate(0, {"t": "arcane", "uid": boom})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": boom, "stance": "atk"})).is_empty()
+	assert_array(_opts(m)).contains_exactly([three])
+	TB.choose_uids(m, [three])
+	TB.choose(m, ["Front row, column 2"])
 	assert_str(CF.zone(m, boom)).is_equal("unit")
-	assert_str(CF.zone(m, hydra)).is_equal("exhaust")
+	assert_str(CF.zone(m, three)).is_equal("spent")
+	assert_str(CF.zone(m, two)).is_equal("unit")
 
 
 func test_c176_tritu_stops_adjacent_units_attacking() -> void:
@@ -764,24 +771,25 @@ func test_c176_tritu_stops_adjacent_units_attacking() -> void:
 	assert_str(m.validate(1, {"t": "attack", "uid": tritu})).is_empty()
 
 
-func test_c176_tritu_summons_a_water_unit_from_spent_into_its_column() -> void:
-	var m := TB.make()
+# 2026-11-17: once per turn a Water unit from Draw to Hand (was: from Spent into its column).
+func test_c176_tritu_adds_a_water_unit_from_draw_to_hand_once_per_turn() -> void:
+	var m := TB.make(7, 0)
 	var tritu := TB.unit(m, 0, TRITU, 1, "atk", 10, 10)
-	var ally := TB.unit(m, 0, MAGE_FIRE, 0)
-	var water := TB.card(m, 0, MAGE_WATER, "spent")
-	TB.card(m, 0, MAGE_FIRE, "spent")
+	var water := TB.card(m, 0, MAGE_WATER, "draw")
+	TB.card(m, 0, MAGE_FIRE, "draw")                                       # not Water
+	TB.card(m, 0, SACRED_OFFERINGS, "draw")                                # not a unit
+	var spent_water := TB.card(m, 0, MAGE_WATER, "spent")                  # not from Spent any more
 	assert_str(TB.ability(m, tritu)).is_empty()
 	assert_array(CF.offered(m)).contains_exactly([water])
 	TB.choose_uids(m, [water])
-	CF.place(m, "column 2")
-	assert_str(CF.zone(m, water)).is_equal("unit")
-	assert_int(int(m.cards[water]["slot"])).is_equal(4)
-	assert_int(m.status_count(ally, "medic")).is_equal(0)                 # the old Medic is gone
+	assert_str(CF.zone(m, water)).is_equal("hand")
+	assert_str(CF.zone(m, spent_water)).is_equal("spent")
+	assert_str(TB.ability(m, tritu)).is_not_empty()                        # once per turn
 
 
-func test_c177_illusionist_gains_20_atk_on_its_turn() -> void:
+func test_c177_illusionist_gains_30_atk_on_its_turn() -> void:
 	var m := TB.make()
 	var ill := TB.unit(m, 0, ILLUSIONIST, 0)
-	assert_int(m.atk_of(ill)).is_equal(50)
+	assert_int(m.atk_of(ill)).is_equal(16 + 30)                          # 16 ATK, +30 since 2026-11-17
 	CF.end_turn(m)
-	assert_int(m.atk_of(ill)).is_equal(30)
+	assert_int(m.atk_of(ill)).is_equal(16)

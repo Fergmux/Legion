@@ -54,15 +54,15 @@ func test_redact_fx_hides_identity_from_unauthorised_seat() -> void:
 	assert_array(MatchView.redact_fx([{"k": "turn"}], 1)).has_size(1)
 
 
-func test_arcane_materials_from_spent_are_anonymous_to_the_opponent() -> void:
+func test_spirit_materials_from_spent_are_anonymous_to_the_opponent() -> void:
 	var m := TB.make()
 	TB.to_turn2(m)
 	var p: int = m.active
 	TB.card(m, p, TB.WATER, "spent")
 	TB.card(m, p, TB.FIRE, "spent")
-	var ar := TB.card(m, p, 171, "extra")                    # Flying Sandworm 2A (Tyde is 3A since 2026-11-03)
+	var ar := TB.card(m, p, 174, "extra")                    # Cliff the Flying Bison 2S (Flying Sandworm is 1S since 2026-11-17)
 	m.players[p]["ap"] = 5
-	assert_str(m.submit(p, {"t": "arcane", "uid": ar})).is_empty()
+	assert_str(m.submit(p, {"t": "spirit", "uid": ar})).is_empty()
 	var pd := m.pending
 	m.submit(p, {"t": "choose", "id": pd["id"], "indices": range(pd["options"].size())})
 	var guard := 0
@@ -73,7 +73,7 @@ func test_arcane_materials_from_spent_are_anonymous_to_the_opponent() -> void:
 	var seen := _fx_of(m, p, "material")
 	var hidden := _fx_of(m, 1 - p, "material")
 	assert_int(seen.size()).is_equal(2)
-	assert_str(String(seen[0]["kind"])).is_equal("arcane")
+	assert_str(String(seen[0]["kind"])).is_equal("spirit")
 	assert_str(String(seen[0]["to"])).is_equal("exhaust")
 	assert_bool(seen[0].has("id")).is_true()
 	assert_int(hidden.size()).is_equal(2)

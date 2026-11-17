@@ -16,8 +16,8 @@ const RADABLAST := 77           # a 2-cost unit
 const SEPPUKU := 68
 const SPARKY := 74              # Mage; if Tributed: apply 1 Infiltrate to a unit
 const UNSTABLE_FUSIONS := 137   # Units in Hand may be Fusion materials (exhausted)
-const CREEPING_NULL := 65       # Ritual, 3 Runes; On Summon: you can apply 1 Rune to a unit
-const TYDE := 172               # Arcane 3; On Summon: you can add a Beast from Draw
+const CREEPING_NULL := 65       # Arcane, 3 Runes; On Summon: you can apply 1 Rune to a unit
+const KAYA := 170               # Spirit 1; On Summon: you can discard a card to gain 1 AP (opponent level or ahead)
 const BASIC_BEAST := 4
 
 const DESTROY_PROMPT := "Destroy a Spell or Trap?"
@@ -149,12 +149,12 @@ func test_tributed_material_effects_and_the_summon_share_one_fx_batch() -> void:
 	assert_int(kinds.count("material")).is_equal(2)
 
 
-func test_ritual_material_is_in_spent_before_the_on_summon() -> void:
+func test_arcane_material_is_in_spent_before_the_on_summon() -> void:
 	var m := TB.make()
 	var mat := TB.unit(m, 0, BASIC_BEAST, 0)
 	m.apply_status(mat, "rune", 3)
 	var null_u := TB.card(m, 0, CREEPING_NULL, "extra")
-	assert_str(m.submit(0, {"t": "ritual_tribute", "uid": mat, "target": null_u})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane_tribute", "uid": mat, "target": null_u})).is_empty()
 	TB.choose(m, ["Front row, column 1"])
 	if TB.pend_kind(m) == "stance":
 		TB.choose(m, ["Attack"])
@@ -163,17 +163,19 @@ func test_ritual_material_is_in_spent_before_the_on_summon() -> void:
 	assert_str(CF.zone(m, null_u)).is_equal("unit")
 
 
-func test_arcane_materials_are_exhausted_before_the_on_summon() -> void:
+func test_spirit_materials_are_exhausted_before_the_on_summon() -> void:
 	var m := TB.make()
-	var mats := [TB.card(m, 0, TB.WATER, "spent"), TB.card(m, 0, TB.WATER, "spent"), TB.card(m, 0, TB.WATER, "spent")]
-	TB.card(m, 0, BASIC_BEAST, "draw")
-	var tyde := TB.card(m, 0, TYDE, "extra")
-	assert_str(m.submit(0, {"t": "arcane", "uid": tyde})).is_empty()
+	# 2026-11-17: Tyde (the old fixture) is an Arcane Unit; Grandmother Kaya's On Summon asks instead.
+	var mats := [TB.card(m, 0, TB.WATER, "spent")]
+	TB.card(m, 0, BASIC_BEAST)                                  # a card to discard
+	TB.unit(m, 1, TB.WATER, 0)                                  # the opponent controls as many units
+	var kaya := TB.card(m, 0, KAYA, "extra")
+	assert_str(m.submit(0, {"t": "spirit", "uid": kaya})).is_empty()
 	assert_str(TB.choose_uids(m, mats)).is_empty()
 	TB.choose(m, ["Front row, column 1"])
 	if TB.pend_kind(m) == "stance":
 		TB.choose(m, ["Attack"])
-	assert_str(String(m.pending.get("prompt", ""))).contains("Beast")
+	assert_str(String(m.pending.get("prompt", ""))).contains("Discard")
 	for u in mats:
 		assert_str(CF.zone(m, u)).is_equal("exhaust")
 

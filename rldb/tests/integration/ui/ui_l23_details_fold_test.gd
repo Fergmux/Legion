@@ -1,8 +1,8 @@
 extends GdUnitTestSuite
-## L23 follow-up (5 Nov): in the match sidebar's card details pane the Evolve section of Symbiote
+## L23 follow-up (5 Nov): in the match sidebar's card details pane the Transform section of Symbiote
 ## Spawn / Larva sat below the fold. The art crop now yields to the text (it shrinks, down to
 ## GameDetails.ART_MIN_H, so the sections fit when they can), and when some still run below the fold
-## the scroll cue names them ("Scroll for Evolve, Statuses") instead of a bare "Scroll for more".
+## the scroll cue names them ("Scroll for Transform, Statuses") instead of a bare "Scroll for more".
 ## Story: design/owner-feedback-2026-11-05.md L23 (follow-up).
 
 const SPAWN := 155
@@ -95,7 +95,7 @@ func test_short_card_keeps_the_full_art_crop() -> void:
 	assert_bool(gs.details.scroll_cue.shown).is_false()
 
 
-func test_scroll_cue_names_the_evolve_section_when_it_is_below_the_fold() -> void:
+func test_scroll_cue_names_the_transform_section_when_it_is_below_the_fold() -> void:
 	# Arrange: Symbiote Spawn with statuses and many modifiers, so its details overflow even with the
 	# crop at its floor.
 	TB.unit(m, me, TB.WATER, 1)
@@ -113,11 +113,11 @@ func test_scroll_cue_names_the_evolve_section_when_it_is_below_the_fold() -> voi
 	var below: PackedStringArray = gs.details.details_view.sections_below(scroll_h)
 	assert_array(Array(below)).is_not_empty()
 	assert_str(cue.text()).contains(below[0])
-	if below.has("Evolve"):
-		assert_str(cue.text()).contains("Evolve")
+	if below.has("Transform"):
+		assert_str(cue.text()).contains("Transform")
 
 
-func test_larva_evolve_section_is_visible_or_named() -> void:
+func test_larva_transform_section_is_visible_or_named() -> void:
 	# Arrange
 	TB.unit(m, me, TB.WATER, 0)
 	var u := TB.unit(m, me, LARVA, 3)
@@ -127,7 +127,7 @@ func test_larva_evolve_section_is_visible_or_named() -> void:
 	# Assert
 	var scroll_h: float = gs.details.details_scroll.size.y
 	var below: PackedStringArray = gs.details.details_view.sections_below(scroll_h)
-	if below.has("Evolve"):
-		assert_str(gs.details.scroll_cue.text()).contains("Evolve")
+	if below.has("Transform"):
+		assert_str(gs.details.scroll_cue.text()).contains("Transform")
 	else:
-		assert_bool(gs.details.details_view.all_text().contains("EVOLVE")).is_true()
+		assert_bool(gs.details.details_view.all_text().contains("TRANSFORM")).is_true()

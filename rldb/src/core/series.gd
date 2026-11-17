@@ -17,7 +17,7 @@ const STAGE_REWARDS := "rewards"
 const STAGE_FIRST := "first_player"
 const STAGE_OVER := "over"
 ## Card types offered by an add-card reward (user feedback 2026-10-16: choose the type first).
-## F03-11: Fusion, Ritual and Arcane form one "extra" (Extra Deck) group drawing from all three.
+## F03-11: Fusion, Arcane and Spirit form one "extra" (Extra Deck) group drawing from all three.
 const REWARD_TYPES := ["unit", "spell", "trap", "power", "extra"]
 ## Draft categories in their display order (F03-10 / F03-11: one combined Extra Deck category).
 ## F06-06: the basic unit is not a drafted category; each player chooses it by Type and Race and
@@ -31,7 +31,7 @@ const LEGACY_BASIC_KEY := "basic"
 const DRAFT_LABELS := {"unit": "Unit", "spell": "Spell", "trap": "Trap", "power": "Power", "extra": "Extra Deck"}
 ## Upper bound per draft category (a sanity limit for the setup steppers, not a deck rule).
 const DRAFT_MAX_PER_CATEGORY := 40
-const EXTRA_CATEGORIES := ["fusion", "ritual", "arcane"]
+const EXTRA_CATEGORIES := ["fusion", "arcane", "spirit"]
 
 var cfg: Dictionary = {}
 var names: Array = ["Player 1", "Player 2"]
@@ -348,7 +348,7 @@ static func from_save(d: Dictionary) -> Series:
 		# means vs bot), so a resumed hot-seat series keeps its one-press Start (G05).
 		s.cfg["mode"] = "bot" if String(s.names[1]) == "Bot" else "local"
 	s.stage = d["stage"]
-	s.decks = d["decks"].map(func(dk): return CardDB.sanitize_deck(dk))   # L23: no evolution-only cards
+	s.decks = d["decks"].map(func(dk): return CardDB.sanitize_deck(dk))   # L23: no transformation-only cards
 	s.deck_names = d["deck_names"]
 	s.scores = d["scores"].map(func(x): return int(x))
 	s.game_no = int(d["game_no"])
@@ -548,18 +548,18 @@ func _draft_pool(cat: String) -> Array:
 
 
 ## L3: the one place that decides whether card `id` may be offered in a draft or as a reward: it is
-## implemented and collectible (L23: evolution-only cards such as Symbiote Larva are not) and not
+## implemented and collectible (L23: transformation-only cards such as Symbiote Larva are not) and not
 ## disabled (CardDB.DISABLED, 2026-11-10).
 static func is_offerable(id: int) -> bool:
 	return CardScripts.is_implemented(id) and CardDB.is_collectible(id) and not CardDB.is_disabled(id)
 
 
-## L3 (owner, 5 Nov): an Extra Deck offer is always one Fusion, one Ritual and one Arcane, shown in
+## L3 (owner, 5 Nov): an Extra Deck offer is always one Fusion, one Arcane and one Spirit, shown in
 ## that order (EXTRA_CATEGORIES), each drawn at random from its own kind. Fallback, so an offer is
 ## never short while cards remain: a kind with nothing to offer gives its slot to the other kinds
 ## (drawn from the Extra Deck cards of the other kinds not already offered), and an offer of more
 ## than three (a larger `offer` setting) fills its extra slots the same way. The offer stays sorted
-## Fusion, Ritual, Arcane whatever filled it; with fewer cards than slots it is simply shorter.
+## Fusion, Arcane, Spirit whatever filled it; with fewer cards than slots it is simply shorter.
 func _extra_offer(n: int, pools: Dictionary) -> Array:
 	var chosen := {}
 	for k in EXTRA_CATEGORIES:
@@ -588,7 +588,7 @@ func _extra_offer(n: int, pools: Dictionary) -> Array:
 	return out
 
 
-## L3: the offerable Extra Deck cards by kind: {"fusion": [ids], "ritual": [...], "arcane": [...]}.
+## L3: the offerable Extra Deck cards by kind: {"fusion": [ids], "arcane": [...], "spirit": [...]}.
 static func extra_pools() -> Dictionary:
 	var out := {}
 	for k in EXTRA_CATEGORIES:
@@ -689,8 +689,8 @@ func _on_game_over() -> void:
 	checkpoint.emit()
 
 
-## Implemented, non-basic cards of one reward type. "extra" (F03-11) is every Fusion, Ritual
-## and Arcane card; the single categories still work for series saved before the change.
+## Implemented, non-basic cards of one reward type. "extra" (F03-11) is every Fusion, Arcane
+## and Spirit card; the single categories still work for series saved before the change.
 static func reward_pool(cat: String) -> Array:
 	var cats: Array = EXTRA_CATEGORIES if cat == "extra" else [cat]
 	var pool := []
@@ -701,7 +701,7 @@ static func reward_pool(cat: String) -> Array:
 
 
 ## Draws the add-card offer for player p from the chosen type. L3: an Extra Deck offer is one
-## Fusion, one Ritual and one Arcane, like the draft's (_extra_offer).
+## Fusion, one Arcane and one Spirit, like the draft's (_extra_offer).
 func _new_add_offer(p: int, cat: String) -> void:
 	var n := int(cfg["reward_add_offer_count"])
 	rewards[p]["offer"] = _extra_offer(n, extra_pools()) if cat == "extra" else _draw_offer(reward_pool(cat), n)

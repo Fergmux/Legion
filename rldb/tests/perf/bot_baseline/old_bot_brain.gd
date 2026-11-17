@@ -84,7 +84,7 @@ func best_action(m: MatchEngine) -> Dictionary:
 ## and, for stance moves and summons, the stance score breakdown of the unit (F11).
 func _debug_text(cmd: Dictionary, sim: MatchEngine, margin: float) -> String:
 	var s := "%s margin %+.2f" % [cmd.get("t", "?"), margin]
-	if sim != null and cmd.has("uid") and (cmd["t"] in ["stance", "summon", "ritual", "arcane"]):
+	if sim != null and cmd.has("uid") and (cmd["t"] in ["stance", "summon", "arcane", "spirit"]):
 		var u: int = int(cmd["uid"])
 		if sim.unit_on_field(u):
 			s += " :: " + OldStance.compare_text(sim, u, me)
@@ -95,9 +95,9 @@ func _debug_text(cmd: Dictionary, sim: MatchEngine, margin: float) -> String:
 func candidates(m: MatchEngine) -> Array:
 	var out := []
 	for a in MatchView.actions_for(m, me):
-		# Ritual Tribute is the Extra Deck Ritual summon started from its material: already covered.
+		# Arcane Tribute is the Extra Deck Arcane summon started from its material: already covered.
 		# The plate's Sacrifice Unit button (J11) is the per-unit "sacrifice" with a pick: covered too.
-		if not a.get("ok", false) or a["t"] in ["next_phase", "ritual_tribute", "sacrifice_pick"]:
+		if not a.get("ok", false) or a["t"] in ["next_phase", "arcane_tribute", "sacrifice_pick"]:
 			continue
 		var cmd := {"t": a["t"], "uid": a["uid"]}
 		if a.has("idx"):
@@ -143,7 +143,7 @@ func choose(m: MatchEngine, depth: int) -> Dictionary:
 func _multi_pick(m: MatchEngine, depth: int) -> Array:
 	var pd: Dictionary = m.pending
 	var n: int = pd["options"].size()
-	# F03-04: an exact-total selection (Arcane materials) takes a combination hitting the total.
+	# F03-04: an exact-total selection (Spirit materials) takes a combination hitting the total.
 	if pd.get("total_exact", false):
 		var vals := []
 		for o in pd["options"]:

@@ -64,7 +64,7 @@ func _cases() -> Array:
 	var ul2 := TB.card(m3b, 0, 12, "hand")
 	out.append(["unit_ability_cost", MatchView.card_view(m3b, ul2, 0), []])
 	var specs := [["spell", 182, "hand"], ["trap", 45, "backrow"], ["power", 149, "hand"],
-		["fusion", 141, "extra"], ["ritual", 63, "extra"], ["arcane", 176, "extra"]]
+		["fusion", 141, "extra"], ["arcane", 63, "extra"], ["spirit", 176, "extra"]]
 	for sp in specs:
 		var mm := TB.make()
 		var uid: int

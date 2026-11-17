@@ -31,5 +31,9 @@ static func card_text(v: Dictionary) -> String:
 	var lines := []
 	for p in parts:
 		var k := String(p.get("k", ""))
+		# 2026-11-17: a Spirit Unit's summon requirement is the same for every Spirit and long; the face
+		# leaves it out (the details pane and the inspector show it in its Condition section).
+		if k == "Condition" and String(v.get("category", "")) == "spirit":
+			continue
 		lines.append(String(p.get("t", "")) if k == "On Field" or k == "" else "%s: %s" % [k, p.get("t", "")])
 	return "\n".join(lines)

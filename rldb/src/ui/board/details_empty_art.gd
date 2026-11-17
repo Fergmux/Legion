@@ -13,9 +13,10 @@ const HINT_PX := 14
 const SUB_PX := 12
 const GAP := 18.0
 
-## The hint lines.
+## The hint lines (N batch 16 Nov: the owner removed the "your own cards show their actions too" sub
+## line; `sub` stays for callers and draws nothing while empty).
 var hint: String = "Click a card to read it"
-var sub: String = "Your own cards show their actions too."
+var sub: String = ""
 ## J31 (performance): the engraving, drawn once at full breath on this internal layer; it breathes by
 ## the layer's alpha (modulate.a = the breath), so no frame repaints it. Every engraved colour's alpha
 ## is a multiple of the breath, and modulate multiplies each draw's colour: the pixels are the same.
@@ -68,7 +69,8 @@ func _draw() -> void:
 	var f := UIStyle.font_italic()
 	var y := r.end.y + GAP + float(HINT_PX)
 	draw_string(f, Vector2(0, y), hint, HORIZONTAL_ALIGNMENT_CENTER, size.x, HINT_PX, UIStyle.MUTED)
-	draw_string(UIStyle.font_body(), Vector2(0, y + float(SUB_PX) * 1.5), sub, HORIZONTAL_ALIGNMENT_CENTER, size.x, SUB_PX, UIStyle.TEXT_DIM)
+	if not sub.is_empty():
+		draw_string(UIStyle.font_body(), Vector2(0, y + float(SUB_PX) * 1.5), sub, HORIZONTAL_ALIGNMENT_CENTER, size.x, SUB_PX, UIStyle.TEXT_DIM)
 
 
 # The engraving at full breath (k = 1), on the _art layer whose alpha breathes.

@@ -29,7 +29,7 @@ static func option_index(m: MatchEngine, keys: Dictionary, opt: Dictionary) -> i
 
 
 ## Sorted pending option indices that pattern `opt` selects ([] when any is missing): every
-## option of {cards: [key]} (a multi-pick such as Arcane materials), else the one option_index.
+## option of {cards: [key]} (a multi-pick such as Spirit materials), else the one option_index.
 static func option_indices(m: MatchEngine, keys: Dictionary, opt: Dictionary) -> Array:
 	var out := []
 	if opt.has("cards"):

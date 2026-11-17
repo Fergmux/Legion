@@ -116,7 +116,7 @@ func _card(p: Control, v, kind: String, pos: Vector2, sc := 1.0, rot := false) -
 
 
 func _page_gallery(p: Control) -> void:
-	var cats := ["basic_unit", "unit", "fusion", "ritual", "arcane", "spell", "trap", "power"]
+	var cats := ["basic_unit", "unit", "fusion", "arcane", "spirit", "spell", "trap", "power"]
 	# Row 1: hand kind per category at rest. Row 2: the same, lifted (scale 1.25).
 	for i in cats.size():
 		var d := _cat(cats[i])

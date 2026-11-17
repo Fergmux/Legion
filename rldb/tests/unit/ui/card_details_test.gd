@@ -8,8 +8,8 @@ const SPELL := 182
 const TRAP := 45
 const POWER := 149
 const FUSION := 141
-const RITUAL := 63
-const ARCANE := 176
+const ARCANE := 63
+const SPIRIT := 176
 
 
 func _view(m: MatchEngine, uid: int) -> Dictionary:
@@ -23,9 +23,10 @@ func _panel() -> CardDetailsPanel:
 func _assert_rules_once(p: CardDetailsPanel, v: Dictionary) -> void:
 	assert_array(v["text_parts"]).is_not_empty()
 	for part0 in v["text_parts"]:
-		var part := CardDetailsPanel.split_once_per_turn(part0)   # "Once per turn" becomes the caption
-		assert_int(p.count_text(String(part["t"]))).is_equal(1)
-		assert_bool(p.all_text().contains(String(part["k"]).to_upper())).is_true()
+		# "Once per turn" becomes the caption; N batch: its sentences split from the passive ones.
+		for part in CardDetailsPanel.split_timings(part0):
+			assert_int(p.count_text(String(part["t"]))).is_equal(1)
+			assert_bool(p.all_text().contains(String(part["k"]).to_upper())).is_true()
 
 
 func test_unit_with_statuses_modifiers_and_abilities() -> void:
@@ -135,7 +136,7 @@ func test_trap_and_power() -> void:
 
 func test_special_cost_cards_show_cost_text() -> void:
 	var p := _panel()
-	for id in [RITUAL, ARCANE]:
+	for id in [ARCANE, SPIRIT]:
 		var v := _non_unit(id, "extra")
 		p.show_card(v, [])
 		assert_bool(p.all_text().contains(String(v["cost_text"]))).is_true()

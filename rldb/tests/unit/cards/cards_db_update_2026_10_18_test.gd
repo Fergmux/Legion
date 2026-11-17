@@ -95,9 +95,9 @@ func test_c009_tag_team_f_destroyed_takes_every_cheap_unit_in_its_column_with_it
 func test_c009_tag_team_f_on_destroy_spares_extra_deck_units() -> void:
 	var m := TB.make()
 	var ttf := TB.unit(m, 0, 9, 0)
-	var arcane := TB.unit(m, 1, 170, 0)                     # Grandmother Kaya: no ordinary cost
+	var spirit := TB.unit(m, 1, 170, 0)                     # Grandmother Kaya: no ordinary cost
 	TB.kill(m, ttf)
-	assert_str(CF.zone(m, arcane)).is_equal("unit")
+	assert_str(CF.zone(m, spirit)).is_equal("unit")
 
 
 func test_c010_tag_team_w_search_is_now_optional() -> void:
@@ -258,14 +258,15 @@ func test_c182_shimmer_serum_atk_gain_lasts_this_turn_only() -> void:
 # ---------------------------------------------------------------- Divine Serpents
 
 ## 2026-11-10: the 30-damage combo is gone from Head, Body and Soul: a Serpent summoned beside two
-## others deals no Damage and destroys no Serpent.
+## others deals no Damage and destroys no Serpent. 2026-11-17: the Soul (Soul of Crashing Ocean) is a
+## Spirit unit, so it lands by a special summon here (TB.special) instead of a normal summon.
 # @cards 158,159,160
 func test_divine_serpents_beside_each_other_no_longer_deal_30_damage_or_destroy_themselves() -> void:
 	var m := TB.make()
 	var head := TB.unit(m, 0, 158, 0)
 	var body := TB.unit(m, 0, 159, 1)
 	var bystander := TB.unit(m, 0, MAGE_WATER, 2)
-	var soul := TB.summon(m, 0, 160, 4)
+	var soul := TB.special(m, 0, 160, 4)
 	assert_int(CF.hp(m, 1)).is_equal(GameCore.START_HP)
 	for u in [head, body, soul]:
 		assert_str(CF.zone(m, u)).is_equal("unit")
@@ -276,7 +277,7 @@ func test_divine_serpents_beside_each_other_no_longer_deal_30_damage_or_destroy_
 func test_divine_serpent_without_two_adjacent_serpents_does_nothing() -> void:
 	var m := TB.make()
 	var head := TB.unit(m, 0, 158, 0)
-	var soul := TB.summon(m, 0, 160, 2)                      # not adjacent to the Head
+	var soul := TB.special(m, 0, 160, 2)                     # not adjacent to the Head
 	assert_int(CF.hp(m, 1)).is_equal(60)
 	assert_str(CF.zone(m, head)).is_equal("unit")
 	assert_str(CF.zone(m, soul)).is_equal("unit")
@@ -529,14 +530,20 @@ func test_renamed_and_recosted_powers_and_spells() -> void:
 	assert_int(CardDB.get_def(44)["cost"]).is_equal(2)
 
 
-# ---------------------------------------------------------------- Arcane stat changes and Boom, Tritu
+# ---------------------------------------------------------------- Spirit stat changes and Boom, Tritu
 
+# 2026-11-17: Tyde (172) and Boom (175) became Arcane units with new stats; Tritu (176) a plain Unit.
 # @cards 170,172,173,174,175,176
-func test_arcane_units_carry_the_new_stats() -> void:
-	var want := {170: [4, 10], 172: [18, 10], 173: [20, 4], 174: [8, 20], 175: [20, 20]}   # 2026-11-03 stats
+func test_spirit_and_councillor_units_carry_their_current_stats() -> void:
+	var want := {170: [4, 10], 172: [24, 20], 173: [20, 4], 174: [8, 20], 175: [34, 10]}   # 2026-11-03 / 2026-11-17 stats
 	for id in want:
 		var d := CardDB.get_def(id)
 		assert_array([d["atk"], d["def"]]).override_failure_message(str(id)).is_equal(want[id])
+	for id in [170, 173, 174]:
+		assert_str(String(CardDB.get_def(id)["category"])).override_failure_message(str(id)).is_equal("spirit")
+	for id in [172, 175]:
+		assert_str(String(CardDB.get_def(id)["category"])).override_failure_message(str(id)).is_equal("arcane")
+	assert_str(String(CardDB.get_def(176)["category"])).is_equal("unit")
 	assert_object(CardDB.get_def(176)["atk"]).is_null()
 	assert_object(CardDB.get_def(176)["def"]).is_null()
 
@@ -552,11 +559,14 @@ func test_c175_boom_destroyed_gives_your_units_10_def_without_asking() -> void:
 	assert_int(m.def_of(foe)).is_equal(8)
 
 
-func test_c176_tritu_becomes_the_combined_atk_and_def_of_the_other_water_units() -> void:
+# 2026-11-17: only the Water units adjacent to Tritu count (was every other Water unit on the Field).
+func test_c176_tritu_becomes_the_combined_atk_and_def_of_the_adjacent_water_units() -> void:
 	var m := TB.make()
-	TB.unit(m, 0, MAGE_WATER, 1)                               # 8/8
-	TB.unit(m, 1, BEAST_WATER, 0, "atk", 12, 20)               # 12/20
-	TB.unit(m, 1, MAGE_FIRE, 1)                                # not Water
+	TB.unit(m, 0, MAGE_WATER, 1)                               # adjacent, 8/8
+	TB.unit(m, 0, BEAST_WATER, 4, "atk", 12, 20)               # adjacent (diagonal), 12/20
+	TB.unit(m, 0, MAGE_FIRE, 3)                                # adjacent, not Water
+	TB.unit(m, 0, MAGE_WATER, 2)                               # Water, not adjacent
+	TB.unit(m, 1, BEAST_WATER, 0, "atk", 30, 30)               # opponent's Water unit: not adjacent
 	var tritu := TB.special(m, 0, 176, 0)
 	assert_int(m.atk_of(tritu)).is_equal(20)
 	assert_int(m.def_of(tritu)).is_equal(28)
@@ -619,7 +629,7 @@ func test_c185_drako_ability_needs_a_power_on_the_field() -> void:
 func test_c186_bronze_salaman_is_a_1_rune_light_dragon_in_the_trial_of_the_warrior_deck() -> void:
 	var d := CardDB.get_def(BRONZE_SALAMAN)
 	assert_array([d["category"], d["race"], d["type"], d["cost_kind"], d["cost"], d["atk"], d["def"]]) \
-		.is_equal(["ritual", "Dragon", "Light", "ritual", 1, 16, 16])            # 2026-11-03 stats
+		.is_equal(["arcane", "Dragon", "Light", "arcane", 1, 16, 16])            # 2026-11-03 stats
 	var decks: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/starter_decks.json"))["decks"]
 	var lone: Dictionary = decks.filter(func(x): return String(x["name"]) == "Trial of the Warrior")[0]
 	assert_array(lone["extra"].map(func(x): return int(x))).contains([BRONZE_SALAMAN])
@@ -658,16 +668,16 @@ func test_c186_bronze_salaman_sacrificed_can_retain_a_card_in_hand() -> void:
 	assert_int(m.status_count(h, "retain")).is_equal(1)
 
 
-func test_c186_bronze_salaman_tributed_for_a_ritual_can_retain_a_card() -> void:
+func test_c186_bronze_salaman_tributed_for_an_arcane_can_retain_a_card() -> void:
 	var m := TB.make()
 	var bronze := TB.unit(m, 0, BRONZE_SALAMAN, 0)
 	m.apply_status(bronze, "rune", 3)
 	var null_u := TB.card(m, 0, 65, "extra")                  # The Creeping Null: 3 Runes
 	var h := TB.card(m, 0, SACRED_OFFERINGS)
-	assert_str(m.submit(0, {"t": "ritual", "uid": null_u, "stance": "atk"})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": null_u, "stance": "atk"})).is_empty()
 	TB.choose_uids(m, [bronze])
 	TB.choose(m, ["Front row, column 1"])
-	# The tribute's trigger resolves as the material leaves, before the Ritual unit lands.
+	# The tribute's trigger resolves as the material leaves, before the Arcane unit lands.
 	assert_bool(_opts(m).has(h)).is_true()
 	TB.choose_uids(m, [h])
 	assert_int(m.status_count(h, "retain")).is_equal(1)
@@ -678,38 +688,43 @@ func test_c186_bronze_salaman_tributed_for_a_ritual_can_retain_a_card() -> void:
 
 # ---------------------------------------------------------------- Fence of the Marked Claw
 
-func test_c187_fence_searches_a_monster_with_a_discount() -> void:
+# 2026-11-17: Fence is a 2-cost Unit; its On Summon Monster search and its Rune on every Spell are gone.
+# Its new "take 10 Damage: add a card from Draw to Hand" is in cards_db_update_2026_11_17_test.gd.
+func test_c187_fence_summoned_no_longer_searches_a_monster() -> void:
 	var m := TB.make(7, 0)
 	var monster := TB.card(m, 0, MONSTER_WATER, "draw")
 	TB.card(m, 0, BEAST_WATER, "draw")
-	TB.special(m, 0, FENCE, 0)
-	assert_array(_opts(m)).contains_exactly_in_any_order([-1, monster])
-	TB.choose_uids(m, [monster])
-	assert_str(CF.zone(m, monster)).is_equal("hand")
-	assert_int(m.current_cost(monster)).is_equal(0)
+	var fence := TB.summon(m, 0, FENCE, 0)
+	assert_str(CF.zone(m, fence)).is_equal("unit")
+	assert_bool(m.pending.is_empty()).is_true()
+	assert_str(CF.zone(m, monster)).is_equal("draw")
+	assert_int(m.current_cost(monster)).is_equal(1)
 
 
-func test_c187_fence_can_apply_a_rune_whenever_a_spell_is_activated() -> void:
+func test_c187_fence_search_offers_any_card_in_draw_at_its_full_cost_once_per_turn() -> void:
+	var m := TB.make(7, 0)
+	var monster := TB.card(m, 0, MONSTER_WATER, "draw")
+	var spell := TB.card(m, 0, SACRED_OFFERINGS, "draw")
+	var fence := TB.unit(m, 0, FENCE, 0)
+	var hp0 := CF.hp(m, 0)                                     # an empty deck's opening draws already cost HP
+	assert_str(TB.ability(m, fence)).is_empty()
+	assert_array(_opts(m)).contains_exactly_in_any_order([monster, spell])   # any card, not optional once paid
+	TB.choose_uids(m, [spell])
+	assert_str(CF.zone(m, spell)).is_equal("hand")
+	assert_int(m.current_cost(spell)).is_equal(1)              # no discount
+	assert_int(CF.hp(m, 0)).is_equal(hp0 - 10)
+	assert_str(TB.ability(m, fence)).is_not_empty()            # once per turn
+
+
+func test_c187_fence_no_longer_answers_a_spell_with_a_rune() -> void:
 	var m := TB.make()
 	var fence := TB.unit(m, 0, FENCE, 0)
 	var target := TB.unit(m, 0, MAGE_WATER, 1)
 	TB.cast(m, 0, SACRED_OFFERINGS)
 	TB.choose_uids(m, [target])                                # Sacred Offerings' own target
-	assert_str(TB.pend_kind(m)).is_equal("select")
-	assert_bool(_opts(m).has(-1)).is_true()                    # Fence's Rune is optional
-	TB.choose_uids(m, [fence])
-	assert_int(m.status_count(fence, "rune")).is_equal(1)
+	assert_bool(m.pending.is_empty()).is_true()
+	assert_int(m.status_count(fence, "rune")).is_equal(0)
 	assert_int(m.status_count(target, "rune")).is_equal(1)
-
-
-func test_c187_fence_answers_the_opponents_spells_too() -> void:
-	var m := CF.p1_main()
-	var fence := TB.unit(m, 0, FENCE, 0)
-	TB.cast(m, 1, SACRED_OFFERINGS)
-	TB.choose_uids(m, [fence])
-	assert_int(int(m.pending.get("player", -1))).is_equal(0)
-	TB.choose_uids(m, [fence])
-	assert_int(m.status_count(fence, "rune")).is_equal(2)
 
 
 func test_c187_fence_ignores_traps_and_powers() -> void:

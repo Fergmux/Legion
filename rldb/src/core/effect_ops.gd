@@ -51,7 +51,7 @@ func _op_choose(f: Dictionary, op: Dictionary) -> int:
 	for u in cands:
 		opts.append(card_option(u, _target_label(u, chooser)))
 	return ask(f, chooser, "select", op.get("prompt", "%s: choose." % f["label"]), opts, min_n, max_n, op.get("cancellable", false),
-		{"reveal_pile": op["sel"].get("kind", "unit") in ["hand", "draw", "spent", "exhaust", "extra"]})
+		{"reveal_pile": op["sel"].get("kind", "unit") in ["hand", "draw", "spent", "exhaust", "extra", "spent_or_draw"]})
 
 
 ## The cards a "choose" op of frame `f` offers: its selector minus the excluded ones. The one place
@@ -178,11 +178,32 @@ func _op_require(f: Dictionary, op: Dictionary) -> int:
 
 func _op_status(f: Dictionary, op: Dictionary) -> int:
 	var n := eval_num(f, op.get("n", 1))
+	var runes := false
 	for u in refs(f, op["target"]):
 		if op.get("unit_only", false) and not unit_on_field(u):
 			continue                      # e.g. "the Unit that Destroyed it" when a Power/Trap did
 		if on_field(u) or cards[u]["zone"] == "hand":
-			apply_status(u, op["s"], n, status_batch(f))
+			if apply_status(u, op["s"], n, status_batch(f)) > 0 and op["s"] == "rune":
+				runes = true
+	# 2026-11-17 Energy Capture: applying a Rune opens a response window for the opponent.
+	if runes:
+		_splice(f, [{"op": "window", "event": {"name": "rune_applied", "player": f["ctl"],
+			"text": "%s applies a Rune" % pname(f["ctl"])}}])
+	return R.CONT
+
+
+## 2026-11-17 (Pickpocket of the Marked Claw): removes `n` of status `s` from the targets.
+func _op_unstatus(f: Dictionary, op: Dictionary) -> int:
+	for u in refs(f, op["target"]):
+		if on_field(u) and status_count(u, op["s"]) > 0:
+			decrement_status(u, op["s"], int(op.get("n", 1)))
+			add_log("%s loses %d %s." % [name_of(u), int(op.get("n", 1)), String(op["s"]).capitalize()])
+	return R.CONT
+
+
+## 2026-11-17: sets a game-long mark on the frame's card (GameCore.mark).
+func _op_mark(f: Dictionary, op: Dictionary) -> int:
+	mark(f["src"], String(op["name"]))
 	return R.CONT
 
 

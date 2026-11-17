@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Production batch 2026-10-17, match UI: F06 zone-choice hover, F08 exact Arcane payment,
+## Production batch 2026-10-17, match UI: F06 zone-choice hover, F08 exact Spirit payment,
 ## F10 reward click-to-take, F05 prompt card context and F04 Extra Deck summon buttons.
 
 
@@ -244,7 +244,7 @@ func _extra_board() -> Array:
 	var poly := TB.card(m, a, 82, "hand")
 	# 2026-11-03 Bastion Wyrm: 20+ ATK-or-DEF unit (Hydra, Guardian) + Physical unit (Aleister).
 	var wyrm := TB.card(m, a, 93, "extra")
-	var kaya := TB.card(m, a, 170, "extra")       # Arcane, cost 2 (1 before 2026-11-03)
+	var kaya := TB.card(m, a, 170, "extra")       # Spirit, cost 2 (1 before 2026-11-03)
 	var none := TB.card(m, a, 56, "extra")        # Razeon Storm: no Lightning unit on the field
 	TB.card(m, a, 34, "spent")                    # cost-1 materials: 1 + 1 pays Kaya's 2
 	TB.card(m, a, 24, "spent")
@@ -270,12 +270,12 @@ func test_extra_list_shows_summon_buttons_without_selection() -> void:
 	var wy := _summon_buttons(gs, r[5])
 	assert_array(wy.map(func(b): return String(b.get_meta("summon_kind")))).contains(["fusion"])
 	var ka := _summon_buttons(gs, r[6])
-	assert_bool(ka.any(func(b): return String(b.get_meta("summon_kind")) == "arcane")).is_true()
+	assert_bool(ka.any(func(b): return String(b.get_meta("summon_kind")) == "spirit")).is_true()
 	assert_array(_summon_buttons(gs, r[7])).is_empty()          # nothing can summon it
 	assert_bool(wy.all(func(b): return not b.disabled)).is_true()
 
 
-## UI review: the Extra Deck viewer has no helper line; an Arcane unit offers one Summon button
+## UI review: the Extra Deck viewer has no helper line; a Spirit unit offers one Summon button
 ## (B3, owner feedback 2026-10-20: no stance choice on your own turn).
 func test_extra_viewer_has_no_hint_and_one_summon_button() -> void:
 	var r := await _extra_board()
@@ -284,7 +284,7 @@ func test_extra_viewer_has_no_hint_and_one_summon_button() -> void:
 	for i in 3:
 		await await_idle_frame()
 	assert_bool(gs.details.pile_hint.visible).is_false()
-	var ka: Array = _summon_buttons(gs, r[6]).filter(func(b): return String(b.get_meta("summon_kind")) == "arcane")
+	var ka: Array = _summon_buttons(gs, r[6]).filter(func(b): return String(b.get_meta("summon_kind")) == "spirit")
 	assert_int(ka.size()).is_equal(1)
 	assert_str((ka[0] as Button).text).is_equal("Summon")
 

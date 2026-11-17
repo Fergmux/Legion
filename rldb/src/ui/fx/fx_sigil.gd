@@ -1,11 +1,11 @@
 class_name FxSigil
 extends Control
 ## Small procedural magic drawings for the card-movement effects (F03-16 / F03-17), drawn centred
-## on the node position as `t` runs 0 -> 1: a Fusion swirl, a Ritual light column, an Arcane
+## on the node position as `t` runs 0 -> 1: a Fusion swirl, an Arcane light column, a Spirit
 ## hexagram sigil, card cracks, a collapsing void ring and a glowing mote. Presentation-only,
 ## click-through; FxPlayer creates, tweens and frees it.
 
-## Which drawing: "fusion" | "ritual" | "arcane" | "crack" | "void" | "mote" | "rays" | "ash".
+## Which drawing: "fusion" | "arcane" | "spirit" | "crack" | "void" | "mote" | "rays" | "ash".
 var kind: String = "mote"
 ## Main colour (alpha is driven by `t`).
 var col: Color = Color.WHITE
@@ -28,8 +28,8 @@ func _set_t(v: float) -> void:
 func _draw() -> void:
 	match kind:
 		"fusion": _draw_swirl()
-		"ritual": _draw_column()
-		"arcane": _draw_sigil()
+		"arcane": _draw_column()
+		"spirit": _draw_sigil()
 		"crack": _draw_cracks()
 		"void": _draw_void()
 		"rays": _draw_rays()

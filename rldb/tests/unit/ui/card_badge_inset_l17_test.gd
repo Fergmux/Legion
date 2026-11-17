@@ -13,7 +13,7 @@ extends GdUnitTestSuite
 const SOLID_MARGIN := 0.3
 ## Painter scales: mini (90 px wide), field / hand, a large field card, big (224 px) and the inspector.
 const SCALES := [0.75, 1.0, 1.25, 224.0 / 120.0, 2.6]
-const KINDS := ["ap", "fusion", "ritual", "arcane"]
+const KINDS := ["ap", "fusion", "arcane", "spirit"]
 
 
 ## The frame's border width (base units) at painter scale `s` (CardFaceParts.frame: an integer px width).
@@ -71,8 +71,8 @@ func test_tall_card_jewels_fit_inside_the_border() -> void:
 	assert_array(bad).is_empty()
 
 
-## The gem keeps the same clearance from the card edge whatever its shape: the Ritual lozenge and the
-## Arcane hexagon sit further in by exactly the distance their points stand out past the round gem.
+## The gem keeps the same clearance from the card edge whatever its shape: the Arcane lozenge and the
+## Spirit hexagon sit further in by exactly the distance their points stand out past the round gem.
 func test_every_cost_shape_keeps_the_same_edge_clearance() -> void:
 	for g in [CardLayouts.FIELD, CardLayouts.TALL]:
 		var r := float(g["gem_r"])

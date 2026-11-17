@@ -15,6 +15,7 @@ const SACRED_OFFERINGS := 83         # Spell, cost 1
 const ASSASSINATE := 84              # Spell, cost 2
 const MAGENTRIC := 69                # Unit, cost 2
 const BRINEKEEPER := 26              # Monster Unit, cost 1
+const KRAKESHIN_COST3 := 70          # Unit, cost 3
 
 
 func _opts(m: MatchEngine) -> Array:
@@ -143,13 +144,23 @@ func test_c013_chaos_witch_changes_its_own_type_and_every_mage_follows() -> void
 	assert_str(m.unit_type(beast)).is_equal("Water")
 
 
-func test_c015_da_mage_destroyed_can_give_eternal_to_a_mage_in_its_column() -> void:
+# 2026-11-17: the On Destruction Eternal moved from Da Mage (15) to Shapeshifter Loak (19).
+func test_c015_da_mage_destroyed_no_longer_gives_eternal() -> void:
 	var m := TB.make()
 	var dm := TB.unit(m, 0, 15, 0)
 	var col_mage := TB.unit(m, 0, MAGE_WATER, 3)
+	TB.kill(m, dm)
+	assert_bool(m.pending.is_empty()).is_true()
+	assert_int(m.status_count(col_mage, "eternal")).is_equal(0)
+
+
+func test_c019_shapeshifter_loak_destroyed_can_give_eternal_to_a_mage_in_its_column() -> void:
+	var m := TB.make()
+	var loak := TB.unit(m, 0, 19, 0)
+	var col_mage := TB.unit(m, 0, MAGE_WATER, 3)
 	TB.unit(m, 0, MAGE_FIRE, 1)                                  # other column: not offered
 	TB.unit(m, 1, BEAST_WATER, 0)                                # same column, not a Mage
-	TB.kill(m, dm)
+	TB.kill(m, loak)
 	assert_array(_opts(m)).contains_exactly_in_any_order([-1, col_mage])
 	TB.choose_uids(m, [col_mage])
 	assert_int(m.status_count(col_mage, "eternal")).is_equal(1)
@@ -241,7 +252,7 @@ func test_c036_dante_burns_every_unit_and_gains_two_atk_per_own_burn() -> void:
 	var dante := TB.special(m, 0, 36, 0)
 	for u in [ally, foe, foe_back, dante]:
 		assert_int(m.status_count(u, "burn")).is_equal(6)
-	assert_int(m.atk_of(dante)).is_equal(28 + 6 * 2)
+	assert_int(m.atk_of(dante)).is_equal(18 + 6 * 2)                # 18 ATK since 2026-11-17
 
 
 # 2026-11-10: the ability's Burn is 5 (was 10).
@@ -262,13 +273,13 @@ func test_c036_dante_burning_itself_raises_its_atk_and_cleanse_lowers_it() -> vo
 	TB.ability(m, dante)
 	TB.choose_uids(m, [dante])
 	assert_str(TB.choose(m, ["5 Burn"])).is_empty()
-	assert_int(m.atk_of(dante)).is_equal(28 + 5 * 2)             # 28 ATK, +2 per Burn since 2026-11-10
+	assert_int(m.atk_of(dante)).is_equal(18 + 5 * 2)             # 18 ATK (2026-11-17), +2 per Burn since 2026-11-10
 	m.turn += 2
 	TB.ability(m, dante)
 	TB.choose_uids(m, [dante])
 	TB.choose(m, ["1 Cleanse"])
 	assert_int(m.status_count(dante, "burn")).is_equal(0)
-	assert_int(m.atk_of(dante)).is_equal(28)
+	assert_int(m.atk_of(dante)).is_equal(18)
 
 
 # 2026-11-03 (rule changed on purpose): +8 ATK while it is Protecting a unit; it used to be +10
@@ -289,7 +300,7 @@ func test_c037_solomon_captain_gains_eight_only_while_protecting() -> void:
 
 # ---------------------------------------------------------------- Magentric's tribute benefit
 # 2026-11-03 (changed on purpose): the unit summoned gets 1 Cleanse (was 2 Pierce). The hook is
-# unchanged: only a Magentric tributed from the Field for a Fusion or Ritual summon gives it.
+# unchanged: only a Magentric tributed from the Field for a Fusion or Arcane summon gives it.
 
 func test_c069_magentric_tributed_for_a_fusion_gives_it_one_cleanse() -> void:
 	var m := TB.make()
@@ -309,12 +320,12 @@ func test_c069_magentric_tributed_for_a_fusion_gives_it_one_cleanse() -> void:
 	assert_int(m.status_count(wyrm, "pierce")).is_equal(0)
 
 
-func test_c069_magentric_tributed_for_a_ritual_gives_it_one_cleanse() -> void:
+func test_c069_magentric_tributed_for_an_arcane_gives_it_one_cleanse() -> void:
 	var m := TB.make()
 	var mag := TB.unit(m, 0, MAGENTRIC, 0)
 	m.apply_status(mag, "rune", 2)
 	var nec := TB.card(m, 0, 64, "extra")                        # Necrovast, 2R
-	assert_str(m.submit(0, {"t": "ritual", "uid": nec, "stance": "atk"})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": nec, "stance": "atk"})).is_empty()
 	TB.choose_uids(m, [mag])
 	TB.choose(m, ["Front row, column 1"])
 	assert_str(m.cards[nec]["zone"]).is_equal("unit")
@@ -339,13 +350,12 @@ func test_c069_other_fusion_materials_give_no_tribute_bonus() -> void:
 	assert_int(m.status_count(wyrm, "cleanse")).is_equal(0)     # the 2026-11-03 bonus is Cleanse
 
 
-func test_c069_magentric_exhausted_for_an_arcane_summon_gives_nothing() -> void:
+func test_c069_magentric_exhausted_for_a_spirit_summon_gives_nothing() -> void:
 	var m := TB.make()
 	var mag := TB.card(m, 0, MAGENTRIC, "spent")                 # cost 2
-	var one := TB.card(m, 0, MAGE_WATER, "spent")                # cost 1
-	var cliff := TB.card(m, 0, 174, "extra")                     # Cliff, 3A since 2026-11-03
-	assert_str(m.submit(0, {"t": "arcane", "uid": cliff, "stance": "atk"})).is_empty()
-	TB.choose_uids(m, [mag, one])
+	var cliff := TB.card(m, 0, 174, "extra")                     # Cliff, 2S since 2026-11-17
+	assert_str(m.submit(0, {"t": "spirit", "uid": cliff, "stance": "atk"})).is_empty()
+	TB.choose_uids(m, [mag])
 	TB.choose(m, ["Front row, column 1"])
 	assert_str(m.cards[cliff]["zone"]).is_equal("unit")
 	assert_int(m.status_count(cliff, "pierce")).is_equal(0)
@@ -409,22 +419,35 @@ func test_c155_symbiote_spawn_boosts_its_protector_by_six() -> void:
 	assert_str(CardDB.get_def(155)["name"]).is_equal("Symbiote Spawn")
 
 
-func test_c156_symbiote_larva_boosts_protector_by_six_and_draws_then_discards() -> void:
+## Index of the ability of `uid` whose label contains `needle`, or -1.
+func _abil_idx(m: MatchEngine, uid: int, needle: String) -> int:
+	var abs: Array = m.script_of(uid).get("abilities", [])
+	for i in abs.size():
+		if String(abs[i].get("label", "")).contains(needle):
+			return i
+	return -1
+
+
+# 2026-11-17: the draw-then-discard is a once-per-turn ability (was at the start of the turn).
+func test_c156_symbiote_larva_boosts_protector_by_six_and_its_ability_draws_then_discards() -> void:
 	var m := TB.make()
-	var front := TB.unit(m, 1, MAGE_WATER, 0)
-	TB.unit(m, 1, 156, 3)
+	var front := TB.unit(m, 0, MAGE_WATER, 0)
+	var larva := TB.unit(m, 0, 156, 3)
 	assert_int(m.atk_of(front)).is_equal(8 + 6)
-	var hand_before: int = m.players[1]["hand"].size()
-	var spent_before: int = m.players[1]["spent"].size()
-	TB.to_turn2(m)                                               # player 1's turn starts
-	TB.choose(m, ["Skip"])                                       # L23: the Evolve prompt comes first
-	assert_int(int(m.pending.get("player", -1))).is_equal(1)
+	var hand_before: int = m.players[0]["hand"].size()
+	var spent_before: int = m.players[0]["spent"].size()
+	var idx := _abil_idx(m, larva, "Draw a card, then discard")
+	assert_int(idx).is_greater_equal(0)
+	assert_str(TB.ability(m, larva, idx)).is_empty()
+	assert_int(int(m.pending.get("player", -1))).is_equal(0)
 	assert_str(String(m.pending.get("prompt", ""))).contains("Discard")
+	assert_int(m.players[0]["hand"].size()).is_equal(hand_before + 1)   # drawn before the discard
 	var pick: int = int(m.pending["options"][0]["v"])
 	TB.choose_uids(m, [pick])
 	assert_str(m.cards[pick]["zone"]).is_equal("spent")
-	assert_int(m.players[1]["spent"].size()).is_equal(spent_before + 1)
-	assert_int(m.players[1]["hand"].size()).is_greater(hand_before)   # normal draw + Larva's draw - discard
+	assert_int(m.players[0]["spent"].size()).is_equal(spent_before + 1)
+	assert_int(m.players[0]["hand"].size()).is_equal(hand_before)        # +1 draw, -1 discard
+	assert_str(TB.ability(m, larva, idx)).is_not_empty()                # once per turn
 
 
 func test_c157_symbiote_siphonophore_boosts_adjacent_only_while_protected() -> void:
@@ -438,7 +461,9 @@ func test_c157_symbiote_siphonophore_boosts_adjacent_only_while_protected() -> v
 	assert_int(m.atk_of(sip)).is_equal(0)
 
 
-func test_c157_symbiote_siphonophore_draws_an_extra_card_at_start_of_turn() -> void:
+# 2026-11-17: the extra draw is a once-per-turn ability now (tests/unit/cards/cards_db_update_2026_11_17_test.gd);
+# the start of its controller's turn draws only the normal card.
+func test_c157_symbiote_siphonophore_no_longer_draws_at_start_of_turn() -> void:
 	var m := TB.make()
 	var hand_before: int = m.players[1]["hand"].size()
 	TB.unit(m, 1, 157, 3)
@@ -446,7 +471,7 @@ func test_c157_symbiote_siphonophore_draws_an_extra_card_at_start_of_turn() -> v
 	var m2 := TB.make()
 	var hand_before2: int = m2.players[1]["hand"].size()
 	TB.to_turn2(m2)
-	assert_int(m.players[1]["hand"].size() - hand_before).is_equal(m2.players[1]["hand"].size() - hand_before2 + 1)
+	assert_int(m.players[1]["hand"].size() - hand_before).is_equal(m2.players[1]["hand"].size() - hand_before2)
 
 
 # ---------------------------------------------------------------- Geolock, Last Foundation, Tyde
@@ -498,22 +523,26 @@ func test_c063_last_foundation_reveals_spells_traps_and_gains_eternal_even_when_
 	assert_bool(m.has_flag(lf, "cant_move")).is_false()           # the movement restriction is gone
 
 
-func test_c172_tyde_adds_a_beast_with_discount_and_destroys_a_runed_unit() -> void:
+# 2026-11-17: Tyde is an Arcane unit; no Beast search any more (a hand card's cost is lowered, see
+# cards_db_update_2026_11_17_test.gd) and its ability Debilitates any unit instead of destroying a runed one.
+func test_c172_tyde_no_longer_searches_and_its_ability_debilitates_any_unit_once_per_turn() -> void:
 	var m := TB.make(7, 0)
 	var beast := TB.card(m, 0, BEAST_FIRE, "draw")
-	TB.card(m, 0, MAGE_FIRE, "draw")
 	var tyde := TB.special(m, 0, 172, 0)
-	assert_array(_opts(m)).contains_exactly_in_any_order([-1, beast])
-	TB.choose_uids(m, [beast])
-	assert_int(m.current_cost(beast)).is_equal(0)
+	assert_bool(_opts(m).has(beast)).is_false()
+	CF.decline(m)
+	assert_str(m.cards[beast]["zone"]).is_equal("draw")
 	var plain := TB.unit(m, 1, MAGE_WATER, 0)
 	var runed := TB.unit(m, 1, MAGE_WATER, 1)
 	m.apply_status(runed, "rune", 1)
 	assert_str(TB.ability(m, tyde)).is_empty()
-	assert_array(_opts(m)).contains_exactly([runed])
-	TB.choose_uids(m, [runed])
-	assert_str(m.cards[runed]["zone"]).is_equal("spent")
+	assert_bool(_opts(m).has(plain)).is_true()                   # any unit, Rune or not
+	assert_bool(_opts(m).has(runed)).is_true()
+	TB.choose_uids(m, [plain])
+	assert_int(m.status_count(plain, "debilitate")).is_equal(1)
 	assert_str(m.cards[plain]["zone"]).is_equal("unit")
+	assert_str(m.cards[runed]["zone"]).is_equal("unit")
+	assert_str(TB.ability(m, tyde)).is_not_empty()               # once per turn
 
 
 func test_c172_tyde_sacrificed_no_longer_destroys_anything() -> void:
@@ -561,15 +590,15 @@ func test_c181_solomon_tyrannical_needs_to_be_protected() -> void:
 	assert_str(TB.ability(m2, sol2)).is_not_empty()
 
 
-# ---------------------------------------------------------------- The Illusionist and Rituals
+# ---------------------------------------------------------------- The Illusionist and Arcanes
 
-func test_c177_illusionist_is_typeless_and_gains_twenty_on_its_own_turn() -> void:
+func test_c177_illusionist_is_typeless_and_gains_thirty_on_its_own_turn() -> void:
 	var m := TB.make()
 	var ill := TB.unit(m, 0, 177, 0)
 	assert_str(m.unit_type(ill)).is_equal("")
-	assert_int(m.atk_of(ill)).is_equal(50)                         # 2026-11-03: +20 (was +30)
+	assert_int(m.atk_of(ill)).is_equal(16 + 30)                    # 2026-11-17: 16 ATK, +30 on its turn
 	TB.to_turn2(m)
-	assert_int(m.atk_of(ill)).is_equal(30)
+	assert_int(m.atk_of(ill)).is_equal(16)
 
 
 func test_c177_illusionist_destroyed_recovers_a_low_cost_card_from_own_exhaust() -> void:
@@ -595,9 +624,9 @@ func test_c177_illusionist_recovery_is_optional() -> void:
 	assert_str(m.cards[cheap]["zone"]).is_equal("exhaust")
 
 
-func test_c095_c065_c183_ritual_costs_and_stats_follow_the_new_source() -> void:
+func test_c095_c065_c183_arcane_costs_and_stats_follow_the_new_source() -> void:
 	var mimic := CardDB.get_def(95)
-	assert_str(mimic["cost_kind"]).is_equal("ritual")
+	assert_str(mimic["cost_kind"]).is_equal("arcane")
 	assert_int(mimic["cost"]).is_equal(2)
 	assert_that(mimic["atk"]).is_null()
 	var null_u := CardDB.get_def(65)                             # 2026-11-03 stats
@@ -616,21 +645,27 @@ func test_c095_mimic_accepts_a_two_rune_material() -> void:
 	m.apply_status(mat, "rune", 2)
 	TB.unit(m, 1, BEAST_WATER, 0)
 	var mimic := TB.card(m, 0, 95, "extra")
-	assert_str(m.submit(0, {"t": "ritual", "uid": mimic, "stance": "atk"})).is_empty()
+	assert_str(m.submit(0, {"t": "arcane", "uid": mimic, "stance": "atk"})).is_empty()
 	assert_array(_opts(m)).contains([mat])
 
 
 # 2026-11-03: the start-of-turn Damage is gone entirely (a Poison ability replaced it).
-func test_c183_yamata_three_runes_and_start_of_turn_damage_kept() -> void:
+# 2026-11-17: Yamata is a Spirit unit: its cost 3 is paid by Exhausting Spent units (was 3 Runes).
+func test_c183_yamata_spirit_summon_exhausts_three_cost_and_deals_no_start_of_turn_damage() -> void:
 	var m := TB.make()
-	var mat := TB.unit(m, 1, MAGE_WATER, 0)
-	m.apply_status(mat, "rune", 3)
+	var runed := TB.unit(m, 1, MAGE_WATER, 1)
+	m.apply_status(runed, "rune", 3)
 	TB.to_turn2(m)
+	var mat := TB.card(m, 1, KRAKESHIN_COST3, "spent")
 	var yam := TB.card(m, 1, 183, "extra")
-	assert_str(m.submit(1, {"t": "ritual", "uid": yam, "stance": "atk"})).is_empty()
+	assert_str(String(CardDB.get_def(183)["category"])).is_equal("spirit")
+	assert_str(m.submit(1, {"t": "arcane", "uid": yam, "stance": "atk"})).is_not_empty()   # Runes no longer pay
+	assert_str(m.submit(1, {"t": "spirit", "uid": yam, "stance": "atk"})).is_empty()
 	TB.choose_uids(m, [mat])
 	TB.choose(m, ["Front row, column 1"])
 	assert_str(m.cards[yam]["zone"]).is_equal("unit")
+	assert_str(m.cards[mat]["zone"]).is_equal("exhaust")
+	assert_int(m.status_count(runed, "rune")).is_equal(3)
 	var hp0: int = m.players[0]["hp"]
 	m.submit(1, {"t": "next_phase"})
 	m.submit(1, {"t": "next_phase"})
@@ -649,9 +684,10 @@ func test_c181_solomon_tyrannical_keeps_summon_pierce_and_takes_ten_on_destructi
 
 
 ## Review 2026-10-17: "Exhaust this unit: ..." is a cost of the unit on the Field. If Neva leaves
-## the Field in the response window, the ability ends: Neva stays in Spent and deals nothing
-## (before the fix its cost then pulled it from Spent to Exhaust).
-func test_c161_neva_destroyed_in_response_window_is_not_exhausted_from_spent() -> void:
+## the Field in the response window, the ability ends and deals nothing (before the fix its cost
+## then pulled it from Spent to Exhaust and dealt the Damage). 2026-11-17: Neva is a Spirit unit,
+## so leaving the Field Exhausts it anyway; the ability still deals nothing.
+func test_c161_neva_destroyed_in_response_window_deals_nothing() -> void:
 	var m := TB.make(7, 20, true)
 	TB.set_card(m, 1, 85, 0)                                   # a face-down card: hidden window opens
 	var neva := TB.unit(m, 0, 161, 0)
@@ -661,5 +697,5 @@ func test_c161_neva_destroyed_in_response_window_is_not_exhausted_from_spent() -
 	m.destroy(neva, "effect", -1, 1)                           # stands in for an opponent's response
 	while not m.pending.is_empty() and TB.pend_kind(m) == "trap_response":
 		TB.choose(m, ["Skip"])
-	assert_str(m.cards[neva]["zone"]).is_equal("spent")
+	assert_str(m.cards[neva]["zone"]).is_equal("exhaust")       # a Spirit leaving the Field
 	assert_int(m.players[1]["hp"]).is_equal(hp1)

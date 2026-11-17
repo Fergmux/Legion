@@ -456,11 +456,11 @@ func _op_mirrorflesh(f: Dictionary, op: Dictionary) -> int:
 	return R.CONT
 
 
-## Roma (96): +`per` ATK/DEF for each Rune used for its Ritual summon (10 since 2026-11-03).
+## Roma (96): +`per` ATK/DEF for each Rune used for its Arcane summon (10 since 2026-11-03).
 func _op_roma(f: Dictionary, op: Dictionary) -> int:
 	var me: int = f["src"]
 	var per: int = int(op.get("per", 10))
-	var n: int = cards[me].get("runes_used", 0)   # any non-Ritual summon (e.g. from Spent) used no Runes
+	var n: int = cards[me].get("runes_used", 0)   # any non-Arcane summon (e.g. from Spent) used no Runes
 	cards[me]["base_atk"] = per * n
 	cards[me]["base_def"] = per * n
 	add_log("Roma uses %d Rune(s): becomes %d/%d." % [n, per * n, per * n])

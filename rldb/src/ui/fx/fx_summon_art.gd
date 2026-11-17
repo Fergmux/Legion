@@ -5,14 +5,14 @@ extends Control
 ## and a redraw at any `t` is stable (no per-frame state, no frame-dependent timing):
 ##   fusion: a vortex of spiral particle arms winding faster and tighter into a white-hot core that
 ##           implodes at the climax, then dissolving spiral remnants;
-##   ritual: a rune circle that inscribes itself (outer ring, inner ring, a seven-point star), rune glyphs
+##   arcane: a rune circle that inscribes itself (outer ring, inner ring, a seven-point star), rune glyphs
 ##           lit one by one by the runes drawn out of the tributed units, then a pillar of light;
-##   arcane: spectral shards rising from the spent materials and assembling into a turning crystalline
+##   spirit: spectral shards rising from the spent materials and assembling into a turning crystalline
 ##           lattice (hexagon, hexagram, a rotating cube), which bursts into flying shards at the climax.
 ## Every kind also draws a gathering charge: streaks converging on the centre during the anticipation.
 ## Additively blended, click-through; FxSummon creates, tweens and frees it.
 
-## Which set piece: "fusion" | "ritual" | "arcane".
+## Which set piece: "fusion" | "arcane" | "spirit".
 var kind: String = "fusion"
 ## The kind's two set-piece colours (FxSummon.PALETTE): the main hue and its accent.
 var col: Color = Color.WHITE
@@ -27,7 +27,7 @@ var sources: PackedVector2Array = PackedVector2Array()
 ## Animation progress 0 -> 1; redraws on every change.
 var t: float = 0.0: set = _set_t
 
-## Particles in the fusion vortex, shards per arcane material, glyphs on the ritual ring.
+## Particles in the fusion vortex, shards per spirit material, glyphs on the arcane ring.
 const VORTEX_ARMS := 4
 const VORTEX_PER_ARM := 26
 const SHARDS_PER_SOURCE := 7
@@ -72,8 +72,8 @@ func _draw() -> void:
 	_draw_charge(s)
 	match kind:
 		"fusion": _draw_fusion(s)
-		"ritual": _draw_ritual(s)
 		"arcane": _draw_arcane(s)
+		"spirit": _draw_spirit(s)
 
 
 # ---------------------------------------------------------------- shared
@@ -166,7 +166,7 @@ func _draw_fusion(s: float) -> void:
 	draw_circle(Vector2.ZERO, radius * 0.1 * swell, Color(1, 1, 1, 0.85 * swell), true, -1.0, true)
 
 
-# ---------------------------------------------------------------- ritual: the rune circle and the pillar
+# ---------------------------------------------------------------- arcane: the rune circle and the pillar
 
 ## Point `i` of a regular star polygon {7/3} on radius `r`, turned by `rot`.
 static func _star_pt(i: int, r: float, rot: float) -> Vector2:
@@ -186,7 +186,7 @@ func _glyph(p: Vector2, h: float, ang: float, idx: int, c: Color, w: float) -> v
 		draw_line(xf * Vector2(0, y0), xf * Vector2(side * h * 0.75, y1), c, w, true)
 
 
-func _draw_ritual(s: float) -> void:
+func _draw_arcane(s: float) -> void:
 	var post := _span(s, climax, life)
 	var fade := 1.0 - _out(_span(s, climax + 0.25, life), 1.6)
 	var flare := sin(clampf(post * 3.0, 0.0, 1.0) * PI)   # the circle flares as the pillar strikes
@@ -272,7 +272,7 @@ func _beam(top: float, w: float, c: Color, a: float) -> void:
 		PackedColorArray([hot, none, none, hot]))
 
 
-# ---------------------------------------------------------------- arcane: shards and the crystal lattice
+# ---------------------------------------------------------------- spirit: shards and the crystal lattice
 
 ## Vertex `i` of the lattice the shards assemble into (hexagon then hexagram points), turned by `rot`.
 func _lattice_pt(i: int, rot: float) -> Vector2:
@@ -300,7 +300,7 @@ static func c2_of(c: Color) -> Color:
 	return c.lightened(0.55)
 
 
-func _draw_arcane(s: float) -> void:
+func _draw_spirit(s: float) -> void:
 	var post := _span(s, climax, life)
 	var rot := s * 1.1
 	var assemble := _span(s, 0.35, climax - 0.05)

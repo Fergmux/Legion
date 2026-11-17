@@ -188,7 +188,7 @@ func answer_choice(player: int, choice_id: int, values: Array) -> String:
 		var total := 0
 		for v in values:
 			total += maxi(current_cost(v), 0)
-		# F03-04: Arcane materials must match the requirement exactly (no overpayment).
+		# F03-04: Spirit materials must match the requirement exactly (no overpayment).
 		if pending.get("total_exact", false):
 			if total != int(pending["total_required"]):
 				return "Selected materials total %d; exactly %d required." % [total, int(pending["total_required"])]
@@ -313,6 +313,9 @@ func _matches(f: Dictionary, uid: int, sel: Dictionary) -> bool:
 				if not is_unit(uid) or (unit_type(uid) != "") != want: return false
 			"atk_below_self":
 				if not unit_on_field(src) or not is_unit(uid) or atk_of(uid) >= atk_of(src): return false
+			"atk_above_self":
+				# 2026-11-17 (Mirrorflesh Construct): "a Unit with higher ATK than this Unit".
+				if not unit_on_field(src) or not unit_on_field(uid) or atk_of(uid) <= atk_of(src): return false
 			"not_self":
 				if uid == src: return false
 			"race":
@@ -555,10 +558,20 @@ func eval_cond(f: Dictionary, cond: Dictionary) -> bool:
 				for c in v:
 					if not eval_cond(f, c): return false
 			"self_status":
-				# 2026-11-10 (Edwin / Solomon Evolve): the frame's card has this status applied.
+				# 2026-11-10 (Edwin / Solomon Transform): the frame's card has this status applied.
 				if not cards.has(f["src"]) or status_count(f["src"], String(v)) <= 0: return false
+			"self_status_min":
+				# 2026-11-17 (Soul of Burning Revenge): at least v.n of status v.s on the frame's card.
+				if not cards.has(f["src"]) or status_count(f["src"], String(v["s"])) < int(v["n"]): return false
+			"self_mark":
+				# 2026-11-17 (Komodos, The Sweeper): a mark set on the card in this game ("has destroyed a
+				# unit", "has had Eternal applied"); cleared when it transforms.
+				if not cards.has(f["src"]) or not cards[f["src"]].get("marks", {}).has(String(v)): return false
+			"opp_units_at_least_mine":
+				# 2026-11-17 (Grandmother Kaya): "If your opponent Controls the same or more Units".
+				if (field_units(opp(f["ctl"])).size() >= field_units(f["ctl"]).size()) != v: return false
 			"self_atk_above_base":
-				# 2026-11-10 (Edwin / Solomon Evolve): "ATK is more than Base".
+				# 2026-11-10 (Edwin / Solomon Transform): "ATK is more than Base".
 				if not unit_on_field(f["src"]) or (atk_of(f["src"]) > base_atk(f["src"])) != v: return false
 	return true
 
@@ -868,11 +881,17 @@ func _trap_eligible(uid: int, p: int, ev: Dictionary) -> bool:
 			if tr.get("attacker_column", false):
 				if int(ev.get("attacker_column", -9)) != cards[uid]["slot"]: return false
 			# 2026-11-10 (Perfect Dodge, Defensive Rally): "an Attack on a Unit in this Column".
+			if tr.get("target_unprotected", false):
+				# 2026-11-17 Emergency Evade: "an Attack on an Unprotected Unit".
+				var tq: int = int(ev.get("target", -1))
+				if tq == -1 or not cards.has(tq) or not unit_on_field(tq) or is_protected(tq): return false
 			if tr.get("target_column", false):
 				var tu: int = int(ev.get("target", -1))
 				if tu == -1 or not cards.has(tu) or not unit_on_field(tu) or column_of(tu) != int(cards[uid]["slot"]): return false
 		"summon":
 			if ev["player"] == p: return false
+			# 2026-11-17 Energy Capture: of the summons, only an Arcane Summon.
+			if tr.get("arcane_summon_only", false) and (not cards.has(int(ev.get("card", -1))) or category(int(ev["card"])) != "arcane"): return false
 			# 2026-11-10 Trap Holes: only a Summon in this Trap's column (column i faces column i).
 			if tr.get("summon_column", false):
 				var sc: int = int(ev.get("card", -1))
@@ -885,6 +904,9 @@ func _trap_eligible(uid: int, p: int, ev: Dictionary) -> bool:
 			if ev["ctl"] != p: return false
 			if tr.get("by_effect", false) and ev["cause"] != "effect": return false
 			if tr.get("by_opponent", false) and ev.get("by_player", -1) != opp(p): return false
+		"rune_applied":
+			# 2026-11-17 Energy Capture: "If your opponent applies a Rune".
+			if int(ev.get("player", -1)) == p: return false
 		"card_destroyed":
 			# 2026-11-10 Shared Fate: any card of the responder (Unit, Spell, Trap or Power).
 			if int(ev.get("ctl", -1)) != p or int(ev.get("self", -1)) == uid: return false
@@ -912,6 +934,10 @@ func _trap_eligible(uid: int, p: int, ev: Dictionary) -> bool:
 			if tr.get("needs_target", false) or not op.get("optional", false):
 				return not select(f, op["sel"]).is_empty()
 			break
+		# 2026-11-16 (owner: "if trap has no target don't prompt for it"): an effect on "all" matching
+		# units (Trap Hole of Spikes with no 10-ATK unit in its column, ...) needs at least one.
+		if op["op"] == "all":
+			return not select(f, op["sel"]).is_empty()
 		if not tr.get("needs_target", false) and not (op["op"] in ["cost_perm"]):
 			break
 	return true
@@ -961,6 +987,9 @@ func activate_trap(uid: int, p: int, ev: Dictionary) -> void:
 
 ## Script flags that apply regardless of zone (e.g. "if sent from Field to Spent").
 func has_flag_raw(uid: int, flag: String) -> bool:
+	# 2026-11-17 (owner): every Spirit Unit is Exhausted whenever it leaves the Field.
+	if flag == "exhaust_on_spent" and category(uid) == "spirit":
+		return true
 	return script_of(uid).get("flags", []).has(flag)
 
 
@@ -1088,5 +1117,7 @@ func _guardian_replacement(uid: int) -> void:
 		if g != uid and has_flag(g, "warrior_guard") and column_of(g) == column_of(uid):
 			add_log("%s protects %s." % [name_of(g), name_of(uid)])
 			apply_status(uid, "eternal", 1)
-			destroy(g, "effect", g, cards[g]["ctl"])
+			# 2026-11-17: Man's Best Friend is Exhausted (was Destroyed).
+			_leave_field(g, "exhaust", "effect")
+			add_log("%s is exhausted." % name_of(g))
 			return

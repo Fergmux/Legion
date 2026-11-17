@@ -61,7 +61,7 @@ static func draw(pt: CardPainter, rect: Rect2, radius: float = 0.0) -> void:
 
 ## H20 foil: the kinds whose art carries the stronger prismatic foil (the summoned-by-cost units);
 ## every other card gets a faint glass sheen. Static (no per-frame redraw).
-const FOIL_CATS := ["fusion", "ritual", "arcane"]
+const FOIL_CATS := ["fusion", "arcane", "spirit"]
 ## [band centre along the diagonal (0 = top-left corner, 1 = bottom-right), half-width share,
 ## peak alpha, colour] of the sheen bands; FOIL adds a second, tinted pair.
 const SHEEN := [[0.3, 0.13, 0.14, Color(1, 0.97, 0.9)]]

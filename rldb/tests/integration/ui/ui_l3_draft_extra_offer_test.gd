@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## L3 (owner, 5 Nov): the Extra Deck draft offer shows one Fusion, one Ritual and one Arcane, in that
+## L3 (owner, 5 Nov): the Extra Deck draft offer shows one Fusion, one Arcane and one Spirit, in that
 ## order. Owner (10 Nov): no kind tags over the cards. A pick plays the draft_pick cue.
 ## Story: design/owner-feedback-2026-11-05.md L3, design/owner-feedback-2026-11-09.md.
 
@@ -34,7 +34,7 @@ func _offer_cards(gs: GameScreen) -> Array:
 	return [] if row == null else row.find_children("*", "CardWidget", true, false)
 
 
-func test_l3_extra_offer_is_fusion_ritual_arcane_with_no_kind_tags() -> void:
+func test_l3_extra_offer_is_fusion_arcane_spirit_with_no_kind_tags() -> void:
 	var r := await _screen()
 	var host: LocalHost = r[0]
 	var gs: GameScreen = r[1]
@@ -43,7 +43,7 @@ func test_l3_extra_offer_is_fusion_ritual_arcane_with_no_kind_tags() -> void:
 	var row: Node = gs.overlays.overlay_box.find_child("Offer", true, false)
 	assert_array(row.find_children("KindChip_*", "", true, false)).is_empty()
 	var kinds := _offer_cards(gs).map(func(w): return String((w as CardWidget).view["category"]))
-	assert_array(kinds).is_equal(["fusion", "ritual", "arcane"])
+	assert_array(kinds).is_equal(["fusion", "arcane", "spirit"])
 
 
 func test_l3_other_categories_have_no_kind_chips() -> void:

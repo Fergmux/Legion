@@ -22,8 +22,8 @@ const SUMMON_TRAPS := [TRAP_HOLE, OVEREXTEND, ALEXANDERS_ARROW, DEFCON_2, DEFCON
 # Values as of the 3 Nov 2026 card sheet.
 const COSMIC_DRAGON := 31          # unit 3 AP 26/16 (2026-11-10), On Summon: 1 Pierce to itself
 const CHIDORI_MONK := 24           # unit 1 AP 14 ATK (2026-11-10), On Summon: 1 Infiltrate to itself
-const CREEPING_NULL := 65          # Ritual 3R 36/12, On Summon: you can apply 1 Rune to a unit
-const BOOM := 175                  # Arcane 4, On Summon: change the opponent's units' stance
+const CREEPING_NULL := 65          # Arcane 3R 36/12, On Summon: you can apply 1 Rune to a unit
+const THUNDERCLAP := 173           # Spirit 2, On Summon: the opponent takes 4 Damage per unit they control (Boom until 2026-11-17, an Arcane Unit now)
 const BASTION_WYRM := 93           # Fusion 20+ ATK-or-DEF unit + Physical unit, On Summon: 1 Eternal to itself
 const TAG_TEAM_X := 12             # ability: lose 1 AP, summon a 20-ATK-or-less unit from Spent in this column
 const AMBUSH := 42
@@ -152,21 +152,21 @@ func _start(m: MatchEngine, kind: String) -> Dictionary:
 			var u := TB.card(m, SUMMONER, COSMIC_DRAGON)
 			m.submit(SUMMONER, {"t": "summon", "uid": u})
 			return {"unit": u, "answers": [0], "on_summon": func(mm): return mm.status_count(u, "pierce") == 1}
-		"ritual":
+		"arcane":
 			var mat := TB.unit(m, SUMMONER, BEAST, 0)
 			m.apply_status(mat, "rune", 3)
 			var r := TB.card(m, SUMMONER, CREEPING_NULL, "extra")
 			# 2026-11-03: its On Summon is an optional Rune on a unit (it used to Paralyse); the stance is
 			# given up front so the answers reach material, zone, then the Rune target.
-			m.submit(SUMMONER, {"t": "ritual", "uid": r, "stance": "atk"})
+			m.submit(SUMMONER, {"t": "arcane", "uid": r, "stance": "atk"})
 			return {"unit": r, "answers": [mat, 0, foe], "on_summon": func(mm): return mm.status_count(foe, "rune") == 1}
-		"arcane":
-			var a := TB.card(m, SUMMONER, 28, "spent")           # cost 2
-			var b := TB.card(m, SUMMONER, 32, "spent")           # cost 2: 2 + 2 = Boom's 4 (3 before 3 Nov)
-			var boom := TB.card(m, SUMMONER, BOOM, "extra")
-			m.submit(SUMMONER, {"t": "arcane", "uid": boom})
-			m.submit(SUMMONER, {"t": "choose", "id": m.pending["id"], "values": [a, b]})
-			return {"unit": boom, "answers": [0], "on_summon": func(mm): return String(mm.cards[foe]["stance"]) == "def"}
+		"spirit":
+			var a := TB.card(m, SUMMONER, 28, "spent")           # cost 2 = Thunderclap's 2
+			var clap := TB.card(m, SUMMONER, THUNDERCLAP, "extra")
+			var hp_before: int = m.players[RESPONDER]["hp"]
+			m.submit(SUMMONER, {"t": "spirit", "uid": clap})
+			m.submit(SUMMONER, {"t": "choose", "id": m.pending["id"], "values": [a]})
+			return {"unit": clap, "answers": [0], "on_summon": func(mm): return int(mm.players[RESPONDER]["hp"]) == hp_before - 4}
 		"fusion":
 			var lab := TB.power(m, SUMMONER, FUSION_LAB, 0)
 			var bb := TB.unit(m, SUMMONER, BEAST, 0, "atk", 20, 8)
@@ -186,7 +186,7 @@ func _start(m: MatchEngine, kind: String) -> Dictionary:
 func test_b2_summon_traps_follow_the_on_summon_effect_for_every_summon_kind() -> void:
 	var opened := {}
 	for trap_id in SUMMON_TRAPS:
-		for kind in ["normal", "ritual", "arcane", "fusion", "effect"]:
+		for kind in ["normal", "arcane", "spirit", "fusion", "effect"]:
 			var m := _board(trap_id)
 			var s := _start(m, kind)
 			var answers: Array = s["answers"]
@@ -197,7 +197,7 @@ func test_b2_summon_traps_follow_the_on_summon_effect_for_every_summon_kind() ->
 			assert_str(m.cards[s["unit"]]["zone"]).override_failure_message(why).is_equal("unit")
 			assert_bool((s["on_summon"] as Callable).call(m)).override_failure_message("%s: On Summon not resolved before the Trap" % why).is_true()
 	# Trap Hole ("If your opponent Summons a Unit") answers every kind of summon.
-	for kind in ["normal", "ritual", "arcane", "fusion", "effect"]:
+	for kind in ["normal", "arcane", "spirit", "fusion", "effect"]:
 		assert_bool(opened.has("%d %s" % [TRAP_HOLE, kind])).override_failure_message("Trap Hole not offered for a %s summon" % kind).is_true()
 	# The cost / ATK / unit-count conditions still hold where they can.
 	assert_bool(opened.has("%d normal" % DEFCON_2)).is_true()

@@ -19,7 +19,7 @@ const OPP_HAND_Y := 24.0
 ## Slots per zone, in render order.
 const ZONE_SLOTS := {"unit": 6, "backrow": 3, "power": 4}
 ## Action kinds that mark a card as able to act now (F02-11).
-const READY_KINDS := ["summon", "cast", "set", "power", "ritual", "arcane", "ability", "attack", "activate_set"]
+const READY_KINDS := ["summon", "cast", "set", "power", "arcane", "spirit", "ability", "attack", "activate_set"]
 ## Pile stacks beside the unit zones: [zone, title] (Draw, Extra, Spent, Exhaust).
 const PILE_ZONES := [["draw", "Draw"], ["extra", "Extra"], ["spent", "Spent"], ["exhaust", "Exhaust"]]
 
@@ -357,14 +357,10 @@ func render() -> void:
 		if have:
 			var pv := gs.pv(pidx)
 			var active: bool = mv["active"] == pidx and mv["winner"] == -1
-			var nxt := ""
-			if pidx == p and not pv.get("ap_next", []).is_empty():
-				var parts := []
-				for m in pv["ap_next"]:
-					parts.append("%+d" % m["n"])
-				nxt = "next turn %s AP" % " ".join(parts)
+			# N batch 16 Nov: no "next turn +1 AP" text; the plate's gem row shows the promised AP as
+			# extra pending sockets (PlayerPlate.next_ap reads pv["ap_next"]).
 			pl.begin_game("%s:%d" % [String(gs.view.get("save_id", "local")), int(gs.view.get("game_no", 0))])
-			pl.update_from(pv, active, pidx == p and not gs.is_spectator(), "", nxt)
+			pl.update_from(pv, active, pidx == p and not gs.is_spectator(), "", "")
 			_update_piles(side, pidx, pv)
 	_render_controls(have)
 	deco.glow_side = -1   # active player is shown by the plate's turn marker, not a table band
@@ -511,7 +507,7 @@ func _render_hidden_own_hand(have: bool) -> void:
 
 
 ## Pile stacks: counts for both players; only your own piles open for inspection. Your Extra
-## pile carries the "can act" ring while a Ritual/Arcane summon is available from it, or a
+## pile carries the "can act" ring while an Arcane/Spirit summon is available from it, or a
 ## Fusion method can be activated now with a summonable Fusion unit (F03-08, `extra_avail`).
 func _update_piles(side: int, pidx: int, pv: Dictionary) -> void:
 	# A spectator opens the bottom player's piles only when that player lets them see their cards.

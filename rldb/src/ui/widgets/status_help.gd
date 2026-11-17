@@ -192,10 +192,10 @@ static func card_tooltip(v: Dictionary, prefix: String = "", suffix: String = ""
 	if parts.is_empty() and String(v.get("text", "")).strip_edges() != "":
 		parts = [{"k": "", "t": String(v["text"])}]
 	for p0 in parts:
-		var p := CardDetailsPanel.split_once_per_turn(p0)
-		var k := String(p.get("k", ""))
-		var c := CardDetailsPanel.timing_color(k)
-		col.add_child(_tip_block(k.to_upper(), String(p.get("t", "")), c, "TipRule"))
+		for p in CardDetailsPanel.split_timings(p0):   # N batch: one block per timing, as the details pane
+			var k := String(p.get("k", ""))
+			var c := CardDetailsPanel.timing_color(k)
+			col.add_child(_tip_block(k.to_upper(), String(p.get("t", "")), c, "TipRule"))
 	if suffix.strip_edges() != "":
 		col.add_child(_tip_label(suffix.strip_edges(), 13, UIStyle.MUTED))
 	return col
@@ -244,7 +244,7 @@ static func _tip_block(caption: String, body: String, col: Color, name: String) 
 		var cap := UIStyle.label(caption, 12, col)
 		cap.add_theme_font_override("font", UIStyle.font_bold())
 		cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		vb.add_child(CardDetailsPanel.caption_icon(cap, caption, 14.0))   # L23: the Evolve section's icon
+		vb.add_child(CardDetailsPanel.caption_icon(cap, caption, 14.0))   # L23: the Transform section's icon
 	var bl := UIStyle.label(body, 14, UIStyle.TEXT, true)
 	bl.custom_minimum_size.x = TIP_W - float(CardDetailsPanel.BLOCK_BAR_W + 2 * UIStyle.sp("sm"))
 	bl.mouse_filter = Control.MOUSE_FILTER_IGNORE

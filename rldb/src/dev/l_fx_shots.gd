@@ -133,7 +133,7 @@ func _mode_cards() -> void:
 		w.position = Vector2(x, y)
 		bg.add_child(w)
 		x += w.size.x + 22.0
-	# A Defense (rotated) field unit, then the Fusion / Ritual / Arcane gems on field and tall cards.
+	# A Defense (rotated) field unit, then the Fusion / Arcane / Spirit gems on field and tall cards.
 	var dv := _view(UNITS[2], "unit", {"poison": 1}, 0, 18, 44)
 	var dw := CardWidget.new()
 	dw.auto_hover = false

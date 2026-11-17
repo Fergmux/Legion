@@ -4,7 +4,7 @@ extends "res://src/dev/f02_driver.gd"
 ##   godot --path rldb -- --duelctl-shots=<absolute dir>
 ## Plays a local match through the real UI with pointer events (the F02 driver's helpers): the
 ## Sacrifice Unit and Trap Prompts controls under the plate (J11 / J6), the card row without
-## Sacrifice, a Paralysed unit's row without a stance change (J25), the single Ritual Summon
+## Sacrifice, a Paralysed unit's row without a stance change (J25), the single Arcane Summon
 ## button and its card select tray (J14), no Trap prompt without a usable Trap (J6) and a full hand beside the
 ## controls. Writes PNG screenshots and `duel_controls_report.json`, then quits.
 
@@ -45,7 +45,7 @@ func _stage_controls() -> void:
 	o = 1 - a
 	uids["water"] = _put(a, 1, 0, "atk")                 # Basic Mage (Water)
 	uids["fire"] = _put(a, 110, 1, "atk", 14)            # Basic Mage (Fire), the attacker later
-	uids["beast"] = _put(a, BASIC_BEAST, 2, "atk")       # 3 Runes: Ritual Summon
+	uids["beast"] = _put(a, BASIC_BEAST, 2, "atk")       # 3 Runes: Arcane Summon
 	m.apply_status(uids["beast"], "rune", 3)
 	uids["para"] = _put(a, 1, 4, "atk")                  # Paralysed
 	m.apply_status(uids["para"], "paralyse", 2)
@@ -77,7 +77,7 @@ func _before_steps() -> void:
 	await _move(Vector2(700, 470))
 	await _wait(0.3)
 	await _shot("before_01_board")
-	for k in [["water", 0, "before_03_row_with_sacrifice"], ["para", 4, "before_04_paralysed_row_with_stance"], ["beast", 2, "before_05_ritual_button_names_the_unit"]]:
+	for k in [["water", 0, "before_03_row_with_sacrifice"], ["para", 4, "before_04_paralysed_row_with_stance"], ["beast", 2, "before_05_arcane_button_names_the_unit"]]:
 		await _click(_slot_rect(a, "unit", int(k[1])).get_center())
 		await _wait(0.5)
 		print("before row %s: %s" % [k[0], _row_labels()])
@@ -121,19 +121,19 @@ func _controls_steps() -> void:
 	await _move(Vector2(1000, 470))
 	await _wait(0.3)
 	await _shot("04_paralysed_row_no_stance")
-	# J14: one Ritual Summon button, then the card select tray.
+	# J14: one Arcane Summon button, then the card select tray.
 	await _click(_slot_rect(a, "unit", 2).get_center())
 	await _wait(0.4)
 	labs = _row_labels()
-	_check("J14 one 'Ritual Summon' button", labs.count("Ritual Summon") == 1 and not labs.any(func(t): return String(t).begins_with("Ritual:")), str(labs))
-	await _shot("05_ritual_summon_button")
-	await _click_row("Ritual Summon")
+	_check("J14 one 'Arcane Summon' button", labs.count("Arcane Summon") == 1 and not labs.any(func(t): return String(t).begins_with("Arcane:")), str(labs))
+	await _shot("05_arcane_summon_button")
+	await _click_row("Arcane Summon")
 	await _wait(0.6)
-	_check("J14 tray asks which Ritual unit", m.pending.get("kind", "") == "select" and m.pending.get("options", []).size() == 2 and _tray_widgets().size() == 2,
+	_check("J14 tray asks which Arcane unit", m.pending.get("kind", "") == "select" and m.pending.get("options", []).size() == 2 and _tray_widgets().size() == 2,
 		"%s %d" % [m.pending.get("kind", ""), _tray_widgets().size()])
 	await _move(Vector2(700, 470))
 	await _wait(0.3)
-	await _shot("06_ritual_tray_two_targets")
+	await _shot("06_arcane_tray_two_targets")
 	await _key(KEY_ESCAPE)
 	await _wait(0.4)
 	_check("J14 Esc cancels the pick", m.pending.is_empty() and m.cards[uids["beast"]]["zone"] == "unit")

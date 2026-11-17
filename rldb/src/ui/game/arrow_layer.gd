@@ -14,6 +14,9 @@ var on: bool = false
 var col: Color = UIStyle.TARGET
 ## Combat-preview verdict shown as a shape at the arrowhead ("good" ✓, "bad" ✕, "neutral" =).
 var verdict: String = ""
+## N batch: more arrow ends (global, like `b`) from the same start `a`: an enemy effect's other
+## chosen targets, shown while I decide a Trap response. Empty for every other arrow.
+var extra: Array = []
 
 const HEAD := 22.0
 const SAMPLES := 48
@@ -30,6 +33,15 @@ func _at(t: float, c: Vector2) -> Vector2:
 func _draw() -> void:
 	if not on:
 		return
+	var b0 := b
+	for e in [b0] + extra:
+		b = e
+		_draw_one()
+	b = b0
+
+
+## One arrow from `a` to `b`.
+func _draw_one() -> void:
 	var d := b - a
 	var length := d.length()
 	if length < 24.0:
