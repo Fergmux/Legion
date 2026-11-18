@@ -6,7 +6,7 @@ Read this first after compaction/crash.
 - Authority for rules: `design/decision-register-answers.md` (user answers) + C-03/C-04 in `design/decision-register.md`.
 - Playtest items: `design/playtest-improvements.md` (I-01..I-03 implemented, evidence recorded).
 - Godot root `legion/`; Godot 4.7.2 (upgraded 2026-11-09 from 4.6.1). Exe `~/Downloads/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe` (this PC: user Fergus; older notes say fergm). Python 3.13 at `~/AppData/Local/Programs/Python/Python313/python.exe`.
-- Branch `build/legion-game` (never pushed). Latest: see `git log` (F02 pass after ace0329).
+- Branch `build/rldb-game` (never pushed). Latest: see `git log` (F02 pass after ace0329).
 - Settings (project.yaml): rigor full, review full, team studio, qa full, multiplayer true, testing.strict all true.
 - Latest work: `design/playtest-feedback-02.md` implemented; checklist `production/stories/playtest-feedback-02.md`; live driver `-- --f02-shots=<dir>`.
 - Tests: 392 GdUnit4, all passing (`-a res://tests`, no `-d`). Perf probe: `tests/perf/perf_run.gd` (windowed).

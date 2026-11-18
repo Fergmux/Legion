@@ -281,3 +281,15 @@ func test_card_back_section_shows_a_tile_for_every_back() -> void:
 	assert_bool((cp.find_child("TablePage", true, false) as Control).visible).is_false()
 	assert_int(cp.back_tiles.size()).is_equal(Customisation.CARD_BACKS.size())
 	assert_object(cp.find_child("ComingSoon", true, false)).is_null()
+
+
+func test_host_game_panel_has_no_steam_login_line() -> void:
+	# Arrange: owner, 18 Nov: the menu foot already says who is logged in.
+	var mm := _menu()
+	# Act
+	var p: Control = auto_free(mm._leaf_panel("host_online"))
+	# Assert
+	var texts := p.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	assert_array(texts).not_contains([SteamBridge.describe()])
+	for t in texts:
+		assert_str(String(t)).not_contains("Logged in")

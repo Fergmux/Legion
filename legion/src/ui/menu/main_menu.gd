@@ -774,7 +774,7 @@ func _leaf_panel(target: String) -> Control:
 					func(on): _options.series["public_lobby"] = on)
 			pub.tooltip_text = "Off: friends-only, joined by invite. On: also visible under Join game."
 			pv[1].add_child(pub)
-			pv[1].add_child(UIStyle.label(SteamBridge.describe(), 14, UIStyle.TEXT_DIM, true))
+			# Owner, 18 Nov: no "Logged in as" line here; the menu foot already shows it.
 			_start_button(pv[1], "Host", steam_host_requested.emit)
 		"tutorial":
 			pv = _leaf(target, "Tutorial", "Guided lessons on a prepared board against a scripted Rival. Nothing is saved.")
