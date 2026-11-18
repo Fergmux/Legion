@@ -4,7 +4,7 @@
     python -I tools/publish_github.py release            # sync, then release the current builds as v<version>
     python -I tools/publish_github.py release --clobber  # replace the assets of an existing v<version>
 
-sync: makes a throwaway hardlinked bare clone of this repo with only `main` and `build/legion-game`,
+sync: makes a throwaway hardlinked bare clone of this repo with only `main` and `build/rldb-game`,
 strips `production/qa/evidence/` from all history with git-filter-repo (5.9 GB of screenshots; GitHub
 takes at most 2 GB per push), and pushes both branches. The filter is deterministic, so every sync
 re-creates the same commits and the push is a fast-forward; it is never forced. Commit hashes on
@@ -13,7 +13,7 @@ GitHub therefore differ from local ones.
 release: zips the playtest build (build/windows -> build/Legion-friends.zip) and the dev build
 (build/windows-dev -> build/Legion-dev.zip), adds the macOS build (build/macos/Legion-macos.zip, already a
 zip, exported by tools/export_all.py) as a third asset, and creates the GitHub release
-v<config/version> at the tip of build/legion-game. Builds must have been exported first; this never
+v<config/version> at the tip of build/rldb-game. Builds must have been exported first; this never
 exports. A missing or unreadable macOS zip is a warning (the release goes out without it); a
 missing Windows build is an error.
 
@@ -31,8 +31,8 @@ import zipfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "Fergmux/Legion"
 REMOTE = "https://github.com/%s.git" % REPO
-BRANCHES = ["main", "build/legion-game"]
-RELEASE_BRANCH = "build/legion-game"
+BRANCHES = ["main", "build/rldb-game"]
+RELEASE_BRANCH = "build/rldb-game"
 STRIP_PATHS = ["production/qa/evidence/"]
 MIRROR = os.path.join(os.path.dirname(ROOT), ".legion-github-mirror")
 GH_CANDIDATES = [shutil.which("gh") or "", r"C:\Program Files\GitHub CLI\gh.exe"]
@@ -83,10 +83,21 @@ def version():
     return m.group(1)
 
 
+def missing_branches(root=None):
+    """The BRANCHES that have no local ref in the repo at `root` (default ROOT)."""
+    return [b for b in BRANCHES
+            if git("rev-parse", "--verify", "--quiet", "refs/heads/" + b, cwd=root or ROOT, check=False).returncode != 0]
+
+
 def sync():
     gh = gh_exe()
     run([gh, "auth", "status"], capture=True)
     run([gh, "auth", "setup-git"], capture=True)   # git uses gh's keyring token for github.com
+    # 2026-11-18: the Legion rename once turned build/rldb-game into a branch that does not exist, and
+    # the mirror kept only `main`. Stop before cloning when a published branch is missing.
+    missing = missing_branches()
+    if missing:
+        sys.exit("No local branch %s: fix BRANCHES in tools/publish_github.py." % ", ".join(missing))
     if os.path.exists(MIRROR):
         shutil.rmtree(MIRROR, onerror=lambda f, p, e: (os.chmod(p, 0o700), f(p)))
     # Local clone = hardlinked objects: fast and no extra disk until the filter repacks.

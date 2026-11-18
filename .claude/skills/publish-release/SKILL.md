@@ -17,7 +17,7 @@ releases. All the work is in `tools/publish_github.py`; this skill only adds the
 1. `gh` must be logged in: `"C:\Program Files\GitHub CLI\gh.exe" auth status`. If not, ask the owner to
    run `gh auth login -h github.com -p https -w` in their own terminal. Never ask for or store a token.
 2. Commit what should be public first. `sync` uploads only **committed** history of `main` and
-   `build/legion-game`; it never pushes the working tree or the `worktree-agent-*` branches.
+   `build/rldb-game`; it never pushes the working tree or the `worktree-agent-*` branches.
 3. Scan the commits being added for secrets (service-account JSON, private keys, refresh tokens, API keys
    other than the Firebase web key in `legion/data/telemetry_config.json`, which ships in every build).
    On any hit: stop and tell the owner. Standing rule: no credentials in checked-in files.
@@ -71,7 +71,7 @@ Run it in the background (the filter and upload take a few minutes). What it doe
 - `sync`:
   - takes a throwaway hardlinked clone in `..\.legion-github-mirror`;
   - strips `production/qa/evidence/` from all history (5.9 GB of screenshots that would break GitHub's
-    limits) and pushes `main` + `build/legion-game`;
+    limits) and pushes `main` + `build/rldb-game`;
   - never force-pushes. A refused push means GitHub has commits this PC lacks: stop and ask.
   - Hashes on GitHub differ from the local ones.
 - `release`:
@@ -81,7 +81,7 @@ Run it in the background (the filter and upload take a few minutes). What it doe
   - a missing, corrupt or incomplete macOS zip prints `WARNING ... WITHOUT the macOS build` and the
     release goes out with the two Windows assets; a missing Windows build stops the release;
   - the release notes describe each asset, including how to open the macOS app (below);
-  - syncs, then creates release `v<version>` at the tip of `build/legion-game`, marked latest.
+  - syncs, then creates release `v<version>` at the tip of `build/rldb-game`, marked latest.
 
 ## 3. Report
 
