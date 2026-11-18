@@ -47,7 +47,7 @@ const MENU := {
 	"options": [["Settings", "settings"], ["Customisation", "customisation"], ["Credits", "credits"]],
 }
 ## Top item of the root level for a profile that has not played yet (F04-09); opens lesson 1.
-const PLAY_TUTORIAL_ITEM := ["Play tutorial", "play_tutorial"]
+const PLAY_TUTORIAL_ITEM := ["Tutorial", "play_tutorial"]   # P batch (owner, 18 Nov): one word
 ## Third-party asset credits shown under Credits, and the height of their scroll area.
 const CREDITS_PATH := "res://data/credits.json"
 const CREDITS_H := 430.0
@@ -75,6 +75,10 @@ const BACK_GAP := 16
 ## Hero logo and subtitle (D3, review #1 / #2), and the width of the divider under them.
 const LOGO_SIZE := 88
 const SUBTITLE_SIZE := 14
+## The logo's word and the subtitle under it. P batch (owner, 18 Nov): the subtitle's tracking is
+## fitted so it spans the logo's width (subtitle_spacing()).
+const LOGO_TEXT := "Legion"
+const SUBTITLE_TEXT := "RISE OF THE ARCANE"
 ## Logo baseline to the subtitle's cap tops (review #2).
 const SUBTITLE_GAP := 16.0
 const LOGO_RULE_W := 300.0
@@ -154,7 +158,7 @@ func _build() -> void:
 	col.add_theme_constant_override("separation", 0)
 	add_child(col)
 	# Hero logo (D3, review #1): the T1 gold metal title with its glow and a sweep every 6 s.
-	logo = TitleText.make("Legion", TitleText.Tier.HERO, LOGO_SIZE)
+	logo = TitleText.make(LOGO_TEXT, TitleText.Tier.HERO, LOGO_SIZE)
 	logo.name = "Logo"
 	col.add_child(logo)
 	# Subtitle (review #2): Cinzel 600, +2 px tracking, MUTED with a hard shadow, its cap tops
@@ -165,7 +169,7 @@ func _build() -> void:
 	sub_m.add_theme_constant_override("margin_top", roundi(subtitle_offset()))
 	col.add_child(sub_m)
 	# 2026-11-17: the game is "Legion: Rise of the Arcane" (was RLDB): the logo is the name, the subtitle the rest.
-	var sub := UIStyle.label("RISE OF THE ARCANE", SUBTITLE_SIZE, UIStyle.MUTED)
+	var sub := UIStyle.label(SUBTITLE_TEXT, SUBTITLE_SIZE, UIStyle.MUTED)
 	sub.name = "Subtitle"
 	sub.add_theme_font_override("font", _subtitle_font())
 	sub.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
@@ -213,13 +217,39 @@ static func subtitle_offset() -> float:
 	return SUBTITLE_GAP - lf.get_descent(LOGO_SIZE) - above_caps
 
 
-## Cinzel 600 with +2 px tracking (the menu subtitle).
+## Cinzel 600 with the tracking that makes the subtitle as wide as the logo (subtitle_spacing()).
 static func _subtitle_font() -> FontVariation:
 	if _sub_font == null:
 		_sub_font = FontVariation.new()
 		_sub_font.base_font = UIStyle.font_display(600)
-		_sub_font.spacing_glyph = 2
+		_sub_font.spacing_glyph = subtitle_spacing()
 	return _sub_font
+
+
+## Width (px) of the logo's word at LOGO_SIZE in the HERO title face.
+static func logo_width() -> float:
+	return TitleText.tier_font(TitleText.Tier.HERO).get_string_size(LOGO_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, LOGO_SIZE).x
+
+
+## P batch (owner, 18 Nov): the subtitle's extra px per glyph that make it span the logo's width.
+## The shaped line gets the spacing once per glyph gap (none after the last glyph), so the width
+## grows by length - 1 px per px of tracking; whole px, so it lands within half that of the logo.
+static func subtitle_spacing() -> int:
+	if _sub_plain == null:
+		# Measured on its own, never-respaced variation: the shaper caches by font, so a font
+		# measured and then respaced could report its old width.
+		_sub_plain = FontVariation.new()
+		_sub_plain.base_font = UIStyle.font_display(600)
+	var base := _sub_plain.get_string_size(SUBTITLE_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, SUBTITLE_SIZE).x
+	return maxi(0, roundi((logo_width() - base) / float(SUBTITLE_TEXT.length() - 1)))
+
+
+static var _sub_plain: FontVariation
+
+
+## The subtitle's laid-out width (px) in its fitted font.
+static func subtitle_width() -> float:
+	return _subtitle_font().get_string_size(SUBTITLE_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, SUBTITLE_SIZE).x
 
 
 ## F1 (owner feedback 20 Oct): the status lines at the foot of the menu column. "Logged in as
@@ -356,6 +386,10 @@ func pick(target: String) -> void:
 			StatsDialog.open(self)
 		"play_tutorial":
 			tutorial_requested.emit(0)
+		"join_online":
+			# P batch (owner, 18 Nov): Join game opens the public lobby browser straight away (no
+			# intermediary panel; friends' invites are accepted in the Steam overlay as before).
+			steam_browse_requested.emit()
 		_:
 			_menu_leaf = target
 			for mi in _menu_list.get_children():
@@ -742,10 +776,6 @@ func _leaf_panel(target: String) -> Control:
 			pv[1].add_child(pub)
 			pv[1].add_child(UIStyle.label(SteamBridge.describe(), 14, UIStyle.TEXT_DIM, true))
 			_start_button(pv[1], "Host", steam_host_requested.emit)
-		"join_online":
-			pv = _leaf(target, "Join game", "Accept a friend's invite in the Steam overlay, or browse public lobbies.")
-			pv[1].add_child(UIStyle.label(SteamBridge.describe(), 14, UIStyle.TEXT_DIM, true))
-			_start_button(pv[1], "Browse public lobbies", steam_browse_requested.emit)
 		"tutorial":
 			pv = _leaf(target, "Tutorial", "Guided lessons on a prepared board against a scripted Rival. Nothing is saved.")
 			TutorialMenu.add_lessons(pv[1], tutorial_requested.emit)

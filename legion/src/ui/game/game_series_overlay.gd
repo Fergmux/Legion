@@ -13,6 +13,8 @@ const HERO_CTA_W := 240.0
 ## Card kinds in list order (CardDB.KIND_ORDER, M8).
 const DECK_SORT := CardDB.KIND_ORDER
 const PAUSE_W := 440.0
+## P batch (owner, 18 Nov): width of the deck-locked-in waiting modal.
+const WAIT_W := 560.0
 ## Draft offer: scale of a hovered card, and the row height that leaves room for it.
 const DRAFT_HOVER_SCALE := 1.06
 const DRAFT_CARD_ROOM := 400.0
@@ -189,7 +191,9 @@ func _chrome_h() -> float:
 ## Pause veil: shown while the network match is paused, with the host's claim button.
 func render_pause() -> void:
 	var net: Dictionary = gs.view.get("net", {})
-	var paused: bool = not net.is_empty() and net.get("paused", false)
+	# P batch (owner, 18 Nov): once the series is over nothing can be paused; a player who leaves
+	# then just leaves (no "Match paused" / reconnect veil over the final result).
+	var paused: bool = not net.is_empty() and net.get("paused", false) and String(gs.view.get("stage", "")) != Series.STAGE_OVER
 	var opening := paused and not pause_dim.visible
 	pause_dim.visible = paused
 	GameUi.clear(pause_box)
@@ -311,12 +315,9 @@ func _show_deck() -> void:
 		if not counts.has(c["id"]):
 			order.append(c)
 		counts[c["id"]] = counts.get(c["id"], 0) + 1
-	# M8: catalogue order (kind first, then the card list's order within the kind), like the deck builder.
+	# P batch (owner, 18 Nov): Basic units first, then by cost, like the card list.
 	var rank := CardDB.catalogue_rank()
-	order.sort_custom(func(a, b):
-		var ra: int = rank.get(int(a["id"]), 1 << 30)
-		var rb: int = rank.get(int(b["id"]), 1 << 30)
-		return ra < rb if ra != rb else int(a["id"]) < int(b["id"]))
+	order.sort_custom(func(a, b): return CardBrowser.cost_before(CardDB.get_def(int(a["id"])), CardDB.get_def(int(b["id"])), rank))
 	(pile_popup as HousePanel).set_tag("%d cards" % cards.size())
 	var head := HBoxContainer.new()
 	pile_box.add_child(head)
@@ -389,17 +390,21 @@ func render() -> void:
 		house.appear()
 	gs.hover.clear()
 	var want := Vector2(1000, 800)
-	match stage:
+	# P batch (owner, 18 Nov): the deck-locked-in wait (a finished draft, or a deck chosen) is a
+	# narrow modal, not the full deck-choice width.
+	var key := "decks_wait" if deck_waiting() else stage
+	match key:
 		"decks": want = Vector2(1180, 860)
+		"decks_wait": want = Vector2(WAIT_W, 640)
 		"rewards": want = Vector2(740, 900)
 		"first_player": want = Vector2(660, 640)   # G05: room for the ready plate; fits to content
 		"over": want = Vector2(660, 760)
 	_overlay_max = want
 	# Re-rendering the same stage keeps the current size (no full-size flash); _fit_overlay then
 	# grows or shrinks it to the new content.
-	if stage != _overlay_stage:
+	if key != _overlay_stage:
 		_overlay_want = want
-		_overlay_stage = stage
+		_overlay_stage = key
 	overlay_box.custom_minimum_size = Vector2(_content_w(modal_width()), 0)
 	if stage != "over":
 		overlay_box.add_child(_stage_header(stage))
@@ -421,6 +426,12 @@ func render() -> void:
 		overlay_box.add_child(see)
 	place_modals()
 	_fit_overlay()
+
+
+## P batch: true while this player's deck is locked in and the deck stage waits for the opponent.
+func deck_waiting() -> bool:
+	var view := gs.view
+	return String(view.get("stage", "")) == "decks" and not gs.is_spectator() and bool((view.get("deck_ready", [false, false]) as Array)[gs.me()])
 
 
 ## J9 / J10 (owner, 22 Oct): drops everything the finished game left in hand: the click-selection and its
@@ -451,9 +462,19 @@ func _stage_header(stage: String) -> Control:
 		sc.add_theme_font_override("font", UIStyle.font_display(700))
 		return sc
 	var spec := gs.is_spectator()
-	v.add_child(score_row(_seat_plate(String(view["names"][0]), gs.me() == 0 and not spec), _seat_plate(String(view["names"][1]), gs.me() == 1 and not spec),
+	var ready := [opponent_ready_tick(0), opponent_ready_tick(1)]
+	v.add_child(score_row(_seat_plate(String(view["names"][0]), gs.me() == 0 and not spec, ready[0]), _seat_plate(String(view["names"][1]), gs.me() == 1 and not spec, ready[1]),
 		view["scores"], score, 14))
 	return v
+
+
+## P batch (owner, 18 Nov): true when seat `seat`'s plate in the header shows a ready tick: the
+## online opponent has pressed Ready up on the next-game screen (it replaced "<name> is ready.").
+## Never against the bot (it is ready at once) nor in hot-seat (one press counts for both).
+func opponent_ready_tick(seat: int) -> bool:
+	if String(gs.view.get("stage", "")) != "first_player" or not gs.is_network() or gs.is_spectator() or seat == gs.me():
+		return false
+	return bool(gs.view.get("next", {}).get("opponent_ready", false))
 
 
 ## "<left> 2 – 1 <right>" with the dash on the row's centre line, whatever the names' or scores'
@@ -485,7 +506,7 @@ static func score_row(left: Control, right: Control, scores: Array, make_label: 
 	return row
 
 
-func _seat_plate(nm: String, mine: bool) -> Control:
+func _seat_plate(nm: String, mine: bool, ready: bool = false) -> Control:
 	var p := PanelContainer.new()
 	var col: Color = UIStyle.GOLD if mine else UIStyle.BRONZE
 	var sb := UIStyle.flat(Color(col.darkened(0.8), 0.95), col, 1, 14)
@@ -502,6 +523,11 @@ func _seat_plate(nm: String, mine: bool) -> Control:
 		yt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(yt)
 	h.add_child(UIStyle.label(nm, 17, UIStyle.TEXT if mine else UIStyle.MUTED, false, true))
+	if ready:
+		var tick := TickMedallion.new(UIStyle.GOOD, 18.0)
+		tick.name = "ReadyTick"
+		tick.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(tick)
 	return p
 
 
@@ -538,25 +564,17 @@ func stage_title(stage: String) -> String:
 	if gs.is_spectator():
 		match stage:
 			"decks": return "The players are choosing decks" if gs.view.get("deck_mode", "starter") == "starter" else "The players are drafting"
-			"rewards": return "Game %d complete — rewards" % gs.view["game_no"]
+			"rewards": return "Rewards"   # P batch (owner, 18 Nov): no "Game N complete"
 			"first_player": return "Next game"
 			"over": return "Series over"
 	if stage == "decks" and decks != null and decks.bot_stage():
 		return "Choose the bot's deck"   # J24: the second deck screen of a bot series
 	match stage:
 		"decks": return "Choose your deck" if gs.view.get("deck_mode", "starter") == "starter" else "Draft your deck"
-		"rewards": return "Game %d complete — rewards" % gs.view["game_no"]
+		"rewards": return "Rewards"   # P batch (owner, 18 Nov): no "Game N complete"
 		"first_player": return "Next game"
 		"over": return "Series over"
 	return ""
-
-
-## "X won game N (turn T, HP a–b)." for the last finished game, or "".
-func game_result_line() -> String:
-	if gs.view.get("history", []).is_empty():
-		return ""
-	var h: Dictionary = gs.view["history"][-1]
-	return "%s won game %d (turn %d, HP %d–%d)." % [gs.view["names"][h["winner"]], h["game"], h["turns"], h["hp"][0], h["hp"][1]]
 
 
 func _render_decks() -> void:
@@ -620,9 +638,11 @@ static func _grouped_names(cards: Array) -> String:
 	return ", ".join(order.map(func(c): return c["name"] + (" ×%d" % n[c["id"]] if n[c["id"]] > 1 else "")))
 
 
-## Who-goes-first stage (G05 / G06), centred: the last game's result, the loser's choice and the
-## Start next duel button. The next duel starts once the loser has chosen and both seats have
-## pressed Start (the bot presses at once; in hot-seat one press counts for both players).
+## Who-goes-first stage (G05 / G06), centred: the loser's choice and the Ready up button. The next
+## duel starts once the loser has chosen and both seats have pressed Ready up (the bot presses at
+## once; in hot-seat one press counts for both players). P batch (owner, 18 Nov): no result line, no
+## "you lost, so you choose" / "<name> chose you to go first" / "<name> is ready" text: the header's
+## score shows the result, and an online opponent's readiness is a tick on their seat plate.
 func _render_first() -> void:
 	var view := gs.view
 	var me := gs.me()
@@ -631,16 +651,11 @@ func _render_first() -> void:
 	var chosen: bool = bool(nx.get("first_chosen", false))
 	var first: int = int(nx.get("first_player", -1))
 	var you_ready: bool = bool(nx.get("you_ready", false))
-	var opp_ready: bool = bool(nx.get("opponent_ready", false))
 	var next_no: int = int(view["game_no"]) + 1
-	var line := game_result_line()
-	if line != "":
-		overlay_box.add_child(_centred(line, 17, UIStyle.TEXT))
 	var chooser: bool = int(view["last_loser"]) == me
 	if chooser:
-		overlay_box.add_child(_centred("You lost the last game, so you choose who goes first in game %d." % next_no, 18, UIStyle.ACCENT))
 		# Design review #60: the two answers are one segmented choice (the chosen one fills gold with a
-		# check mark); Start next duel below is the screen's primary, disabled until a choice is made.
+		# check mark); Ready up below is the screen's primary, disabled until a choice is made.
 		var whos := [me, 1 - me]
 		var sel := -1
 		if chosen:
@@ -658,27 +673,22 @@ func _render_first() -> void:
 		room.add_theme_constant_override("margin_bottom", UIStyle.sp("md"))
 		room.add_child(seg)
 		overlay_box.add_child(room)
-	elif chosen:
-		overlay_box.add_child(_centred(("%s chose you to go first in game %d." if first == me else "%s chose to go first in game %d.") % [opp, next_no], 18, UIStyle.ACCENT))
-	else:
-		overlay_box.add_child(_centred("%s lost the last game and is choosing who goes first in game %d…" % [opp, next_no], 17, UIStyle.TEXT))
 	if you_ready:
-		var sub := "Waiting for %s to choose who goes first…" % opp if not chosen else "Waiting for %s to start the next duel…" % opp
+		var sub := "Waiting for %s to choose who goes first…" % opp if not chosen else "Waiting for %s to ready up…" % opp
 		# N batch (owner, 16 Nov): no status chips on the waiting plate; the line says what it waits for.
 		var wp := WaitPlate.new("Ready for game %d" % next_no, sub, [])
 		wp.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		wp.custom_minimum_size = Vector2(minf(420.0, overlay_box.custom_minimum_size.x), 0)
 		overlay_box.add_child(wp)
 		return
-	var start := UIStyle.primary_button("Start next duel", 19)
+	var start := UIStyle.primary_button("Ready up", 19)
+	start.name = "ReadyUp"
 	start.custom_minimum_size = Vector2(260, 52)
 	start.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	start.disabled = chooser and not chosen
-	start.tooltip_text = "Choose who goes first, then start the next duel." if start.disabled else "Start game %d" % next_no
+	start.tooltip_text = "Choose who goes first" if start.disabled else ""
 	start.pressed.connect(func(): gs.send({"t": "start_duel"}))
 	overlay_box.add_child(start)
-	if opp_ready and not gs.is_hotseat():
-		overlay_box.add_child(_centred("%s is ready." % opp, 15, UIStyle.GOOD))
 
 
 ## A2: what a spectator sees between duels: each player's public progress as a ready plate, the
@@ -708,9 +718,7 @@ func _render_spectator(stage: String) -> void:
 		b.pressed.connect(func(): gs.back_to_menu.emit())
 		overlay_box.add_child(b)
 		return
-	var line := game_result_line()
-	if line != "" and stage != "decks":
-		overlay_box.add_child(_centred(line, 17, UIStyle.TEXT))
+	# P batch (owner, 18 Nov): no "X won game N (turn ...)" line; the header's score shows the result.
 	var title := ""
 	var sub := ""
 	var chips := []

@@ -253,11 +253,17 @@ static func is_unit_view(c: Dictionary) -> bool:
 
 func _build_identity(c: Dictionary) -> void:
 	sections.append("identity")
+	add_child(_name_title(String(c.get("name", "?"))))
+	add_child(identity_badges(c))
+
+
+## P batch B1 (owner, 18 Nov): a card's identity chips at this panel's scale (category, cost, and for a
+## unit its Race and Type with the type icon), in a wrapping row that is not yet added anywhere. The
+## card tooltip shows them too (identity_chips), so a pile row's tooltip reads in the same colours.
+func identity_badges(c: Dictionary) -> HFlowContainer:
 	var cat: String = c.get("category", "unit")
 	var cat_col: Color = UIStyle.CATEGORY_COLORS.get(cat, UIStyle.MUTED)
-	add_child(_name_title(String(c.get("name", "?"))))
 	var badges := _flow()
-	add_child(badges)
 	badges.add_child(_chip(String(UIStyle.CATEGORY_NAMES.get(cat, cat)), cat_col, "", true))
 	if String(c.get("cost_kind", "ap")) != "fusion":   # "Fusion Unit" already says how it is summoned
 		badges.add_child(_cost_chip(c))
@@ -275,6 +281,17 @@ func _build_identity(c: Dictionary) -> void:
 		hb.move_child(icon_slot, 0)
 		icon_slot.add_child(TypeIcons.TypeBadge.new(ty_s, float(_line_h(SMALL))))
 		badges.add_child(chip)
+	return badges
+
+
+## P batch B1: card view `c`'s identity chips (identity_badges) at the compact pile-row scale, for a
+## tooltip or other caller outside a details panel.
+static func identity_chips(c: Dictionary, compact_scale: bool = true) -> HFlowContainer:
+	var p := CardDetailsPanel.new()
+	p.compact = compact_scale
+	var f := p.identity_badges(c)
+	p.free()
+	return f
 
 
 ## Cost badge: "N AP" (with the base cost and an up/down marker when changed) or the cost text.

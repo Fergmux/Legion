@@ -6,12 +6,12 @@ extends VBoxContainer
 ##     is always present: an italic dim line instead of an empty pane;
 ##   - "In your decks": how many copies the player's saved decks hold, across how many decks
 ##     (catalogue), or the "In this deck" copy gems (deck builder, CopyGems: one empty socket, or one gem per copy);
-##   - the card's kind and cost line ("Basic Unit · 1 AP", "Fusion Unit · Fusion summon").
+##   - P batch B9 (owner, 18 Nov): no kind and cost line any more ("Basic Unit · 1 AP"): the details
+##     panel's chips above already say it (kind_text stays for callers).
 ## Pure presentation; reads CardDB and DeckStore only.
 
 var _rules: Control
 var _usage: Label
-var _kind: Label
 var _gems: CopyGems
 
 
@@ -35,9 +35,6 @@ func _init(with_gems: bool = false) -> void:
 		_usage = UIStyle.label("", 14, UIStyle.MUTED, true)
 		_usage.name = "Usage"
 		add_child(_usage)
-	_kind = UIStyle.label("", 13, UIStyle.TEXT_DIM, true)
-	_kind.name = "Kind"
-	add_child(_kind)
 
 
 ## A SECTION-tier header (TitleText) at 14 px with its engraved underline.
@@ -55,7 +52,6 @@ func show_card(id: int, has_rules: bool, copies: int = 0) -> void:
 		_usage.text = usage_text(id, DeckStore.list())
 	if _gems != null:
 		_gems.set_count(copies)
-	_kind.text = kind_text(CardDB.get_def(id) if CardDB.has(id) else {})
 
 
 ## The copies gem row (deck builder; null without it).

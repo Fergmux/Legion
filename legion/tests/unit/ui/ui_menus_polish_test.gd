@@ -44,6 +44,17 @@ func test_settings_form_extra_toggles_and_share_note() -> void:
 	assert_object(info.get_parent()).is_same(f.controls["share"])
 
 
+func test_share_info_tooltip_wraps_at_a_max_width() -> void:
+	# P batch (owner, 18 Nov): the long privacy note wraps instead of running across the screen.
+	var f: SettingsForm = auto_free(SettingsForm.new())
+	var info: Control = f.controls["share_info"]
+	var tip: Label = auto_free(info._make_custom_tooltip(info.tooltip_text))
+	assert_int(tip.autowrap_mode).is_not_equal(TextServer.AUTOWRAP_OFF)
+	assert_float(tip.custom_minimum_size.x).is_equal(SettingsForm.InfoDot.TIP_MAX_W)
+	# A short tip keeps its own width.
+	assert_float(SettingsForm.InfoDot.tip_width("Short")).is_less(SettingsForm.InfoDot.TIP_MAX_W)
+
+
 func test_settings_form_has_mute_when_unfocused() -> void:
 	# Arrange
 	var was := Sfx.mute_when_unfocused()

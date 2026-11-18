@@ -96,8 +96,15 @@ func on_widget_pressed(w: CardWidget) -> void:
 	if opt != -1:
 		pick_option(opt)
 		return
-	if w.view.is_empty() or w.view.get("hidden", false) or not w.view.has("uid"):
-		if not w.view.is_empty() and w.view.get("hidden", false):
+	if w.view.is_empty():
+		# P batch B5 (owner, 18 Nov): an empty zone (or the zone around a card) that answers nothing
+		# is bare table: the click clears the selection and the passive pile list, as GameScreen's.
+		gs.details.dismiss_passive()
+		if gs.pending().is_empty() or not gs.pending().get("mine", false):
+			deselect()
+		return
+	if w.view.get("hidden", false) or not w.view.has("uid"):
+		if w.view.get("hidden", false):
 			deselect()          # face-down/hidden cards are never selectable or inspectable
 		return
 	var uid: int = w.view["uid"]

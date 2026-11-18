@@ -98,6 +98,8 @@ static func card_view(m: MatchEngine, uid: int, viewer: int) -> Dictionary:
 		"cost_kind": df["cost_kind"], "cost_text": m.cost_text(uid),
 		"cost": m.extra_cost(uid) if df["cost_kind"] in ["arcane", "spirit"] else m.current_cost(uid),
 		"printed_cost": df["cost"], "zone": inst["zone"], "slot": inst["slot"], "owner": inst["owner"], "ctl": inst["ctl"],
+		# Owner, 18 Nov: status help reads "your turn" / "your opponent's turn" (null for a spectator).
+		"mine": (int(inst["ctl"]) == viewer) if viewer in [0, 1] else null,
 		"face_up": m.is_face_up(uid), "statuses": inst["st"].duplicate(), "runes": inst["runes"],
 		"text": _rules_text(df), "text_parts": rules_parts(df), "support": CardScripts.support_status(df["id"]), "art": df["art"],
 		"keywords": df["keywords"],

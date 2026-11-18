@@ -534,7 +534,7 @@ func _update_status_tip(at: Vector2) -> void:
 		return
 	var k := text_status_at(at)
 	if k != "":
-		StatusTip.show_for(self, "", get_global_transform_with_canvas() * Rect2(at - Vector2(6, 9), Vector2(12, 18)), StatusHelp.describe(k), k)
+		StatusTip.show_for(self, "", get_global_transform_with_canvas() * Rect2(at - Vector2(6, 9), Vector2(12, 18)), StatusHelp.describe(k, view.get("mine")), k)
 		return
 	StatusTip.hide_for(self)
 

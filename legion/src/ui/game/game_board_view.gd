@@ -588,6 +588,9 @@ func _set_slot(side: int, zone: String, slot: int, pidx: int, have: bool, target
 	ring.set_on((zone_pick or is_cause or sac_ok) and cv != null)
 	if ring.on:
 		ring.queue_redraw()
+	# P batch B5 (owner, 18 Nov): a zone shows the pointer only while a click on it answers my choice;
+	# otherwise it is bare table (a click deselects, GameSelection.on_widget_pressed).
+	bg.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if opt != -1 else Control.CURSOR_ARROW
 	if cv == null:
 		bg.set_marks(opt != -1, chosen, dim)
 		return

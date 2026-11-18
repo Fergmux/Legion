@@ -394,7 +394,8 @@ func validate(p: int, cmd: Dictionary) -> String:
 		"activate_set":
 			if inst["ctl"] != p or inst["zone"] != "backrow": return "Not your set card."
 			if df["category"] != "spell": return "Only set Spells are activated manually; Traps respond to events."
-			if not own_turn_phase: return "Spells are activated during your turn."
+			# Owner, 18 Nov: no Spells in the Battle Phase, set ones included.
+			if not main: return "Spells can only be activated in the Setup or Recovery Phase."
 			return _spell_target_check(p, uid)
 		"power":
 			if inst["owner"] != p or inst["zone"] != "hand": return "Card is not in your Hand."
@@ -707,7 +708,8 @@ func _execute(p: int, cmd: Dictionary) -> void:
 				{"op": "pick_slot", "zone": "unit", "as": "slot", "cancellable": true},
 				_stance_op(cmd),
 				{"op": "tribute", "target": "$mats", "to": "exhaust"},
-				{"op": "place", "target": "self", "slot": "$slot", "stance": "$stance"}] + summon_tail(uid, p), "Spirit summon " + name_of(uid)))
+				{"op": "place", "target": "self", "slot": "$slot", "stance": "$stance"},
+				{"op": "tribute_bonus", "target": "self"}] + summon_tail(uid, p), "Spirit summon " + name_of(uid)))
 	run()
 
 

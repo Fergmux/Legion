@@ -132,6 +132,9 @@ func _splice(f: Dictionary, ops: Array) -> void:
 func _op_mode(f: Dictionary, op: Dictionary) -> int:
 	var ans: Variant = take_answer(f)
 	if ans != null:
+		if int(ans[0]) == MODE_SKIP:
+			add_log("%s: skipped." % f["label"])
+			return R.END
 		if op.has("defer"):               # lead mode: applied later by its mode_apply op
 			f["vars"][op["defer"]] = ans[0]
 		else:
@@ -146,7 +149,14 @@ func _op_mode(f: Dictionary, op: Dictionary) -> int:
 	if opts.is_empty():
 		add_log("%s: no effect can be applied." % f["label"])
 		return R.END
+	# Owner, 18 Nov: an optional effect's choice ("You can apply 1 of any Buff") offers Skip.
+	if op.get("optional", false):
+		opts.append({"v": MODE_SKIP, "label": "Skip"})
 	return ask(f, f["ctl"], "mode", op.get("prompt", "Choose an effect."), opts, 1, 1, op.get("cancellable", false))
+
+
+## The answer value of the Skip option of an optional mode.
+const MODE_SKIP := -1
 
 
 ## False when an option opens with a required target choice that has no legal target.

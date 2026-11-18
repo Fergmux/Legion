@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Post-duel rewards layout (2026-10-20, E1-E3): the result plate fits its line, the chosen-reward
+## Post-duel rewards layout (2026-10-20, E1-E3; P batch 18 Nov: no result plate, Picks heading): the chosen-reward
 ## list is one aligned row per reward with an icon per kind, and option tiles are all one size.
 
 
@@ -7,18 +7,31 @@ func _panels() -> GameRewardPanels:
 	return GameRewardPanels.new(null)
 
 
-func test_result_plate_fits_its_line_instead_of_the_full_width() -> void:
-	var host := VBoxContainer.new()
-	host.custom_minimum_size = Vector2(700, 0)
-	add_child(host)
-	auto_free(host)
-	var plate := _panels()._result_plate("Ben won game 1 (turn 2, HP 60-60).")
-	host.add_child(plate)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	assert_float(plate.size.x).is_less(host.size.x - 100.0)
-	assert_float(plate.size.x).is_greater(100.0)
-	assert_int(plate.size_flags_horizontal).is_equal(Control.SIZE_SHRINK_CENTER)
+func test_picks_heading_sits_above_a_plate_holding_only_the_gems() -> void:
+	# P batch (owner, 18 Nov): "Picks" is a heading over the gem plate, not a caption inside it.
+	var picks: Control = auto_free(_panels()._picks_plate(3, 4))
+	assert_str(picks.name).is_equal("Picks")
+	var head: Label = picks.get_child(0)
+	assert_str(head.name).is_equal("PicksTitle")
+	assert_str(head.text).is_equal("PICKS")
+	var plate: Control = picks.get_child(1)
+	assert_array(plate.find_children("*", "Label", true, false)).is_empty()
+	var pips := plate.find_children("*", "PickPips", true, false)
+	assert_int(pips.size()).is_equal(1)
+	assert_int((pips[0] as PickPips).left).is_equal(3)
+	assert_int((pips[0] as PickPips).total).is_equal(4)
+
+
+func test_remove_list_click_selects_and_a_second_click_deselects() -> void:
+	# P batch (owner, 18 Nov): clicking the selected card again deselects it.
+	var p := _panels()
+	assert_int(p.remove_selection()).is_equal(-1)
+	p.toggle_remove(42)
+	assert_int(p.remove_selection()).is_equal(42)
+	p.toggle_remove(7)
+	assert_int(p.remove_selection()).is_equal(7)
+	p.toggle_remove(7)
+	assert_int(p.remove_selection()).is_equal(-1)
 
 
 func test_reward_kind_reads_each_kind_of_taken_sentence() -> void:

@@ -59,7 +59,6 @@ func render() -> bool:
 	list_area = null
 	_tiles.clear()
 	_draft_rest_sig = 0
-	_opp_chip = null
 	var gs := ov.gs
 	var view := gs.view
 	var p := gs.me()
@@ -421,23 +420,10 @@ func _draft(box: VBoxContainer) -> void:
 	var pips := DraftPips.new(int(dr["step"]), int(dr["total"]))
 	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	strip.add_child(pips)
-	# The draft's progress line is a SECTION header (D3: gold, a hard dark shadow).
+	# Show, don't tell (owner, 18 Nov): the pips are the progress; no "Pick N of 12" line beside them.
 	var complete := bool(dr.get("complete", false))
-	var line := ("All %d cards drafted" % int(dr["total"])) if complete else ("Pick %d of %d" % [mini(int(dr["step"]) + 1, int(dr["total"])), dr["total"]])
-	var pick := UIStyle.label(line, 18, UIStyle.GOLD, false, true)
-	pick.name = "PickLine"
-	pick.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	strip.add_child(pick)
-	var pt := TitleText.apply(pick, TitleText.Tier.SECTION, 18)
-	pt.show_underline = false
-	TitleText.apply(pick, TitleText.Tier.SECTION, 18)
-	var od: Dictionary = dr.get("opponent", {})
-	if not od.is_empty():
-		# M2: kept even once the opponent is ready (hidden then), so update_in_place can follow it.
-		_opp_chip = ov.rewards._info_chip(_opponent_line(), false)
-		_opp_chip.name = "OpponentProgress"
-		_opp_chip.visible = not gs.view["deck_ready"][1 - gs.me()]
-		strip.add_child(_opp_chip)
+	# P batch (owner, 18 Nov): no "<opponent> is drafting (pick N of M)" chip; the right-hand pane
+	# shows the draft (with its card count).
 	_draft_rest_sig = draft_rest_sig()
 	# Category folder tabs (the basic unit at the right of the strip) joined to the pane with the offer.
 	var ft := category_tabs(dr)
@@ -473,7 +459,6 @@ func _draft(box: VBoxContainer) -> void:
 		row.add_child(colm)
 		var cw := CardWidget.new().setup(MatchView.summary_view(c), "big")
 		cw.custom_minimum_size = card
-		cw.tooltip_text = "Pick %s" % c["name"]
 		cw.hover_sound = true
 		cw.hover_cue = "draft_hover"   # M batch: the owner's draft-only hover take
 		var idx: int = i
@@ -721,8 +706,6 @@ static func pick_settle_delay(since_pick_ms: int) -> float:
 ## Signature of what the draft screen shows apart from the opponent's progress (its draft step and
 ## whether it is ready), as last built by _draft; 0 when the draft is not what is shown.
 var _draft_rest_sig: int = 0
-## The "<opponent> is drafting (pick N of M)" chip of the shown draft (null when none).
-var _opp_chip: Control
 
 
 ## M2: signature of the current view's draft screen without the opponent's progress: the series view
@@ -744,31 +727,14 @@ func draft_rest_sig() -> int:
 	return hash([vv, ov.deck_open, tab, held])
 
 
-## M2: when the only change since the draft was built is the opponent's progress, updates its chip
-## in place and returns true, so the offer cards (and a hover on one) are kept. False when the
-## screen must be rebuilt.
+## M2: when the only change since the draft was built is the opponent's progress, returns true so
+## the screen is not rebuilt (the offer cards, and a hover on one, are kept); the draft screen shows
+## nothing of that progress (P batch: its chip is gone). False when the screen must be rebuilt.
 func update_in_place() -> bool:
 	var gs := ov.gs
 	if _draft_rest_sig == 0 or not gs.view.has("draft") or bool(gs.view["deck_ready"][gs.me()]):
 		return false
-	if draft_rest_sig() != _draft_rest_sig:
-		return false
-	var od: Dictionary = gs.view["draft"].get("opponent", {})
-	var have := _opp_chip != null and is_instance_valid(_opp_chip) and _opp_chip.is_inside_tree()
-	if od.is_empty() != (not have):
-		return false
-	if have:
-		_opp_chip.visible = not gs.view["deck_ready"][1 - gs.me()]
-		var labels := _opp_chip.find_children("*", "Label", true, false)
-		if not labels.is_empty():
-			(labels[0] as Label).text = _opponent_line()
-	return true
-
-
-## The opponent progress chip's text: "<name> is drafting (pick N of M)…".
-func _opponent_line() -> String:
-	var gs := ov.gs
-	return "%s %s" % [String(gs.view["names"][1 - gs.me()]), _opponent_doing(gs.view["draft"])]
+	return draft_rest_sig() == _draft_rest_sig
 
 
 ## M2: an offer card under the pointer that got no mouse_entered (built under a still pointer) is

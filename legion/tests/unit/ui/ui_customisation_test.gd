@@ -34,7 +34,7 @@ func test_new_profile_plays_on_the_forest_ruins() -> void:
 	assert_str(Customisation.table_path()).is_equal("res://assets/art/tables/table_ruins.jpg")
 
 
-func test_four_tables_with_names_art_and_thumbnails() -> void:
+func test_every_table_has_a_name_art_and_a_thumbnail() -> void:
 	# Arrange / Act
 	var ids := []
 	for t in Customisation.TABLES:
@@ -44,28 +44,28 @@ func test_four_tables_with_names_art_and_thumbnails() -> void:
 		assert_bool(ResourceLoader.exists(String(t["path"]))).is_true()
 		assert_bool(ResourceLoader.exists(String(t["thumb"]))).is_true()
 		assert_float(float(t["veil"])).is_between(0.0, 0.6)
-	assert_array(ids).contains_exactly(["ruins", "leather", "parquet", "dragon"])
+	assert_array(ids).contains_exactly(["ruins", "volcano", "lagoon", "storm"])
 
 
 func test_picked_table_is_saved_and_read_back() -> void:
 	# Arrange
-	var ok := Customisation.set_table("dragon")
+	var ok := Customisation.set_table("volcano")
 	# Act: a fresh read from the file.
 	Customisation.reset_cache()
 	# Assert
 	assert_bool(ok).is_true()
-	assert_str(Customisation.table_id()).is_equal("dragon")
-	assert_str(Customisation.table_path()).is_equal("res://assets/art/tables/table_dragon.jpg")
+	assert_str(Customisation.table_id()).is_equal("volcano")
+	assert_str(Customisation.table_path()).is_equal("res://assets/art/tables/table_volcano.jpg")
 
 
 func test_unknown_table_is_refused() -> void:
 	# Arrange
-	Customisation.set_table("leather")
+	Customisation.set_table("lagoon")
 	# Act
 	var ok := Customisation.set_table("velvet")
 	# Assert
 	assert_bool(ok).is_false()
-	assert_str(Customisation.table_id()).is_equal("leather")
+	assert_str(Customisation.table_id()).is_equal("lagoon")
 
 
 func test_unknown_saved_table_falls_back_to_the_default() -> void:
@@ -86,13 +86,13 @@ func test_saving_the_table_keeps_the_other_settings() -> void:
 	cf.set_value("privacy", "share_gameplay_stats", false)
 	cf.save(FILE)
 	# Act
-	Customisation.set_table("parquet")
+	Customisation.set_table("storm")
 	# Assert
 	var back := ConfigFile.new()
 	back.load(FILE)
 	assert_bool(bool(back.get_value("ui", "reduce_motion", false))).is_true()
 	assert_bool(bool(back.get_value("privacy", "share_gameplay_stats", true))).is_false()
-	assert_str(String(back.get_value(Customisation.SECTION, "table", ""))).is_equal("parquet")
+	assert_str(String(back.get_value(Customisation.SECTION, "table", ""))).is_equal("storm")
 
 
 func test_automated_runs_use_the_test_file() -> void:
@@ -107,15 +107,15 @@ func test_automated_runs_use_the_test_file() -> void:
 
 func test_board_table_is_the_chosen_art_under_its_veil() -> void:
 	# Arrange
-	Customisation.set_table("leather")
+	Customisation.set_table("lagoon")
 	# Act
 	var bg: Control = auto_free(UIStyle.table_background())
 	# Assert
 	var art := bg.get_child(0) as TextureRect
-	assert_str(art.texture.resource_path).is_equal("res://assets/art/tables/table_leather.jpg")
+	assert_str(art.texture.resource_path).is_equal("res://assets/art/tables/table_lagoon.jpg")
 	var veil := bg.get_child(1) as ColorRect
-	assert_float(veil.color.a).is_equal_approx(float(Customisation.table("leather")["veil"]), 0.001)
-	assert_str(String(bg.name)).is_equal("Table_leather")
+	assert_float(veil.color.a).is_equal_approx(float(Customisation.table("lagoon")["veil"]), 0.001)
+	assert_str(String(bg.name)).is_equal("Table_lagoon")
 
 
 # ---------------------------------------------------------------- the Options menu
@@ -237,13 +237,13 @@ func test_options_sections_share_one_width() -> void:
 
 func test_picker_marks_the_table_in_use() -> void:
 	# Arrange
-	Customisation.set_table("parquet")
+	Customisation.set_table("storm")
 	# Act
 	var cp: CustomisationPanel = auto_free(CustomisationPanel.new())
 	# Assert
 	assert_int(cp.tiles.size()).is_equal(4)
 	for id in cp.tiles:
-		assert_bool((cp.tiles[id] as CustomisationPanel.TableTile).chosen).is_equal(id == "parquet")
+		assert_bool((cp.tiles[id] as CustomisationPanel.TableTile).chosen).is_equal(id == "storm")
 
 
 func test_picking_a_tile_saves_it_and_moves_the_mark() -> void:
@@ -252,11 +252,11 @@ func test_picking_a_tile_saves_it_and_moves_the_mark() -> void:
 	var picked := []
 	cp.table_picked.connect(func(id): picked.append(id))
 	# Act
-	(cp.tiles["dragon"] as Button).pressed.emit()
+	(cp.tiles["volcano"] as Button).pressed.emit()
 	# Assert
-	assert_str(Customisation.table_id()).is_equal("dragon")
-	assert_array(picked).is_equal(["dragon"])
-	assert_bool((cp.tiles["dragon"] as CustomisationPanel.TableTile).chosen).is_true()
+	assert_str(Customisation.table_id()).is_equal("volcano")
+	assert_array(picked).is_equal(["volcano"])
+	assert_bool((cp.tiles["volcano"] as CustomisationPanel.TableTile).chosen).is_true()
 	assert_bool((cp.tiles["ruins"] as CustomisationPanel.TableTile).chosen).is_false()
 
 
@@ -264,7 +264,7 @@ func test_tiles_click_with_the_customise_cue() -> void:
 	# Arrange
 	var cp: CustomisationPanel = auto_free(CustomisationPanel.new())
 	# Act
-	var cue := Sfx.button_sound(cp.tiles["leather"] as Button)
+	var cue := Sfx.button_sound(cp.tiles["lagoon"] as Button)
 	# Assert
 	assert_str(cue).is_equal("customise_select")
 	assert_bool(Sfx.NAMES.has("customise_select")).is_true()

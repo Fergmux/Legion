@@ -163,6 +163,12 @@ func _parse_cmdline() -> void:
 		if a.begins_with("--nbatcha-shots="):   # owner feedback 16 Nov, items A1-A8
 			_run_driver("res://src/dev/n_batch_a_shots.gd", a.split("=", true, 1)[1])
 			return
+		if a.begins_with("--pbatcha-shots="):   # owner feedback 18 Nov, items A1-A12
+			_run_driver("res://src/dev/p_batch_a_shots.gd", a.split("=", true, 1)[1])
+			return
+		if a.begins_with("--pbatchb-shots="):   # owner feedback 18 Nov, items B1-B9
+			_run_driver("res://src/dev/p_batch_b_shots.gd", a.split("=", true, 1)[1])
+			return
 		if a.begins_with("--nbatchb-shots="):   # owner feedback 16 Nov, items B1-B9
 			_run_driver("res://src/dev/n_batch_b_shots.gd", a.split("=", true, 1)[1])
 			return

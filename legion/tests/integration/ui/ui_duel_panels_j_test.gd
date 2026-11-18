@@ -105,18 +105,25 @@ func test_j3_a_pile_row_closed_again_is_no_longer_the_selected_card() -> void:
 	assert_bool(gs.details.empty_art.visible).is_true()
 
 
-func test_j4_hovering_a_card_leaves_the_details_empty() -> void:
+## P batch B4 (owner, 18 Nov) replaces J4's "hover leaves the details empty": with no card selected,
+## the hovered card shows in the details panel, and the empty state returns when the hover ends.
+func test_b4_hovering_a_card_with_nothing_selected_shows_it_until_the_hover_ends() -> void:
 	# Arrange
 	var uid: int = gs.hand.order[0]
 	# Act
 	gs.hover.debug_hover_hand(0)
 	await await_millis(200)
-	# Assert: the hover lifts the card, but the panel keeps its empty state
+	# Assert: the hover lifts the card and the panel shows it
 	assert_bool(gs.hover.hv.is_empty()).is_false()
+	assert_int(gs.details.details_uid()).is_equal(uid)
+	assert_bool(gs.details.empty_art.visible).is_false()
+	assert_str(gs.details.details_view.all_text()).contains(String(gs.details.find_card(uid)["name"]))
+	# Act: the hover ends
+	gs.hover.debug_clear()
+	await await_idle_frame()
+	# Assert
 	assert_int(gs.details.details_uid()).is_equal(-1)
 	assert_bool(gs.details.empty_art.visible).is_true()
-	assert_str(gs.details.details_view.all_text()).not_contains(String(gs.details.find_card(uid)["name"]))
-	gs.hover.debug_clear()
 
 
 func test_j4_clicking_a_card_shows_it_and_hovering_another_keeps_it() -> void:

@@ -1,9 +1,9 @@
 class_name GameHoverController
 extends RefCounted
 ## Hover is inspection only (F02-01): the card under the pointer lifts (and shows its tooltip);
-## it never shows action buttons and never sends anything. J4 (owner, 22 Oct): it no longer
-## shows the card in the details panel, which follows clicks only. Over the selected card's
-## action row, the tray or the banner nothing else hovers.
+## it never shows action buttons and never sends anything. P batch B4 (owner, 18 Nov): with no card
+## selected the hovered card shows in the details panel; a selected card keeps the panel (J4). Over
+## the selected card's action row, the tray or the banner nothing else hovers.
 
 ## Owner feedback 2026-10-18: a hovered hand card grows enough to read its whole text (hand cards
 ## carry no tooltip). 1.75 x 120x180 = 210x315.
@@ -179,7 +179,8 @@ func lift(it: Dictionary) -> void:
 		tw.tween_property(holder, "rotation", 0.0, d)
 
 
-## Makes `it` the hovered item: lifts it (the details panel keeps the clicked card, J4).
+## Makes `it` the hovered item: lifts it and, with nothing selected, shows it in the details panel
+## (B4; a clicked card keeps the panel, J4).
 func set_hover(it: Dictionary) -> void:
 	if not hv.is_empty():
 		unlift(hv)
@@ -187,6 +188,7 @@ func set_hover(it: Dictionary) -> void:
 	_close_at = -1.0
 	(it["w"] as CardWidget).hovered = true
 	lift(it)
+	_refresh_details()
 	# #32: a hand card lifting makes the soft paper-slide cue (rate-limited with every hover cue).
 	if it["kind"] == "hand" and it.get("own", true):
 		Sfx.hover_card()
@@ -235,11 +237,20 @@ func unlift(it: Dictionary) -> void:
 
 ## Ends any hover.
 func clear() -> void:
-	if not hv.is_empty():
+	var had := not hv.is_empty()
+	if had:
 		unlift(hv)
 	hv = {}
 	forced = false
 	_close_at = -1.0
+	if had:
+		_refresh_details()
+
+
+## B4: the details panel follows the hover while nothing is selected.
+func _refresh_details() -> void:
+	if gs.details != null and gs.selected_uid == -1:
+		gs.details.render()
 
 
 ## Dev/test API: force the hover state on a hand card (index).

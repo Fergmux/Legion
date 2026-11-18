@@ -37,14 +37,16 @@ func _row() -> Array:
 	return gs.action_row.stack.get_children().map(func(b): return (b as Button).text)
 
 
-func test_f02_01_hover_shows_no_details_nor_actions_and_sends_nothing() -> void:
+## P batch B4 (owner, 18 Nov): with nothing selected the hover now shows the card's details (J4 had
+## them follow clicks only); it still shows no actions and sends nothing.
+func test_f02_01_hover_shows_no_actions_and_sends_nothing() -> void:
 	var uid := _hand_unit()
 	await await_idle_frame()
 	var idx: int = gs.hand.order.find(uid)
 	var log_n := m.log_entries.size()
 	gs.hover.debug_hover_hand(idx)
 	await await_millis(300)
-	assert_int(gs.details.details_uid()).is_equal(-1)    # J4 (owner, 22 Oct): details follow clicks only
+	assert_int(gs.details.details_uid()).is_equal(uid)   # B4: nothing selected, so the hover shows it
 	assert_object(gs.action_row.stack).is_null()
 	assert_int(gs.debug_sent).is_equal(0)
 	assert_int(m.log_entries.size()).is_equal(log_n)

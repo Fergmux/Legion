@@ -153,7 +153,7 @@ static func draw_icon(pt: CardPainter, c: Vector2, r: float, e: Dictionary) -> v
 	pt.upright_begin(c)
 	draw_token(pt.ci, c, r, String(e["key"]), int(e["n"]), int(e["k"]), true, pt.text_os)
 	pt.upright_end()
-	_hit(pt, c, r, String(e["label"]), StatusHelp.describe(String(e["key"])), String(e["key"]))
+	_hit(pt, c, r, String(e["label"]), StatusHelp.describe(String(e["key"]), pt.view.get("mine")), String(e["key"]))
 
 
 ## The token for `n` stacks of status `key` (kind `k`) on any CanvasItem, centred on `c`, half-size
@@ -202,7 +202,7 @@ static func _more_token(pt: CardPainter, c: Vector2, r: float, more: int, rest: 
 	pt.ci.draw_circle(c, r - maxf(1.0, r * 0.13), TOKEN, true, -1.0, true)
 	pt.text_c(UIStyle.font_bold(), "+%d" % more, c, maxi(CardPainter.MIN_FS, roundi(r * 1.05)), UIStyle.TEXT)
 	pt.upright_end()
-	_hit(pt, c, r, "\n".join(rest.map(func(e): return e["label"])), "\n".join(rest.map(func(e): return StatusHelp.describe(String(e["key"])))))
+	_hit(pt, c, r, "\n".join(rest.map(func(e): return e["label"])), "\n".join(rest.map(func(e): return StatusHelp.describe(String(e["key"]), pt.view.get("mine")))))
 
 
 static func _count_badge(ci: CanvasItem, c: Vector2, r: float, txt: String, rim: Color, text_os: float) -> void:

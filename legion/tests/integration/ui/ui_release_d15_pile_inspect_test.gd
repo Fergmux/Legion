@@ -43,13 +43,15 @@ func _buttons(n: Node, out: Array) -> void:
 		_buttons(c, out)
 
 
-func test_pile_row_has_no_inspect_button_and_its_tooltip_names_right_click() -> void:
+## P batch B1 (owner, 18 Nov): no "Right-click to inspect" line in the tooltip either (show, don't tell).
+func test_pile_row_has_no_inspect_button_and_no_right_click_hint() -> void:
 	var row := await _open_spent()
 	assert_object(row).is_not_null()
 	var texts := []
 	_buttons(row, texts)
 	assert_array(texts).not_contains(["Inspect"])
-	assert_str(row.tooltip_text).contains("Right-click to inspect")
+	assert_str(row.tooltip_text).is_not_empty()
+	assert_str(row.tooltip_text).not_contains("Right-click")
 
 
 ## Design review #91: a pile row is a compact summary (name, Type, "ATK / DEF"). J3 (owner, 22 Oct):

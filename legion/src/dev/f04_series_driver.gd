@@ -709,7 +709,7 @@ func _g02_toggle_in_place(area: ScrollArea) -> void:
 ## Start next duel button (enabled once chosen) and the three-choice leave dialog.
 func _g01_g05_hotseat(loser: int) -> void:
 	var gs: GameScreen = main.screen
-	var start := _overlay_button(gs, "Start next duel")
+	var start := _overlay_button(gs, "Ready up")
 	_check("G05 Start next duel waits for the loser's choice", start != null and start.disabled)
 	var mine := _overlay_button(gs, "I go first")
 	_check("G06 the choice buttons are centred in the modal", mine != null and absf(mine.get_parent().get_global_rect().get_center().x - gs.overlays.overlay.get_global_rect().get_center().x) < 4.0)
@@ -726,7 +726,7 @@ func _g01_g05_hotseat(loser: int) -> void:
 	if d != null:
 		d.press("Keep playing")
 	await _frames(4)
-	start = _overlay_button(gs, "Start next duel")
+	start = _overlay_button(gs, "Ready up")
 	_check("G05 Start next duel is enabled after the choice", start != null and not start.disabled)
 
 

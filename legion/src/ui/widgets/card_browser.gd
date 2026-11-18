@@ -57,6 +57,9 @@ const SORT_OPTIONS := [["Catalogue order", "index"], ["Name", "name"], ["Cost", 
 var footer_h: int = 0
 ## Offer the sort selector (the catalogue screen; the deck builder keeps catalogue order).
 var with_sort: bool = false
+## P batch B8: the sort the selector starts on and returns to on clear_filters() (a SORT_OPTIONS key;
+## set before build()). The card list starts on "cost" (Basics first, then by cost).
+var default_sort: String = "index"
 ## Currently selected card id (-1 = none).
 var selected_id: int = -1
 
@@ -178,16 +181,30 @@ static func sort_before(a: Dictionary, b: Dictionary, mode: String, index_of: Di
 			if na != nb:
 				return na < nb
 		"cost":
-			var ca: float = float(a["cost"]) if a["cost_kind"] == "ap" and a["cost"] != null else 1000.0
-			var cb: float = float(b["cost"]) if b["cost_kind"] == "ap" and b["cost"] != null else 1000.0
-			if ca != cb:
-				return ca < cb
+			return cost_before(a, b, index_of)
 		"atk", "def":
 			var va: float = float(a[mode]) if a.get(mode) != null else -1.0
 			var vb: float = float(b[mode]) if b.get(mode) != null else -1.0
 			if va != vb:
 				return va > vb
 	return ia < ib
+
+
+## P batch B8 (owner, 18 Nov): the cost order of card defs (or summaries with "category", "cost_kind"
+## and "cost"): Basic units first, then by AP cost (Fusion / Arcane / Spirit costs last), ties in
+## `index_of` order (card id -> catalogue position). Shared by the card list and the series deck viewer.
+static func cost_before(a: Dictionary, b: Dictionary, index_of: Dictionary) -> bool:
+	var ba := String(a.get("category", "")) == "basic_unit"
+	var bb := String(b.get("category", "")) == "basic_unit"
+	if ba != bb:
+		return ba
+	var ca: float = float(a["cost"]) if String(a.get("cost_kind", "")) == "ap" and a.get("cost") != null else 1000.0
+	var cb: float = float(b["cost"]) if String(b.get("cost_kind", "")) == "ap" and b.get("cost") != null else 1000.0
+	if ca != cb:
+		return ca < cb
+	var ia: int = index_of.get(int(a["id"]), 1 << 30)
+	var ib: int = index_of.get(int(b["id"]), 1 << 30)
+	return ia < ib if ia != ib else int(a["id"]) < int(b["id"])
 
 
 ## Card id -> position in canonical catalogue order (CardDB.collectible(): L23, no transformation-only forms).
@@ -214,7 +231,17 @@ func clear_filters() -> void:
 	for o in [cat_opt, type_opt, race_opt, cost_opt, sort_opt]:
 		if o != null:
 			o.select(0)
+	_select_default_sort()
 	refresh()
+
+
+## Puts the sort selector on `default_sort` (B8).
+func _select_default_sort() -> void:
+	if sort_opt == null:
+		return
+	for i in sort_opt.item_count:
+		if String(sort_opt.get_item_metadata(i)) == default_sort:
+			sort_opt.select(i)
 
 
 ## Number of cards currently shown.
@@ -402,6 +429,7 @@ func _build_filters() -> void:
 			sort_opt.add_item(c[0])
 			sort_opt.set_item_metadata(sort_opt.item_count - 1, c[1])
 		sort_opt.tooltip_text = "Sort order"
+		_select_default_sort()
 		opts.append(sort_opt)
 	for o in opts:
 		o.item_selected.connect(func(_i): refresh())

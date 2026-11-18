@@ -347,6 +347,9 @@ class HouseCheck extends CheckBox:
 ## (the statistics-sharing privacy note). It brightens on hover and shows the house tooltip.
 class InfoDot extends Control:
 	const PX := 18.0
+	## P batch (owner, 18 Nov): the tooltip wraps at this width (px) instead of one long line.
+	const TIP_MAX_W := 360.0
+	const TIP_PX := 15
 
 	func _init(tip: String = "") -> void:
 		tooltip_text = tip
@@ -355,6 +358,17 @@ class InfoDot extends Control:
 		mouse_default_cursor_shape = Control.CURSOR_HELP
 		mouse_entered.connect(queue_redraw)
 		mouse_exited.connect(queue_redraw)
+
+	## The house tooltip's text, wrapped at TIP_MAX_W (narrower when the text is short).
+	func _make_custom_tooltip(for_text: String) -> Object:
+		var l := UIStyle.label(for_text, TIP_PX, UIStyle.TEXT, true)
+		l.name = "InfoTip"
+		l.custom_minimum_size.x = tip_width(for_text)
+		return l
+
+	## Width of the tooltip for `text`: its one-line width, at most TIP_MAX_W.
+	static func tip_width(text: String) -> float:
+		return minf(TIP_MAX_W, UIStyle.font_body().get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, TIP_PX).x + 2.0)
 
 	func _draw() -> void:
 		var hov := get_global_rect().has_point(get_global_mouse_position())

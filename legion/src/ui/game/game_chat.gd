@@ -71,10 +71,23 @@ func _init(screen: GameScreen) -> void:
 ## Builds the Chat button (into the top strip row, before Menu), its badge and preview, and the
 ## hidden popover.
 func build(row: HBoxContainer, before: Control) -> void:
-	button = UIStyle.button("Chat", 13)
+	# P batch B6 (owner, 18 Nov): an icon button (the speech-bubble ChatGlyph), no "Chat" text, in the
+	# Menu button's style; the tooltip names it.
+	button = UIStyle.secondary_button("", 15)
 	button.name = "ChatButton"
-	button.custom_minimum_size = Vector2(76, 30)
-	button.tooltip_text = "Talk to everyone at this table"
+	button.custom_minimum_size = GameMenu.MENU_BUTTON
+	button.tooltip_text = "Chat"
+	var glyph := ChatGlyph.new(22.0)
+	glyph.name = "ChatIcon"
+	glyph.col = UIStyle.GOLD
+	glyph.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	glyph.offset_left = -11.0
+	glyph.offset_top = -11.0
+	glyph.offset_right = 11.0
+	glyph.offset_bottom = 11.0
+	button.add_child(glyph)
+	button.mouse_entered.connect(func(): glyph.col = UIStyle.GOLD_HI)
+	button.mouse_exited.connect(func(): glyph.col = UIStyle.GOLD)
 	button.visible = false
 	button.pressed.connect(toggle)
 	row.add_child(button)

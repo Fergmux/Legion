@@ -112,7 +112,7 @@ func test_unknown_saved_back_falls_back_to_the_default() -> void:
 
 func test_saving_the_back_keeps_the_table_and_other_sections() -> void:
 	# Arrange
-	Customisation.set_table("parquet")
+	Customisation.set_table("storm")
 	var cf := ConfigFile.new()
 	cf.load(FILE)
 	cf.set_value("ui", "reduce_motion", true)
@@ -123,7 +123,7 @@ func test_saving_the_back_keeps_the_table_and_other_sections() -> void:
 	var back := ConfigFile.new()
 	back.load(FILE)
 	assert_str(String(back.get_value(Customisation.SECTION, "card_back", ""))).is_equal("sun")
-	assert_str(String(back.get_value(Customisation.SECTION, "table", ""))).is_equal("parquet")
+	assert_str(String(back.get_value(Customisation.SECTION, "table", ""))).is_equal("storm")
 	assert_bool(bool(back.get_value("ui", "reduce_motion", false))).is_true()
 
 

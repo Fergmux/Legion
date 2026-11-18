@@ -108,7 +108,7 @@ func _check_play_tutorial_entry() -> void:
 	main._show_menu()
 	await _wait(0.6)
 	var first := _first_item(main.menu)
-	_check("fresh profile: Play tutorial is the top menu item", first != null and first.label_text == "Play tutorial")
+	_check("fresh profile: Play tutorial is the top menu item", first != null and first.label_text == MainMenu.PLAY_TUTORIAL_ITEM[0])
 	await _shot("menu_play_tutorial")
 	_check("scripted run does not persist the has-played flag", not PlayerProgress.persist)
 	if first != null:
@@ -119,7 +119,7 @@ func _check_play_tutorial_entry() -> void:
 		await _click(_rect(_overlay().exit_btn).get_center())
 		await _wait(1.5)
 		var again := _first_item(main.menu)
-		_check("after the tutorial the menu no longer offers Play tutorial", again == null or again.label_text != "Play tutorial")
+		_check("after the tutorial the menu no longer offers Play tutorial", again == null or again.label_text != MainMenu.PLAY_TUTORIAL_ITEM[0])
 	SeriesStore.DIR = real_dir
 	PlayerProgress.reset_cache()
 	main._show_menu()

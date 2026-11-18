@@ -163,6 +163,14 @@ func _exit_tree() -> void:
 		SteamBridge.steam().leaveLobby(lobby_id)
 
 
+## P batch: true once the series has a final result (host: its Series; client: the last view).
+## A disconnect then pauses nothing and starts no reconnect.
+func series_over() -> bool:
+	if is_host:
+		return series != null and series.stage == Series.STAGE_OVER
+	return not local_seat.last_view.is_empty() and String(local_seat.last_view.get("stage", "")) == Series.STAGE_OVER
+
+
 ## True while this session is part of a live series (used to confirm before leaving).
 func is_active() -> bool:
 	if is_host:
@@ -381,6 +389,12 @@ func _on_peer_disconnected(id: int) -> void:
 		return
 	if is_host and id == remote_peer:
 		remote_peer = 0
+		if series_over():
+			# P batch (owner, 18 Nov): after the series nothing is paused and nobody is waited for;
+			# the opponent simply left.
+			_status("Your opponent left.")
+			_broadcast()
+			return
 		paused = true
 		_disconnected_at = Time.get_ticks_msec()
 		_claim_tick.start()
@@ -406,6 +420,15 @@ func _on_connection_failed() -> void:
 
 
 func _on_server_disconnected() -> void:
+	if series_over():
+		# P batch (owner, 18 Nov): the host left (or the link dropped) after the series: there is
+		# nothing to reconnect to or wait for; the final result stays and the player leaves freely.
+		host_gone = true
+		_reconnect_timer.stop()
+		_watchdog.stop()
+		api.multiplayer_peer = null
+		_status("Your opponent left.")
+		return
 	if host_suspended:
 		# G01: the host saved and left on purpose; there is nothing to reconnect to.
 		host_gone = true
@@ -740,6 +763,11 @@ func _broadcast() -> void:
 func _net_info(seat: int) -> Dictionary:
 	var connected := remote_peer != 0
 	var msg := ""
+	if series_over():
+		# P batch: after the series an absent opponent pauses nothing and needs no message.
+		return {"paused": false, "opponent_connected": connected, "message": "",
+			"transport": transport, "is_host": seat == HOST_SEAT, "lobby": lobby_id, "claim_in": -1,
+			"suspended": host_suspended and seat == CLIENT_SEAT, "spectators": spectator_list(seat)}
 	if not connected:
 		msg = "Opponent disconnected — match paused, waiting for them to reconnect." if opponent_ever_joined else "Waiting for an opponent to join…"
 		if opponent_suspended:
@@ -896,7 +924,7 @@ func _send_spectator_view(peer: int) -> void:
 	var seat: int = sp["follow"]
 	var allowed: bool = spectator_allow[seat].has(sp["id"])
 	var v := series.spectator_view(seat, seat if allowed else -1)
-	var away := remote_peer == 0 and opponent_ever_joined
+	var away := remote_peer == 0 and opponent_ever_joined and not series_over()
 	v["net"] = {"spectator": true, "spec_id": sp["id"], "follow": seat, "allowed": allowed,
 		"allowed_by": [spectator_allow[0].has(sp["id"]), spectator_allow[1].has(sp["id"])],
 		"paused": away, "opponent_connected": remote_peer != 0, "transport": transport, "is_host": false,

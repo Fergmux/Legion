@@ -10,10 +10,11 @@ extends RefCounted
 ## drivers: the runs where DeckStore uses its TEST path) read and write TEST_PATH instead, so a
 ## test never changes the player's table.
 ##
-##     Customisation.set_table("leather")
+##     Customisation.set_table("volcano")
 ##     var bg := UIStyle.table_background()   # the chosen table, with its veil
 
-## The tables, in picker order. `veil`: the dark veil over the art on the board (0..1) that keeps
+## The tables, in picker order (owner, 18 Nov: forest, fire, water, lightning; the leather, parquet
+## and dragon tables were retired, their art left out of the build). `veil`: the dark veil over the art on the board (0..1) that keeps
 ## zones, cards and text readable on that table; `thumb`: a small copy for the picker.
 ## M batch (owner, 9 Nov: the tables are "a bit distracting"): in a match each table also recedes a
 ## little behind the cards: `recede` is a faint extra black veil over the art (0..1, on top of
@@ -22,12 +23,13 @@ extends RefCounted
 const TABLES := [
 	{"id": "ruins", "name": "Forest Ruins", "blurb": "Moss-grown flagstones in a forgotten grove",
 		"path": "res://assets/art/tables/table_ruins.jpg", "thumb": "res://assets/art/tables/thumbs/table_ruins.jpg", "veil": 0.36, "recede": 0.06, "desat": 0.08},
-	{"id": "leather", "name": "Emerald Leather", "blurb": "Tooled green hide in a brass-cornered frame",
-		"path": "res://assets/art/tables/table_leather.jpg", "thumb": "res://assets/art/tables/thumbs/table_leather.jpg", "veil": 0.1, "recede": 0.1, "desat": 0.12},
-	{"id": "parquet", "name": "Guildhall Parquet", "blurb": "Inlaid oak with bronze rosettes",
-		"path": "res://assets/art/tables/table_parquet.jpg", "thumb": "res://assets/art/tables/thumbs/table_parquet.jpg", "veil": 0.3, "recede": 0.07, "desat": 0.08},
-	{"id": "dragon", "name": "Gilded Dragon", "blurb": "Parquet guarded by golden wyrms",
-		"path": "res://assets/art/tables/table_dragon.jpg", "thumb": "res://assets/art/tables/thumbs/table_dragon.jpg", "veil": 0.3, "recede": 0.09, "desat": 0.14},
+	# P batch (owner, 18 Nov): fire, water and lightning tables.
+	{"id": "volcano", "name": "Scorched Wastes", "blurb": "Ash plains ringed by rivers of lava",
+		"path": "res://assets/art/tables/table_volcano.jpg", "thumb": "res://assets/art/tables/thumbs/table_volcano.jpg", "veil": 0.32, "recede": 0.08, "desat": 0.12},
+	{"id": "lagoon", "name": "Coral Lagoon", "blurb": "Clear shallows over a sandbar, ringed by reef",
+		"path": "res://assets/art/tables/table_lagoon.jpg", "thumb": "res://assets/art/tables/thumbs/table_lagoon.jpg", "veil": 0.42, "recede": 0.1, "desat": 0.16},
+	{"id": "storm", "name": "Storm Summit", "blurb": "A peak above the clouds, struck by lightning",
+		"path": "res://assets/art/tables/table_storm.jpg", "thumb": "res://assets/art/tables/thumbs/table_storm.jpg", "veil": 0.32, "recede": 0.07, "desat": 0.1},
 ]
 ## The table of a new profile (owner, 5 Nov: the "Luxury Fantasy Table Background").
 const DEFAULT_TABLE := "ruins"

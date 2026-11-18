@@ -521,6 +521,12 @@
 					"tests": [
 						"test_c020_courageous_soldier_copies_buffs_and_grows_per_opposing_unit"
 					]
+				},
+				{
+					"file": "res://tests/unit/rules/rules_p_batch_2026_11_18_test.gd",
+					"tests": [
+						"test_c020_the_optional_any_buff_pick_can_be_skipped"
+					]
 				}
 			]
 		},
@@ -1773,7 +1779,7 @@
 				{
 					"file": "res://tests/unit/cards/cards_db_update_2026_10_17_test.gd",
 					"tests": [
-						"test_c069_magentric_exhausted_for_a_spirit_summon_gives_nothing",
+						"test_c069_magentric_exhausted_for_a_spirit_summon_gives_cleanse",
 						"test_c069_magentric_tributed_for_a_fusion_gives_it_one_cleanse",
 						"test_c069_magentric_tributed_for_an_arcane_gives_it_one_cleanse",
 						"test_c069_other_fusion_materials_give_no_tribute_bonus"
@@ -2008,6 +2014,13 @@
 					"file": "res://tests/unit/cards/cards_units_test.gd",
 					"tests": [
 						"test_c077_radablast_gains_rune_when_trap_activates"
+					]
+				},
+				{
+					"file": "res://tests/unit/rules/rules_p_batch_2026_11_18_test.gd",
+					"tests": [
+						"test_c077_radablast_spent_as_spirit_material_gives_the_spirit_infiltrate",
+						"test_c077_radablast_tributed_for_an_arcane_summon_gives_infiltrate"
 					]
 				}
 			]

@@ -1,6 +1,6 @@
 class_name LobbyListPanel
 extends Control
-## "Browse public lobbies": a centred dialog over the dimmed menu. Shows "Searching…" until
+## Join game (P batch: opened straight from the menu item): a centred dialog over the dimmed menu. Shows "Searching…" until
 ## `show_lobbies` gives the results, then a Join button per lobby. Back (or clicking the dim)
 ## closes it and leaves the menu as it was. Frees itself before emitting either choice.
 

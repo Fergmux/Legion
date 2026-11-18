@@ -43,9 +43,12 @@ func test_ambush_stops_when_the_zones_are_full() -> void:
 	assert_int(m.field_units(0).size()).is_equal(6)
 
 
-func test_set_ambush_activated_in_the_battle_phase_asks_each_stance() -> void:
+func test_set_ambush_activated_in_the_recovery_phase_places_units_in_attack() -> void:
+	# Owner, 18 Nov: no Spells in the Battle Phase, so the set Ambush is activated in Recovery, where
+	# (as for any own-turn summon in a main phase) the unit enters in Attack without a stance prompt.
 	var m := TB.make(7, 4)
 	TB.p1_battle(m)
+	assert_str(m.submit(1, {"t": "next_phase"})).is_empty()   # to Recovery
 	for u in m.players[1]["hand"].duplicate():
 		m.move_to_pile(u, "spent")
 	m.players[1]["draw"].clear()
@@ -53,9 +56,9 @@ func test_set_ambush_activated_in_the_battle_phase_asks_each_stance() -> void:
 	var sc := TB.set_card(m, 1, AMBUSH, 0)
 	assert_str(m.submit(1, {"t": "activate_set", "uid": sc})).is_empty()
 	assert_str(TB.choose(m, [TB.slot_label(0)])).is_empty()
-	assert_str(TB.pend_kind(m)).is_equal("stance")
-	assert_str(TB.choose(m, ["Defense"])).is_empty()
-	assert_str(m.cards[a]["stance"]).is_equal("def")
+	assert_str(TB.pend_kind(m)).is_not_equal("stance")
+	assert_str(String(m.cards[a]["zone"])).is_equal("unit")
+	assert_str(m.cards[a]["stance"]).is_equal("atk")
 
 
 func test_bot_answers_each_ambush_zone_prompt() -> void:

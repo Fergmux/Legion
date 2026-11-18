@@ -203,9 +203,15 @@ func show_card_def(id: int) -> void:
 	render()
 
 
-## Card whose details are shown: the clicked (selected) one (J4: never the hovered one), or -1.
+## Card whose details are shown: the clicked (selected) one, else (P batch B4, owner 18 Nov) the
+## hovered one while nothing is selected and no pile list or log card holds the panel, or -1. A
+## selected card stays shown while other cards are hovered (J4).
 func details_uid() -> int:
-	return gs.selected_uid
+	if gs.selected_uid != -1:
+		return gs.selected_uid
+	if pile_zone == "" and log_card.is_empty() and gs.hover != null and not gs.hover.hv.is_empty():
+		return int(gs.hover.hv.get("uid", -1))
+	return -1
 
 
 ## Shows the current card's details (with the reasons its actions are unavailable). An open pile
@@ -345,7 +351,9 @@ func render_pile_list() -> void:
 	pile_scroll.visible = true
 	pile_head.visible = true
 	if drafting:
-		pile_hint.text = "The cards you have drafted so far."
+		# P batch (owner, 18 Nov): the draft pane is enough, with its card count in the title (it
+		# replaced the "<opponent> is drafting" chip); no hint line under it.
+		pile_hint.text = ""
 		details_title.text = "Your draft (%d)" % cards.size()
 	else:
 		pile_hint.text = ""   # N batch (owner, 16 Nov): no hint line at the top of the pile viewer
@@ -424,7 +432,7 @@ func _pile_row(c: Dictionary) -> Control:
 	sb.content_margin_bottom = ROW_PAD - 2
 	row.add_theme_stylebox_override("panel", sb)
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
-	row.tooltip_text = CardWidget.tooltip_for(c) + "\n\nRight-click to inspect"   # D15: no Inspect button
+	row.tooltip_text = CardWidget.tooltip_for(c)   # P batch B1 (owner, 18 Nov): no "Right-click to inspect" line
 	row.set_meta(&"tip_card", c)   # H8: the coloured card tooltip
 	var editable := pile_zone != DRAFT_ZONE   # draft picks are read-only (but can still be inspected)
 	row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND

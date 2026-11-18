@@ -197,7 +197,7 @@ func _run() -> void:
 	await _until(func(): return client.local_seat.last_view.get("next", {}).get("first_chosen", false), 4.0)
 	await _wait(0.6)
 	_check("G05 the first-player choice alone does not start the next duel", host.series.stage == Series.STAGE_FIRST, host.series.stage)
-	var start := _button("Start next duel")
+	var start := _button("Ready up")
 	_check("G05 the client sees Start next duel, enabled", start != null and not start.disabled)
 	if start != null:
 		start.pressed.emit()

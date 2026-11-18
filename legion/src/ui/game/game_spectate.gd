@@ -368,7 +368,7 @@ func _player_row(p: Dictionary) -> Control:
 	elif muted:
 		note = "Muted · chat hidden"
 	elif not gs.is_spectator() and not bool(net.get("opponent_connected", true)):
-		note = "Away · reconnecting"
+		note = "Away · reconnecting" if gs.has_live_series() else "Left"   # P batch: no reconnect after the series
 	elif gs.is_spectator() and bool((net.get("allowed_by", [false, false]) as Array)[seat]):
 		note = "Lets you see their cards"
 	var plate := _plate(me, muted)

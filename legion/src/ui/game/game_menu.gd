@@ -8,8 +8,8 @@ const SETTINGS_W := 400.0
 ## M9 (owner, 9 Nov): the Menu button is an icon (a drawn three-bar glyph, MenuGlyph), square at the
 ## strip's small button height, immediately left of the opponent's plate (PLATE_GAP between them).
 const MENU_BUTTON := Vector2(36, 36)
-## Chat beside it keeps the strip's text-button size (design review #15).
-const CHAT_BUTTON := Vector2(96, 36)
+## P batch B6 (owner, 18 Nov): Chat beside it is an icon button of the same size (was a 96 px text button).
+const CHAT_BUTTON := MENU_BUTTON
 const PLATE_GAP := 12.0
 ## M4 (owner, 9 Nov): the series score sits at the top of the in-game menu. The scoreboard plaque
 ## scales down to fit SERIES_W (px) and fits each name into SERIES_NAME_MAX (px at full size).
@@ -108,7 +108,7 @@ func build_top_strip() -> void:
 	if gs.chat.button != null:
 		gs.chat.button.custom_minimum_size = CHAT_BUTTON   # review #15: the strip's button size, 12 px apart
 		gs.chat.button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		gs.chat.button.add_theme_font_size_override("font_size", 15)
+	gs.appendix.build(row, menu_b)   # B6: the appendix icon between Chat and Menu
 	gs.spectate.build(row, gs.chat.button)
 
 
@@ -308,6 +308,8 @@ func update_conn() -> void:
 	var net: Dictionary = gs.view.get("net", {})
 	if net.is_empty():
 		conn_label.text = ""
+	elif String(gs.view.get("stage", "")) == "over":
+		conn_label.text = ""   # P batch (owner, 18 Nov): after the series a leaving opponent is no news
 	elif net.get("paused", false):
 		conn_label.text = "● Paused"
 	elif not net.get("opponent_connected", true) and not gs.is_spectator():
@@ -354,6 +356,8 @@ func close_popups() -> void:
 		gs.chat.panel.visible = false
 	if gs.spectate.panel != null:
 		gs.spectate.panel.visible = false
+	if gs.appendix.panel != null:
+		gs.appendix.panel.visible = false
 
 
 ## Opens or closes the in-game menu (closes the settings popup).
@@ -364,6 +368,8 @@ func toggle() -> void:
 		gs.chat.panel.visible = false
 	if gs.spectate.panel != null:
 		gs.spectate.panel.visible = false
+	if gs.appendix.panel != null:
+		gs.appendix.panel.visible = false
 	if game_menu.visible and not _closing:
 		close_menu()
 	else:

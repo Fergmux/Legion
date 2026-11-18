@@ -59,9 +59,18 @@ static func key_at(text: String, idx: int) -> String:
 	return ""
 
 
-## The effect of status `key` ("Poison: at the end of its controller's turn ..."), or "".
-static func describe(key: String) -> String:
-	return String(CardDB.STATUS_HELP.get(key, ""))
+## The effect of status `key` ("Poison: at the end of its controller's turn ..."), or "". `mine` (owner,
+## 18 Nov): true when the viewer controls the card, false for the opponent's card: "its controller" then
+## reads "you" / "your opponent". null (a spectator, a pile card) keeps the general wording.
+static func describe(key: String, mine = null) -> String:
+	var t := String(CardDB.STATUS_HELP.get(key, ""))
+	if mine == null:
+		return t
+	if bool(mine):
+		return t.replace("its controller's turn they Heal", "your turn you Heal") \
+			.replace("its controller's turn they take", "your turn you take") \
+			.replace("its controller's turn", "your turn").replace("its controller takes", "you take")
+	return t.replace("its controller's turn", "your opponent's turn").replace("its controller takes", "your opponent takes")
 
 
 ## `bbcode` with each status word outside existing tags and links wrapped in a status link.
@@ -183,11 +192,13 @@ static func card_tooltip(v: Dictionary, prefix: String = "", suffix: String = ""
 	nm.name = "TipName"
 	nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(nm)
-	var kind := tip_kind_line(v)
-	if kind != "":
-		var kl := _tip_label(kind, 13, UIStyle.category_text_color(String(v.get("category", ""))))
-		kl.name = "TipKind"
-		col.add_child(kl)
+	# P batch B1 (owner, 18 Nov): the kind, cost, Race and Type as the details pane's coloured chips
+	# (Type with its icon), not one plain line in the kind colour.
+	var kind := CardDetailsPanel.identity_chips(v, false)   # the details pane's 13 px chips (compact ones read too small)
+	kind.name = "TipKind"
+	kind.custom_minimum_size.x = TIP_W
+	GameUi.ignore_mouse(kind)
+	col.add_child(kind)
 	var parts: Array = v.get("text_parts", [])
 	if parts.is_empty() and String(v.get("text", "")).strip_edges() != "":
 		parts = [{"k": "", "t": String(v["text"])}]

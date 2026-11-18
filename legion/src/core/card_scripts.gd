@@ -306,7 +306,7 @@ static func _build() -> Dictionary:
 		need("u"), st("$u", "debilitate"), {"op": "copy_stats", "from": "$u", "art": true}]),
 		trig("destroyed", [ch({"kind": "unit", "race": "Mage", "column": true}, "u", true, "Apply 1 Eternal to a Mage unit in this column?"), st("$u", "eternal")])]}
 	t[20] = {"on": [trig("summoned", [{"op": "copy_all_buffs"}]), trig("destroyed", [ch({"kind": "unit"}, "u", true, "Apply 1 of any Buff to a unit?"), need("u"),
-			{"op": "mode", "options": ANY_BUFF}])],
+			{"op": "mode", "options": ANY_BUFF, "optional": true}])],
 		"aura": [{"to": "self", "atk": {"count": {"kind": "unit", "side": "opp"}, "mul": 4}, "def": {"count": {"kind": "unit", "side": "opp"}, "mul": 4}}]}
 	# 2026-11-03: every unit the opponent summons (any kind of summon) while Shen is on the Field
 	# permanently loses 10 ATK.

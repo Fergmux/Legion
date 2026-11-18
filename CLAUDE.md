@@ -7,6 +7,20 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 Once the current setup phase is complete, read and apply `rules/08-POST-SETUP-FULL-GAME-BUILD.md` before continuing implementation. If setup is already complete, apply it now without restarting completed work. This updates the earlier minimal-rigor recommendation: use the installed studio skills and focused specialist subagents, with standard rigor where useful, to complete and verify the full game specified in `rules/`. A first playable prototype is a milestone, not the final scope.
 
+## UI text rule: show, don't tell (owner, 2026-11-18)
+
+Applies to every screen, prompt, tooltip and panel in the game (`legion/src/ui/**`):
+
+- **No superfluous plain-text hints.** Do not add captions, sub-lines or tooltips that explain a mechanic the
+  tutorial already teaches, the UI already shows graphically, or the card text already states ("Right-click to
+  inspect", "Your own cards show their actions too", "Free, no AP", "X is drafting...", "Bot is ready").
+- **Graphics over text.** Prefer a visual representation (gems, pips, icons, colour, glow, arrows, badges) to
+  spelled-out text. Never show both: if filled/empty gems show 3 of 4 picks, do not also write "3/4 picks".
+- **No duplicated information.** If the player can already see something somewhere on screen, do not repeat it
+  elsewhere (e.g. a game result already on the scoreboard does not also get a "X won game 1 (turn 7)" line).
+- **Short labels.** Buttons and titles say the action or place in a word or two ("Tutorial", "Rewards", "Ready up").
+- When unsure whether a line of text earns its place, leave it out and mention the choice to the owner.
+
 ## Technology Stack
 
 - **Engine**: [CHOOSE: Godot 4 / Unity / Unreal Engine 5]

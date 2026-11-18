@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## Playtest feedback 08, G01 and G05 on a real match screen. G01: leaving between duels offers
 ## Save / Forfeit / Keep playing, and saving leaves the series resumable without forfeiting it.
-## G05: Start next duel (hot-seat: one press for both players; vs the bot: never blocked).
+## G05: Ready up (was Start next duel; hot-seat: one press for both players; vs the bot: never blocked).
 
 const DIR := "user://test_saves_fb08"
 
@@ -171,18 +171,22 @@ func test_bot_mode_needs_each_seat_and_the_bot_readies_itself() -> void:
 	assert_str(host.series.stage).is_equal(Series.STAGE_GAME)
 
 
-func test_start_next_duel_button_is_centred_and_waits_for_the_choice() -> void:
+func test_ready_up_button_is_centred_and_waits_for_the_choice() -> void:
 	var r: Array = await _screen("first_player", "bot")
 	var gs: GameScreen = r[0]
 	var host: LocalHost = r[1]
 	await await_idle_frame()
-	var start := _button(gs, "Start next duel")
+	# P batch (owner, 18 Nov): the button says "Ready up" (was "Start next duel").
+	var start := _button(gs, "Ready up")
 	assert_object(start).is_not_null()
+	assert_object(_button(gs, "Start next duel")).is_null()
 	assert_bool(start.disabled).is_false()              # seat 0 won: nothing to choose
 	assert_int(start.size_flags_horizontal).is_equal(Control.SIZE_SHRINK_CENTER)
-	var labels: Array = gs.overlays.overlay_box.find_children("*", "Label", true, false).filter(func(l): return (l as Label).text.contains("choosing who goes first"))
-	assert_int(labels.size()).is_equal(1)
-	assert_int(labels[0].horizontal_alignment).is_equal(HORIZONTAL_ALIGNMENT_CENTER)
+	# P batch: no "<name> lost the last game and is choosing who goes first" line, no result line.
+	var labels: Array = gs.overlays.overlay_box.find_children("*", "Label", true, false).filter(func(l):
+		var t := (l as Label).text
+		return t.contains("goes first") or t.contains("won game") or t.ends_with("is ready."))
+	assert_array(labels).is_empty()
 	start.pressed.emit()
 	await await_idle_frame()
 	assert_bool(host.series.duel_ready[0]).is_true()

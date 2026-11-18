@@ -179,8 +179,8 @@ func _op_place_power(f: Dictionary, op: Dictionary) -> int:
 	return R.CONT
 
 
-## Tribute materials for a special summon. Field materials go to Spent and fire
-## tribute triggers; Spent materials (Spirit) are exhausted without field triggers.
+## Tribute materials for a special summon. Field materials go to Spent; Spent materials (Spirit) are
+## exhausted. Both are tributed (owner, 18 Nov): their tribute bonuses and triggers apply.
 ## L19 (2026-11-05): every material has left for its pile before the summoned unit lands, so its On
 ## Summon effects never see one. A Field material's own "If this Unit is Tributed" effects
 ## (tribute_or_sacrifice) are queued here and emitted once the unit has landed (_op_tribute_bonus),
@@ -223,6 +223,18 @@ func _op_tribute(f: Dictionary, op: Dictionary) -> int:
 			add_log("%s exhausts a card from %s as material." % [pname(p), from.capitalize()],
 				{p: "%s exhausts %s from %s as material." % [pname(p), name_of(m), from.capitalize()]})
 			add_fx(mfx)
+			# Owner, 18 Nov: "Tribute now also means spirit summon as well as fusion/arcane": a Spirit
+			# material (exhausted from Spent) is tributed: its tribute bonus and its own "If this Unit is
+			# Tributed" effects apply as for a Field material.
+			if op.get("to", "") == "exhaust":
+				if not f["vars"].has("tribute_events"):
+					f["vars"]["tribute_events"] = []
+				f["vars"]["tribute_events"].append({"self": m, "ctl": p, "player": p, "tribute": true, "debilitated": false})
+				var stb: Dictionary = script_of(m).get("tribute_bonus", {})
+				if not stb.is_empty():
+					if not f["vars"].has("tribute_bonus"):
+						f["vars"]["tribute_bonus"] = []
+					f["vars"]["tribute_bonus"].append({"s": stb["s"], "n": stb["n"], "from": name_of(m)})
 	if op.get("arcane", false) and d(f["src"])["cost"] == null:
 		var n: int = f["vars"]["runes_used"]
 		cards[f["src"]]["runes_used"] = n

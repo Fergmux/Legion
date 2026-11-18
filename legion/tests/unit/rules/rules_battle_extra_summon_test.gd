@@ -44,7 +44,7 @@ func test_set_fusion_spell_is_refused_in_the_battle_phase() -> void:
 	TB.unit(m, 1, BASIC_DRAGON, 2)
 	assert_str(m.validate(1, {"t": "activate_set", "uid": sc})).is_empty()
 	TB.to_battle(m)
-	assert_str(m.validate(1, {"t": "activate_set", "uid": sc})).is_equal(MatchEngine.NO_EXTRA_IN_BATTLE)
+	assert_str(m.validate(1, {"t": "activate_set", "uid": sc})).is_not_empty()   # owner, 18 Nov: no Spell at all in the Battle Phase
 
 
 func test_arcane_summon_is_refused_in_the_battle_phase() -> void:

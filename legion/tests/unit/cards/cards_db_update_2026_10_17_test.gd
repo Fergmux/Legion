@@ -350,7 +350,7 @@ func test_c069_other_fusion_materials_give_no_tribute_bonus() -> void:
 	assert_int(m.status_count(wyrm, "cleanse")).is_equal(0)     # the 2026-11-03 bonus is Cleanse
 
 
-func test_c069_magentric_exhausted_for_a_spirit_summon_gives_nothing() -> void:
+func test_c069_magentric_exhausted_for_a_spirit_summon_gives_cleanse() -> void:
 	var m := TB.make()
 	var mag := TB.card(m, 0, MAGENTRIC, "spent")                 # cost 2
 	var cliff := TB.card(m, 0, 174, "extra")                     # Cliff, 2S since 2026-11-17
@@ -359,7 +359,7 @@ func test_c069_magentric_exhausted_for_a_spirit_summon_gives_nothing() -> void:
 	TB.choose(m, ["Front row, column 1"])
 	assert_str(m.cards[cliff]["zone"]).is_equal("unit")
 	assert_int(m.status_count(cliff, "pierce")).is_equal(0)
-	assert_int(m.status_count(cliff, "cleanse")).is_equal(0)    # the 2026-11-03 bonus is Cleanse
+	assert_int(m.status_count(cliff, "cleanse")).is_equal(1)    # owner, 18 Nov: Spirit materials are Tributes too
 	var df := CardDB.get_def(MAGENTRIC)
 	assert_int(df["atk"]).is_equal(20)                           # 20/20 -> 16/16 on 2026-11-03, 20/16 on 2026-11-10
 	assert_int(df["def"]).is_equal(16)

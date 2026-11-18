@@ -966,6 +966,11 @@ func _render_banner() -> void:
 	# (Pass, No, Skip) always comes last, below the accepting ones (Activate, Yes, Confirm).
 	var row: Control = banner_btns if pick else banner_flow
 	var type_choice := is_type_choice(pd)
+	# P batch B2 (owner, 18 Nov): a choice between statuses (Heretic of the Divine Order, Courageous
+	# Soldier...) gets the Type buttons' treatment in each status's own colour and badge.
+	var status_choice := not type_choice and is_status_choice(pd)
+	if status_choice and not pick:
+		type_choice = true
 	if type_choice and not pick:
 		row = type_grid
 	elif not pick and (String(pd["kind"]) in LIST_KINDS or _has_decline(pd) or String(pd["kind"]) == "stance"):
@@ -979,7 +984,11 @@ func _render_banner() -> void:
 		var label := ("✓ " if chosen else "") + String(o["label"])
 		var decline := is_decline(String(o["label"]))
 		var b: Button
-		if type_choice:
+		if status_choice and status_key_of(String(o["label"])) != "":
+			b = status_button(String(o["label"]), 15)
+			b.set_meta("type_choice", String(o["label"]))
+			b.set_meta("status_choice", status_key_of(String(o["label"])))
+		elif type_choice and not status_choice:
 			b = type_button(String(o["label"]), 15)
 			b.set_meta("type_choice", String(o["label"]))
 		elif pd["kind"] == "confirm" and String(o["label"]) == MatchEngine.SACRIFICE_YES:
@@ -1297,6 +1306,37 @@ static func is_type_choice(pd: Dictionary) -> bool:
 	return true
 
 
+static var _status_re: RegEx
+
+
+## P batch B2: the status an option label names on its own ("1 Burn", "2 Pierce", "Nimble"), or "".
+static func status_key_of(label: String) -> String:
+	if _status_re == null:
+		var words := []
+		for k in CardDB.STATUS_ORDER:
+			words.append(String(k).capitalize())
+		_status_re = RegEx.new()
+		_status_re.compile("^(?:\\d+\\s+)?(%s)$" % "|".join(words))
+	var m := _status_re.search(label.strip_edges())
+	return String(m.get_string(1)).to_lower() if m != null else ""
+
+
+## P batch B2 (owner, 18 Nov): true when every option of a "mode" choice (declines aside) names a
+## status ("1 Eternal", "1 Burn"...): those render as status-coloured buttons with the status badge.
+static func is_status_choice(pd: Dictionary) -> bool:
+	if pd.is_empty() or String(pd.get("kind", "")) != "mode":
+		return false
+	var any := false
+	for o in pd.get("options", []):
+		var l := String(o.get("label", ""))
+		if is_decline(l):
+			continue
+		if status_key_of(l) == "":
+			return false
+		any = true
+	return any
+
+
 ## Readable text colour (white or near-black, whichever contrasts more) on a fill.
 static func type_text_color(fill: Color) -> Color:
 	var dark := Color(0.06, 0.05, 0.05)
@@ -1376,8 +1416,28 @@ class StanceGlyph extends Control:
 ## fills were too bright; the fill is now the Type's hue, softened and darkened.
 static func type_button(type_name: String, size: int = 15) -> Button:
 	var ty := "" if type_name == "No type" else type_name
-	var col := UIStyle.type_color(ty)
-	var b := UIStyle.button(type_name, size)
+	var px := icon_box(size)
+	var badge := TypeIcons.TypeBadge.new(ty, px)
+	badge.pip = true          # review F03: the same filled disc for every Type, readable on its own fill
+	badge.set_meta("type_icon", true)
+	return tinted_button(type_name, UIStyle.type_color(ty), badge, size)
+
+
+## P batch B2 (owner, 18 Nov): a status option ("1 Burn") styled like a Type button, in the status's
+## accent colour (CardStatusIcons.accent) with its badge where the Type icon sits.
+static func status_button(label: String, size: int = 15) -> Button:
+	var key := status_key_of(label)
+	var tok := CardStatusIcons.Token.new(key, CardStatusIcons.kind_of(key), icon_box(size))
+	tok.set_meta("status_icon", key)
+	var b := tinted_button(label, CardStatusIcons.accent(key), tok, size)
+	b.tooltip_text = StatusHelp.describe(key)   # as every status word does on hover
+	return b
+
+
+## The Type / status button body: `text` on a deep tint of `col` with a rim in the full colour and
+## `icon` (a square Control) on the left, vertically centred.
+static func tinted_button(text: String, col: Color, icon: Control, size: int = 15) -> Button:
+	var b := UIStyle.button(text, size)
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var fills := {"normal": type_fill(col, 0.5), "hover": type_fill(col, 0.66), "pressed": type_fill(col, 0.4)}
 	for k in fills:
@@ -1398,18 +1458,15 @@ static func type_button(type_name: String, size: int = 15) -> Button:
 	# Godot clamp it back to 0, which stretched the box from the button's top and drew every icon
 	# high (Waang's Type choice). The box scales with the label size, not with the button height.
 	var px := icon_box(size)
-	var badge := TypeIcons.TypeBadge.new(ty, px)
-	badge.pip = true          # review F03: the same filled disc for every Type, readable on its own fill
-	badge.anchor_bottom = 0.5
-	badge.anchor_top = 0.5
-	badge.anchor_left = 0.0
-	badge.anchor_right = 0.0
-	badge.offset_top = -px / 2.0
-	badge.offset_bottom = px / 2.0
-	badge.offset_left = TYPE_ICON_X
-	badge.offset_right = TYPE_ICON_X + px
-	badge.set_meta("type_icon", true)
-	b.add_child(badge)
+	icon.anchor_bottom = 0.5
+	icon.anchor_top = 0.5
+	icon.anchor_left = 0.0
+	icon.anchor_right = 0.0
+	icon.offset_top = -px / 2.0
+	icon.offset_bottom = px / 2.0
+	icon.offset_left = TYPE_ICON_X
+	icon.offset_right = TYPE_ICON_X + px
+	b.add_child(icon)
 	return b
 
 

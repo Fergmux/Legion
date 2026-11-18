@@ -34,6 +34,9 @@ var mode: String = ""
 var _took_sig: int = 0
 var _took_at: int = 0
 var _remove_sel: int = -1
+## The row of the remove-a-card list last hovered (-1: none); a rebuild with nothing selected
+## previews it, so deselecting the card under the pointer keeps that card in the preview.
+var _remove_hover: int = -1
 ## Basic-unit change being composed (F06-04: the chosen Type and Race for every basic unit).
 var _basic_race: String = ""
 var _basic_type: String = ""
@@ -62,9 +65,7 @@ func _init(screen: GameScreen) -> void:
 ## Fills the modal with the rewards stage.
 func render() -> void:
 	var box := gs.overlays.overlay_box
-	var line := gs.overlays.game_result_line()
-	if line != "":
-		box.add_child(_result_plate(line))
+	# P batch (owner, 18 Nov): no "X won game N (turn ...)" plate; the header's score shows the result.
 	var r: Dictionary = gs.view["rewards"]
 	if r["taken"].is_empty():
 		_ledger_seen = 0
@@ -134,24 +135,6 @@ static func remove_order(deck: Array) -> Array:
 
 
 # ------------------------------------------------------------------ pieces
-func _result_plate(line: String) -> Control:
-	var p := PanelContainer.new()
-	# E1: the plate is as wide as its line (with generous padding), centred, not the modal's full width.
-	p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	var sb := UIStyle.flat(Color(0.06, 0.047, 0.032, 0.92), Color(UIStyle.GOLD, 0.55), 1, 10)
-	sb.content_margin_left = 28
-	sb.content_margin_right = 28
-	sb.content_margin_top = 9
-	sb.content_margin_bottom = 9
-	UIStyle.lift_style(sb, Color(0, 0, 0, 0.45), 6, 2)
-	p.add_theme_stylebox_override("panel", UiSurface.box(sb, UiSurface.LEATHER, UIStyle.PANEL_GRAIN))
-	var l := UIStyle.label(line, 16, UIStyle.TEXT, false)
-	l.add_theme_font_override("font", UIStyle.font_bold())
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	p.add_child(l)
-	return p
-
-
 ## The rewards opening (design review #63): one rising `reward_reveal` chime, the picks gems pop in
 ## one by one, then the reward tiles rise in a `stagger` (fade, scale 0.94 -> 1). Under reduce
 ## motion the tiles fade in together and the gems are simply there. Returns the tile tween (null when
@@ -180,9 +163,22 @@ func reveal(picks: Control, tiles: Array) -> Tween:
 	return tw
 
 
-## Plate with the "picks left" gems.
+## The "Picks" heading over a plate holding only the picks-left gems. P batch (owner, 18 Nov): the
+## heading was a caption inside the plate; it is now a title above it (the gems are the count).
 func _picks_plate(left: int, total: int) -> Control:
-	var op := OrnatePanel.new(10, UIStyle.CONTENT_FLOOR)   # D5: the caption sat 7 px from the rim (8 px margin)
+	var v := VBoxContainer.new()
+	v.name = "Picks"
+	v.add_theme_constant_override("separation", UIStyle.sp("xs"))
+	v.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var head := UIStyle.label("PICKS", PANEL_HEAD_PX, UIStyle.GOLD, false, true)
+	head.name = "PicksTitle"
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tt := TitleText.apply(head, TitleText.Tier.SECTION, PANEL_HEAD_PX)
+	tt.show_underline = false
+	TitleText.apply(head, TitleText.Tier.SECTION, PANEL_HEAD_PX)
+	v.add_child(head)
+	var op := OrnatePanel.new(10, UIStyle.CONTENT_FLOOR)
 	op.arm = 10.0
 	op.frame_inset = 0.0
 	op.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -191,19 +187,13 @@ func _picks_plate(left: int, total: int) -> Control:
 	op.box().content_margin_left = 18    # clear of the 10 px corner arms
 	op.box().content_margin_right = 18
 	op.tooltip_text = "%d pick%s remaining" % [left, "" if left == 1 else "s"]
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 14)
-	h.alignment = BoxContainer.ALIGNMENT_CENTER
-	op.add_child(h)
-	var cap := section_caption("Picks")
-	cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	h.add_child(cap)
+	v.add_child(op)
 	var pips := PickPips.new()
 	pips.left = left
 	pips.total = total
 	pips.custom_minimum_size = Vector2(PickPips.width_for(total), 36)
-	h.add_child(pips)
-	return op
+	op.add_child(pips)
+	return v
 
 
 func _info_chip(text: String, done: bool) -> Control:
@@ -260,7 +250,7 @@ func _taken_flow(taken: Array) -> Control:
 	var cap := section_caption("Rewards chosen")
 	cap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(cap)
-	head.add_child(GameUi.pill(str(taken.size()), UIStyle.GOLD, 12))
+	# P batch (owner, 18 Nov): no count pill beside the caption; the rows are the count.
 	v.add_child(head)
 	v.add_child(Ornate.Rule.new(Color(UIStyle.GOLD, 0.4), true, 8.0))
 	var rows := VBoxContainer.new()
@@ -404,7 +394,6 @@ func _render_offer(r: Dictionary) -> void:
 			holder.add_theme_constant_override(side, 6)
 		var cw := CardWidget.new().setup(MatchView.summary_view(c), "big")
 		GameUi.resize_card(cw, OFFER_CARD)
-		cw.tooltip_text = "Take %s\nRight-click to inspect" % c["name"]
 		cw.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		cw.set_meta("reward_offer", i)
 		cw.hover_sound = true
@@ -697,7 +686,7 @@ static func _reward_panel(title: String, note: String) -> Array:
 
 ## Add a card: choose the type first (this spends the pick), then one of three cards of it.
 func _reward_add_panel(r: Dictionary) -> Control:
-	var pv: Array = _reward_panel("Choose a card type", "Using this pick, you then take one of three cards of that type.")
+	var pv: Array = _reward_panel("Choose a card type", "")
 	var tf := GridContainer.new()
 	tf.columns = 3
 	tf.add_theme_constant_override("h_separation", 10)
@@ -716,9 +705,11 @@ func _reward_add_panel(r: Dictionary) -> Control:
 	return pv[0]
 
 
-## Remove a card: pick it from the list (preview on the right), then Confirm.
+## Remove a card: pick it from the list (preview on the right), then Confirm. P batch (owner, 18 Nov):
+## with no card selected the preview follows the hovered row; a selected card stays in the preview
+## whatever is hovered, and clicking it again deselects it (the hover preview comes back).
 func _reward_remove_panel(order: Array, counts: Dictionary) -> Control:
-	var pv: Array = _reward_panel("Remove a card", "Choose a card, then confirm. One copy leaves your deck.")
+	var pv: Array = _reward_panel("Remove a card", "")
 	var lr := HBoxContainer.new()
 	lr.add_theme_constant_override("separation", 14)
 	pv[1].add_child(lr)
@@ -741,8 +732,9 @@ func _reward_remove_panel(order: Array, counts: Dictionary) -> Control:
 	prev.auto_hover = false
 	prev.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var shown: Dictionary = {}
+	var want := _remove_sel if _remove_sel != -1 else _remove_hover
 	for c in order:
-		if int(c["id"]) == _remove_sel:
+		if int(c["id"]) == want:
 			shown = c
 	if shown.is_empty() and not order.is_empty():
 		shown = order[0]
@@ -757,10 +749,13 @@ func _reward_remove_panel(order: Array, counts: Dictionary) -> Control:
 		row.custom_minimum_size = Vector2(0, 46)
 		var cc: Dictionary = c
 		row.mouse_entered.connect(func():
+			_remove_hover = int(cc["id"])
+			if _remove_sel != -1:
+				return   # the selected card keeps the preview
 			prev.setup(MatchView.summary_view(cc), "big")
 			GameUi.resize_card(prev, PREVIEW_CARD))
 		row.pressed.connect(func():
-			_remove_sel = int(cc["id"])
+			toggle_remove(int(cc["id"]))
 			var keep: int = area.scroll.scroll_vertical
 			gs.overlays.refresh()
 			_keep_scroll_later(keep))
@@ -777,6 +772,17 @@ func _reward_remove_panel(order: Array, counts: Dictionary) -> Control:
 		gs.send({"t": "reward_remove", "card_id": rid}))
 	right.add_child(ok)
 	return pv[0]
+
+
+## The card of the remove-a-card list now selected (-1: none).
+func remove_selection() -> int:
+	return _remove_sel
+
+
+## Clicks card `id` of the remove-a-card list: selects it, or deselects it when it is already the
+## selected one (P batch, owner 18 Nov).
+func toggle_remove(id: int) -> void:
+	_remove_sel = -1 if _remove_sel == id else id
 
 
 var _scroll_keep: int = 0
@@ -809,7 +815,7 @@ func _find_area(n: Node) -> ScrollArea:
 ## "Add a basic unit" (owner feedback 2026-10-18): the deck's basic unit as a card and a confirm
 ## button; it copies the most common basic unit, so it always matches the deck's Type and Race.
 func _extra_basic_panel(order: Array, counts: Dictionary) -> Control:
-	var pv: Array = _reward_panel("Add a basic unit", "Adds one more copy of your basic unit to your deck, for one pick.")
+	var pv: Array = _reward_panel("Add a basic unit", "")
 	var col: VBoxContainer = pv[1]
 	var ids: Array = []
 	for c in gs.view["deck"]:
@@ -827,7 +833,6 @@ func _extra_basic_panel(order: Array, counts: Dictionary) -> Control:
 	col.add_child(holder)
 	var cw := CardWidget.new().setup(MatchView.summary_view(c), "big")
 	GameUi.resize_card(cw, PREVIEW_CARD)
-	cw.tooltip_text = "Right-click to inspect"
 	cw.right_pressed.connect(gs.inspect.inspect_widget)
 	holder.add_child(cw)
 	var have := int(counts.get(bid, 0))
@@ -843,7 +848,7 @@ func _extra_basic_panel(order: Array, counts: Dictionary) -> Control:
 
 
 func _basic_change_panel(r: Dictionary, order: Array, counts: Dictionary) -> Control:
-	var pv: Array = _reward_panel("Change basic units", "Choose a Type and a Race. Every basic unit in your deck becomes that unit, for one pick.")
+	var pv: Array = _reward_panel("Change basic units", "")
 	var col: VBoxContainer = pv[1]
 	var basics := order.filter(func(c): return c["category"] == "basic_unit")
 	if basics.is_empty():

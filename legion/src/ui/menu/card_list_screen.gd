@@ -12,7 +12,8 @@ extends Control
 ## Emitted when the screen is closed.
 signal closed
 
-const PREVIEW_W := 380
+## P batch B9 (owner, 18 Nov): the details pane is wider (was 380 px).
+const PREVIEW_W := 480
 
 ## The page header (title, divider, Back).
 var header: PageHeader
@@ -60,6 +61,7 @@ func _ready() -> void:
 	left.add_child(lv)
 	lv.add_child(DeckBuilder.heading("All cards"))
 	browser = CardBrowser.new(true, 0)
+	browser.default_sort = "cost"   # P batch B8 (owner, 18 Nov): by cost, Basic units first
 	browser.card_selected.connect(show_card)
 	browser.card_inspected.connect(func(id): inspect_card(id))
 	browser.card_activated.connect(func(id): inspect_card(id))
@@ -133,8 +135,7 @@ func show_card(id: int) -> void:
 		c.queue_free()
 	var s := _summary(id)
 	_preview_card = CardWidget.new().setup(MatchView.summary_view(s), "big")
-	_preview_card.show_tooltip = false
-	_preview_card.tooltip_text = "Right-click to inspect"      # D15: no Inspect button; right-click is enough
+	_preview_card.show_tooltip = false   # P batch (show, don't tell): no "Right-click to inspect" tooltip
 	_preview_card.right_pressed.connect(func(pw): inspect_card(id, pw))
 	_preview_card.pressed.connect(func(pw): inspect_card(id, pw))
 	_preview_holder.add_child(_preview_card)

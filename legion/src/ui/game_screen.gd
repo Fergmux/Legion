@@ -98,6 +98,8 @@ var overlays: GameSeriesOverlay
 var inspect: GameInspect
 ## A1 in-game chat (online only).
 var chat: GameChat
+## P batch B6: the appendix (rules reference) button and popover in the top strip.
+var appendix: GameAppendix
 ## A2 spectating: badges, the Spectators list, the live cursor.
 var spectate: GameSpectate
 ## L5: sacrifice mode (the Sacrifice button toggles it).
@@ -146,6 +148,7 @@ func _init() -> void:
 	overlays = GameSeriesOverlay.new(self)
 	inspect = GameInspect.new(self)
 	chat = GameChat.new(self)
+	appendix = GameAppendix.new(self)
 	spectate = GameSpectate.new(self)
 	sacrifice = GameSacrificeMode.new(self)
 
@@ -273,6 +276,7 @@ func _relayout() -> void:
 	overlays.layout_pause(w, h)
 	menu.layout_popups(w)
 	chat.layout(w)
+	appendix.layout(w)
 	spectate.layout(w)
 	hand.layout([], true)
 	board.place_opp_hand()
@@ -589,7 +593,9 @@ func render_all() -> void:
 	if details.is_drafting():
 		details.show_draft()
 	elif details.pile_zone != "":
-		if view.get("stage", "") != "game" or mv.is_empty():
+		# P batch B3 (owner, 18 Nov): the draft list ends with the draft. When the game began in the
+		# same update that ended my draft, it was left holding the panel until a card was clicked.
+		if details.pile_zone == GameDetails.DRAFT_ZONE or view.get("stage", "") != "game" or mv.is_empty():
 			details.close_pile()
 		else:
 			details.render_pile_list()
@@ -666,7 +672,7 @@ func is_spectator() -> bool:
 ## A2: true while the mouse is over the chat box or the Spectators list (no board hover there).
 func over_side_popover() -> bool:
 	var m := get_local_mouse_position()
-	for p in [chat.panel, spectate.panel, chat.peek]:   # J17: the new-message preview too
+	for p in [chat.panel, spectate.panel, chat.peek, appendix.panel]:   # J17: the new-message preview too
 		if p != null and p.visible and Rect2(p.position, p.size).has_point(m):
 			return true
 	return false
@@ -703,6 +709,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _input(event: InputEvent) -> void:
 	if game_ending() and is_visible_in_tree() and _ending_blocks(event):
 		get_viewport().set_input_as_handled()   # J9: the kill plays out; no click, key or skip reaches anything
+		return
+	if event is InputEventKey and event.pressed and not event.echo and is_visible_in_tree() and appendix.is_open() and (event as InputEventKey).keycode == KEY_ESCAPE:
+		appendix.close_box()   # B6: Esc closes the appendix first
+		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and is_visible_in_tree() and chat.is_open():
 		# A1: Esc closes the chat box first; while typing, no key is a game shortcut.

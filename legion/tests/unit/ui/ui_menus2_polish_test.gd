@@ -212,6 +212,21 @@ func test_subtitle_cap_tops_sit_16px_under_the_logo_baseline() -> void:
 	assert_float(MainMenu.SUBTITLE_GAP).is_equal(16.0)
 
 
+func test_subtitle_spans_the_logo_width() -> void:
+	# P batch (owner, 18 Nov): "RISE OF THE ARCANE" is as wide as the LEGION logo (whole-px
+	# tracking, so within half a px per glyph gap).
+	var tol := float(MainMenu.SUBTITLE_TEXT.length() - 1) / 2.0
+	assert_int(MainMenu.subtitle_spacing()).is_greater(0)
+	assert_float(MainMenu.subtitle_width()).is_between(MainMenu.logo_width() - tol, MainMenu.logo_width() + tol)
+	assert_int(MainMenu._subtitle_font().spacing_glyph).is_equal(MainMenu.subtitle_spacing())
+
+
+func test_first_run_tutorial_item_is_one_word() -> void:
+	# P batch (owner, 18 Nov): "Tutorial", not "Play tutorial".
+	assert_str(String(MainMenu.PLAY_TUTORIAL_ITEM[0])).is_equal("Tutorial")
+	assert_str(String(MainMenu.PLAY_TUTORIAL_ITEM[1])).is_equal("play_tutorial")
+
+
 # ---------------------------------------------------------------- tutorial menu (#97)
 
 func before() -> void:
